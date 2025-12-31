@@ -440,7 +440,8 @@ function t(t,e,i,s){var n,o=arguments.length,a=o<3?e:null===s?s=Object.getOwnPro
   }
 
   ha-textfield,
-  ha-select {
+  ha-select,
+  ha-selector {
     width: 100%;
   }
 
@@ -482,24 +483,24 @@ function t(t,e,i,s){var n,o=arguments.length,a=o<3?e:null===s?s=Object.getOwnPro
           <div class="form-row">
             <span class="form-label">Entity</span>
             <div class="form-input">
-              <ha-entity-picker
+              <ha-selector
                 .hass=${this.hass}
+                .selector=${{entity:{}}}
                 .value=${this._config?.entity||""}
-                .configValue=${"entity"}
                 @value-changed=${t=>this._valueChanged("entity",t.detail.value)}
-                allow-custom-entity
-              ></ha-entity-picker>
+              ></ha-selector>
             </div>
           </div>
           <!-- Icon -->
           <div class="form-row">
             <span class="form-label">Icon</span>
             <div class="form-input">
-              <ha-icon-picker
+              <ha-selector
                 .hass=${this.hass}
+                .selector=${{icon:{}}}
                 .value=${this._config?.icon||""}
                 @value-changed=${t=>this._valueChanged("icon",t.detail.value)}
-              ></ha-icon-picker>
+              ></ha-selector>
             </div>
           </div>
           <!-- Show Name / Show Icon (dual row) -->
@@ -861,7 +862,7 @@ function t(t,e,i,s){var n,o=arguments.length,a=o<3?e:null===s?s=Object.getOwnPro
         ${this._config?.show_state&&t?q`<span class="state-text">${t.state}</span>`:F}
         <div class="icon-wrapper">
           ${i?q`
-                <div
+                <div 
                   class=${vt(o)}
                   style=${wt(a)}
                 >
