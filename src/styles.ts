@@ -190,6 +190,19 @@ export const iconStyles = css`
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 8px;
+    /* Fixed minimum width to prevent layout shift */
+    min-width: ${unsafeCSS(DEFAULT_IMG_CELL_WIDTH)};
+  }
+
+  .icon-wrapper {
+    /* Fixed size wrapper - always reserves space for img-cell size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: ${unsafeCSS(DEFAULT_IMG_CELL_WIDTH)};
+    height: ${unsafeCSS(DEFAULT_IMG_CELL_HEIGHT)};
+    flex-shrink: 0;
   }
 
   .icon-container {
@@ -198,6 +211,7 @@ export const iconStyles = css`
     justify-content: center;
     width: ${unsafeCSS(DEFAULT_ICON_WIDTH)};
     height: ${unsafeCSS(DEFAULT_ICON_HEIGHT)};
+    transition: all 0.2s ease;
   }
 
   .icon-container.with-img-cell {
@@ -220,8 +234,15 @@ export const iconStyles = css`
 
   .state-text {
     font-size: 12px;
+    font-weight: 500;
     color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
-    margin-left: 8px;
+    text-transform: capitalize;
+    white-space: nowrap;
+  }
+
+  /* When icon is hidden, keep the section but hide content */
+  .icon-section.hidden {
+    visibility: hidden;
   }
 `;
 
@@ -452,6 +473,30 @@ export const editorStyles = css`
 
   .form-row:last-child {
     margin-bottom: 0;
+  }
+
+  .form-row-dual {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 16px;
+  }
+
+  .form-row-dual .form-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-row-dual .form-label {
+    flex: 0 0 auto;
+    margin-right: 8px;
+    font-size: 13px;
+  }
+
+  .form-row-dual .form-input {
+    flex: 0 0 auto;
   }
 
   .form-label {

@@ -86,7 +86,7 @@ export class UnifiedRoomCard extends LitElement {
       show_name: true,
       show_icon: true,
       show_state: false,
-      show_img_cell: false,
+      show_img_cell: true, // Default to enabled
       animate_icon: false,
       tap_action: { action: DEFAULT_TAP_ACTION },
       hold_action: { action: DEFAULT_HOLD_ACTION },
@@ -280,11 +280,7 @@ export class UnifiedRoomCard extends LitElement {
    * Render main icon section
    */
   private _renderIcon(): TemplateResult | typeof nothing {
-    if (!this._config?.show_icon) {
-      return nothing;
-    }
-
-    const mainEntity = this._config.entity
+    const mainEntity = this._config?.entity
       ? this.hass?.states[this._config.entity]
       : undefined;
 
@@ -292,31 +288,38 @@ export class UnifiedRoomCard extends LitElement {
       ? this._isEntityActive(mainEntity.state)
       : false;
 
-    const icon = this._config.icon || this._getDefaultIcon(mainEntity);
+    const showIcon = this._config?.show_icon !== false;
+    const icon = this._config?.icon || this._getDefaultIcon(mainEntity);
 
     const iconContainerClasses = {
       'icon-container': true,
-      'with-img-cell': this._config.show_img_cell || false,
+      'with-img-cell': this._config?.show_img_cell ?? true, // Default to true
       active: isActive,
-      [getAnimationClass(this._config.animate_icon && isActive ? 'pulse' : undefined)]: true,
+      [getAnimationClass(this._config?.animate_icon && isActive ? 'pulse' : undefined)]: true,
     };
 
     const iconStyles: Record<string, string> = {};
-    if (this._config.icon_size) {
+    if (this._config?.icon_size) {
       iconStyles['--mdc-icon-size'] = this._config.icon_size;
     }
 
     return html`
       <div class="icon-section">
-        <div class=${classMap(iconContainerClasses)}>
-          <ha-icon
-            .icon=${icon}
-            style=${styleMap(iconStyles)}
-          ></ha-icon>
-        </div>
-        ${this._config.show_state && mainEntity
+        ${this._config?.show_state && mainEntity
           ? html`<span class="state-text">${mainEntity.state}</span>`
           : nothing}
+        <div class="icon-wrapper">
+          ${showIcon
+            ? html`
+                <div class=${classMap(iconContainerClasses)}>
+                  <ha-icon
+                    .icon=${icon}
+                    style=${styleMap(iconStyles)}
+                  ></ha-icon>
+                </div>
+              `
+            : nothing}
+        </div>
       </div>
     `;
   }

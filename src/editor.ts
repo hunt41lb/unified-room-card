@@ -110,6 +110,7 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
+          <!-- Card Name -->
           <div class="form-row">
             <span class="form-label">Card Name</span>
             <div class="form-input">
@@ -119,6 +120,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-textfield>
             </div>
           </div>
+          <!-- Entity -->
           <div class="form-row">
             <span class="form-label">Entity</span>
             <div class="form-input">
@@ -130,6 +132,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-entity-picker>
             </div>
           </div>
+          <!-- Icon -->
           <div class="form-row">
             <span class="form-label">Icon</span>
             <div class="form-input">
@@ -140,42 +143,49 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-icon-picker>
             </div>
           </div>
-          <div class="form-row">
-            <span class="form-label">Show Name</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${this._config?.show_name !== false}
-                @change=${(e: Event) => this._valueChanged('show_name', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
+          <!-- Show Name / Show Icon (dual row) -->
+          <div class="form-row-dual">
+            <div class="form-item">
+              <span class="form-label">Show Name</span>
+              <div class="form-input">
+                <ha-switch
+                  .checked=${this._config?.show_name !== false}
+                  @change=${(e: Event) => this._valueChanged('show_name', (e.target as HTMLInputElement).checked)}
+                ></ha-switch>
+              </div>
+            </div>
+            <div class="form-item">
+              <span class="form-label">Show Icon</span>
+              <div class="form-input">
+                <ha-switch
+                  .checked=${this._config?.show_icon !== false}
+                  @change=${(e: Event) => this._valueChanged('show_icon', (e.target as HTMLInputElement).checked)}
+                ></ha-switch>
+              </div>
             </div>
           </div>
-          <div class="form-row">
-            <span class="form-label">Show Icon</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${this._config?.show_icon !== false}
-                @change=${(e: Event) => this._valueChanged('show_icon', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
+          <!-- Show State Text / Show Icon Background (dual row) -->
+          <div class="form-row-dual">
+            <div class="form-item">
+              <span class="form-label">Show State</span>
+              <div class="form-input">
+                <ha-switch
+                  .checked=${this._config?.show_state || false}
+                  @change=${(e: Event) => this._valueChanged('show_state', (e.target as HTMLInputElement).checked)}
+                ></ha-switch>
+              </div>
+            </div>
+            <div class="form-item">
+              <span class="form-label">Icon Background</span>
+              <div class="form-input">
+                <ha-switch
+                  .checked=${this._config?.show_img_cell !== false}
+                  @change=${(e: Event) => this._valueChanged('show_img_cell', (e.target as HTMLInputElement).checked)}
+                ></ha-switch>
+              </div>
             </div>
           </div>
-          <div class="form-row">
-            <span class="form-label">Show State Text</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${this._config?.show_state || false}
-                @change=${(e: Event) => this._valueChanged('show_state', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
-            </div>
-          </div>
-          <div class="form-row">
-            <span class="form-label">Show Icon Background</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${this._config?.show_img_cell || false}
-                @change=${(e: Event) => this._valueChanged('show_img_cell', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
-            </div>
-          </div>
+          <!-- Animate Icon (single row) -->
           <div class="form-row">
             <span class="form-label">Animate Icon</span>
             <div class="form-input">
@@ -185,24 +195,29 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-switch>
             </div>
           </div>
-          <div class="form-row">
-            <span class="form-label">Card Height</span>
-            <div class="form-input">
-              <ha-textfield
-                .value=${this._config?.card_height || ''}
-                placeholder="97px"
-                @input=${(e: Event) => this._valueChanged('card_height', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+          <!-- Card Height / Card Width (dual row) -->
+          <div class="form-row-dual">
+            <div class="form-item">
+              <span class="form-label">Height</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${this._config?.card_height || ''}
+                  placeholder="97px"
+                  @input=${(e: Event) => this._valueChanged('card_height', (e.target as HTMLInputElement).value)}
+                  style="width: 80px;"
+                ></ha-textfield>
+              </div>
             </div>
-          </div>
-          <div class="form-row">
-            <span class="form-label">Card Width</span>
-            <div class="form-input">
-              <ha-textfield
-                .value=${this._config?.card_width || ''}
-                placeholder="auto"
-                @input=${(e: Event) => this._valueChanged('card_width', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+            <div class="form-item">
+              <span class="form-label">Width</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${this._config?.card_width || ''}
+                  placeholder="auto"
+                  @input=${(e: Event) => this._valueChanged('card_width', (e.target as HTMLInputElement).value)}
+                  style="width: 80px;"
+                ></ha-textfield>
+              </div>
             </div>
           </div>
         </div>
