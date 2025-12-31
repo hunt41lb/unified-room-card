@@ -4,7 +4,7 @@
  * Central source of truth for all card metadata, default values,
  * and configuration constants. Update values here for global changes.
  */
-export declare const CARD_VERSION = "1.0.0";
+export declare const CARD_VERSION = "1.0.2";
 export declare const CARD_NAME = "unified-room-card";
 export declare const CARD_DESCRIPTION = "A comprehensive room status card for Home Assistant with support for climate, persistent, and intermittent entities.";
 export declare const CARD_EDITOR_NAME = "unified-room-card-editor";
