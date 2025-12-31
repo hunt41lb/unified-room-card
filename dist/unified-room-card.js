@@ -722,7 +722,7 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
       <div class="name-section">
         ${this._config.name}
       </div>
-    `:F}_renderIcon(){const t=this._config?.entity?this.hass?.states[this._config.entity]:void 0,e=!!t&&this._isEntityActive(t.state),i=!1!==this._config?.show_icon,s=this._config?.show_img_cell??!0,n=this._config?.icon||this._getDefaultIcon(t),o={"icon-container":!0,"with-img-cell":s,active:e,[Dt(this._config?.animate_icon&&e?"pulse":void 0)]:!0},r={};if(e&&s){const e=this._getEntityBackgroundColor(t);r.background=e}const a={};return this._config?.icon_size&&(a["--mdc-icon-size"]=this._config.icon_size),e&&s&&(a.color="var(--text-primary-color, #fff)"),q`
+    `:F}_renderIcon(){const t=this._config?.entity?this.hass?.states[this._config.entity]:void 0,e=!!t&&this._isEntityActive(t.state),i=!1!==this._config?.show_icon,s=this._config?.show_img_cell??!0,n=this._config?.icon||this._getDefaultIcon(t),o={"icon-container":!0,"with-img-cell":s,active:e,[Dt(this._config?.animate_icon&&e?"pulse":void 0)]:!0},r={};if(e&&s){const e=this._getEntityBackgroundColor(t);r["background-color"]=e,r.background=e}const a={};return this._config?.icon_size&&(a["--mdc-icon-size"]=this._config.icon_size),e&&s&&(a.color="var(--text-primary-color, #fff)"),q`
       <div class="icon-section">
         ${this._config?.show_state&&t?q`<span class="state-text">${t.state}</span>`:F}
         <div class="icon-wrapper">
@@ -739,7 +739,7 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
               `:F}
         </div>
       </div>
-    `}_getEntityBackgroundColor(t){if(!t)return"rgba(3, 169, 244, 0.7)";const e=t.attributes.rgb_color;if(e&&Array.isArray(e)&&3===e.length)return`rgba(${e[0]}, ${e[1]}, ${e[2]}, 0.7)`;const i=t.attributes.hs_color,s=t.attributes.brightness;if(i&&Array.isArray(i)&&2===i.length){const t=this._hsToRgb(i[0],i[1],s);return`rgba(${t[0]}, ${t[1]}, ${t[2]}, 0.7)`}return"rgba(3, 169, 244, 0.7)"}_hsToRgb(t,e,i){const s=e/100,n=(i??255)/255*.5,o=(1-Math.abs(2*n-1))*s,r=o*(1-Math.abs(t/60%2-1)),a=n-o/2;let c=0,d=0,h=0;return t>=0&&t<60?(c=o,d=r,h=0):t>=60&&t<120?(c=r,d=o,h=0):t>=120&&t<180?(c=0,d=o,h=r):t>=180&&t<240?(c=0,d=r,h=o):t>=240&&t<300?(c=r,d=0,h=o):t>=300&&t<360&&(c=o,d=0,h=r),[Math.round(255*(c+a)),Math.round(255*(d+a)),Math.round(255*(h+a))]}_renderClimateSection(){return this._config?.climate_entities||this._config?.power_entities?q`
+    `}_getEntityBackgroundColor(t){if(!t)return"rgba(66, 133, 244, 0.6)";const e=t.attributes.rgb_color;if(e&&Array.isArray(e)&&3===e.length)return`rgba(${e[0]}, ${e[1]}, ${e[2]}, 0.6)`;const i=t.attributes.hs_color,s=t.attributes.brightness;if(i&&Array.isArray(i)&&2===i.length){const t=this._hsToRgb(i[0],i[1],s);return`rgba(${t[0]}, ${t[1]}, ${t[2]}, 0.6)`}return"rgba(255, 167, 38, 0.6)"}_hsToRgb(t,e,i){const s=e/100,n=(i??255)/255*.5,o=(1-Math.abs(2*n-1))*s,r=o*(1-Math.abs(t/60%2-1)),a=n-o/2;let c=0,d=0,h=0;return t>=0&&t<60?(c=o,d=r,h=0):t>=60&&t<120?(c=r,d=o,h=0):t>=120&&t<180?(c=0,d=o,h=r):t>=180&&t<240?(c=0,d=r,h=o):t>=240&&t<300?(c=r,d=0,h=o):t>=300&&t<360&&(c=o,d=0,h=r),[Math.round(255*(c+a)),Math.round(255*(d+a)),Math.round(255*(h+a))]}_renderClimateSection(){return this._config?.climate_entities||this._config?.power_entities?q`
       <div class="climate-section">
         <!-- Climate rendering will be implemented in Phase 3 -->
         <span class="climate-primary">--°</span>
