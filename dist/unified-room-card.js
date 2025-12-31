@@ -727,7 +727,7 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
         ${this._config?.show_state&&t?q`<span class="state-text">${t.state}</span>`:F}
         <div class="icon-wrapper">
           ${i?q`
-                <div 
+                <div
                   class=${vt(o)}
                   style=${bt(r)}
                 >
@@ -739,7 +739,7 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
               `:F}
         </div>
       </div>
-    `}_getEntityBackgroundColor(t){if(!t)return"rgba(66, 133, 244, 0.6)";const e=t.attributes.rgb_color;if(e&&Array.isArray(e)&&3===e.length)return`rgba(${e[0]}, ${e[1]}, ${e[2]}, 0.6)`;const i=t.attributes.hs_color,s=t.attributes.brightness;if(i&&Array.isArray(i)&&2===i.length){const t=this._hsToRgb(i[0],i[1],s);return`rgba(${t[0]}, ${t[1]}, ${t[2]}, 0.6)`}return"rgba(255, 167, 38, 0.6)"}_hsToRgb(t,e,i){const s=e/100,n=(i??255)/255*.5,o=(1-Math.abs(2*n-1))*s,r=o*(1-Math.abs(t/60%2-1)),a=n-o/2;let c=0,d=0,h=0;return t>=0&&t<60?(c=o,d=r,h=0):t>=60&&t<120?(c=r,d=o,h=0):t>=120&&t<180?(c=0,d=o,h=r):t>=180&&t<240?(c=0,d=r,h=o):t>=240&&t<300?(c=r,d=0,h=o):t>=300&&t<360&&(c=o,d=0,h=r),[Math.round(255*(c+a)),Math.round(255*(d+a)),Math.round(255*(h+a))]}_renderClimateSection(){return this._config?.climate_entities||this._config?.power_entities?q`
+    `}_getEntityBackgroundColor(t){if(!t)return"rgba(66, 133, 244, 0.3)";const e=t.attributes.rgb_color;if(e&&Array.isArray(e)&&3===e.length)return`rgba(${e[0]}, ${e[1]}, ${e[2]}, 0.3)`;const i=t.attributes.hs_color,s=t.attributes.brightness;if(i&&Array.isArray(i)&&2===i.length){const t=this._hsToRgb(i[0],i[1],s);return`rgba(${t[0]}, ${t[1]}, ${t[2]}, 0.3)`}return"rgba(255, 167, 38, 0.3)"}_hsToRgb(t,e,i){const s=e/100,n=(i??255)/255*.5,o=(1-Math.abs(2*n-1))*s,r=o*(1-Math.abs(t/60%2-1)),a=n-o/2;let c=0,d=0,h=0;return t>=0&&t<60?(c=o,d=r,h=0):t>=60&&t<120?(c=r,d=o,h=0):t>=120&&t<180?(c=0,d=o,h=r):t>=180&&t<240?(c=0,d=r,h=o):t>=240&&t<300?(c=r,d=0,h=o):t>=300&&t<360&&(c=o,d=0,h=r),[Math.round(255*(c+a)),Math.round(255*(d+a)),Math.round(255*(h+a))]}_renderClimateSection(){return this._config?.climate_entities||this._config?.power_entities?q`
       <div class="climate-section">
         <!-- Climate rendering will be implemented in Phase 3 -->
         <span class="climate-primary">--°</span>
