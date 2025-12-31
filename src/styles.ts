@@ -157,8 +157,12 @@ export const cardBaseStyles = css`
     transition: background-color 0.3s ease;
   }
 
-  ha-card.active {
-    /* Active background is applied dynamically via config */
+  ha-card.state-on {
+    background-color: var(--card-background-color);
+  }
+
+  ha-card.state-off {
+    background-color: color-mix(in srgb, var(--card-background-color) 50%, transparent);
   }
 `;
 
@@ -171,7 +175,7 @@ export const nameStyles = css`
     grid-area: name;
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
     overflow: hidden;
@@ -223,9 +227,7 @@ export const iconStyles = css`
     transition: background 0.3s ease;
   }
 
-  .icon-container.with-img-cell.active {
-    background: ${unsafeCSS(HA_CSS_VARIABLES.stateActiveColor)};
-  }
+  /* Active state background is applied dynamically via inline style for light color support */
 
   .icon-container ha-icon {
     --mdc-icon-size: ${unsafeCSS(DEFAULT_ICON_WIDTH)};
@@ -503,19 +505,24 @@ export const editorStyles = css`
   }
 
   .form-row-dual .form-label {
-    flex: 0 0 auto;
-    margin-right: 12px;
+    flex: 1;
     font-size: 14px;
     white-space: nowrap;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
   }
 
   .form-row-dual .form-input {
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 auto;
   }
 
   .form-row-dual .form-input ha-textfield {
     width: 100%;
+  }
+
+  /* For dual rows with text inputs, the input should expand */
+  .form-row-dual.expand-inputs .form-input {
+    flex: 1;
+    min-width: 0;
   }
 
   .form-label {

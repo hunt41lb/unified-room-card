@@ -127,6 +127,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               <ha-entity-picker
                 .hass=${this.hass}
                 .value=${this._config?.entity || ''}
+                .configValue=${'entity'}
                 @value-changed=${(e: CustomEvent) => this._valueChanged('entity', e.detail.value)}
                 allow-custom-entity
               ></ha-entity-picker>
@@ -196,7 +197,7 @@ export class UnifiedRoomCardEditor extends LitElement {
             </div>
           </div>
           <!-- Card Height / Card Width (dual row) -->
-          <div class="form-row-dual">
+          <div class="form-row-dual expand-inputs">
             <div class="form-item">
               <span class="form-label">Height</span>
               <div class="form-input">
@@ -218,6 +219,135 @@ export class UnifiedRoomCardEditor extends LitElement {
               </div>
             </div>
           </div>
+          <!-- Tap Action -->
+          <div class="form-row">
+            <span class="form-label">Tap Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${this._config?.tap_action?.action || 'toggle'}
+                @selected=${(e: CustomEvent) => this._tapActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="toggle">Toggle</mwc-list-item>
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="navigate">Navigate</mwc-list-item>
+                <mwc-list-item value="url">URL</mwc-list-item>
+                <mwc-list-item value="perform-action">Perform Action</mwc-list-item>
+                <mwc-list-item value="assist">Assist</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          ${this._config?.tap_action?.action === 'navigate' ? html`
+          <div class="form-row">
+            <span class="form-label">Navigation Path</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.tap_action?.navigation_path || ''}
+                placeholder="/lovelace/0"
+                @input=${(e: Event) => this._tapActionDataChanged('tap_action', 'navigation_path', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          ` : ''}
+          ${this._config?.tap_action?.action === 'url' ? html`
+          <div class="form-row">
+            <span class="form-label">URL Path</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.tap_action?.url_path || ''}
+                placeholder="https://example.com"
+                @input=${(e: Event) => this._tapActionDataChanged('tap_action', 'url_path', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          ` : ''}
+          <!-- Hold Action -->
+          <div class="form-row">
+            <span class="form-label">Hold Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${this._config?.hold_action?.action || 'none'}
+                @selected=${(e: CustomEvent) => this._tapActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="none">None</mwc-list-item>
+                <mwc-list-item value="toggle">Toggle</mwc-list-item>
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="navigate">Navigate</mwc-list-item>
+                <mwc-list-item value="url">URL</mwc-list-item>
+                <mwc-list-item value="perform-action">Perform Action</mwc-list-item>
+                <mwc-list-item value="assist">Assist</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          ${this._config?.hold_action?.action === 'navigate' ? html`
+          <div class="form-row">
+            <span class="form-label">Navigation Path</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.hold_action?.navigation_path || ''}
+                placeholder="/lovelace/0"
+                @input=${(e: Event) => this._tapActionDataChanged('hold_action', 'navigation_path', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          ` : ''}
+          ${this._config?.hold_action?.action === 'url' ? html`
+          <div class="form-row">
+            <span class="form-label">URL Path</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.hold_action?.url_path || ''}
+                placeholder="https://example.com"
+                @input=${(e: Event) => this._tapActionDataChanged('hold_action', 'url_path', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          ` : ''}
+          <!-- Double Tap Action -->
+          <div class="form-row">
+            <span class="form-label">Double Tap Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${this._config?.double_tap_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._tapActionChanged('double_tap_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="toggle">Toggle</mwc-list-item>
+                <mwc-list-item value="navigate">Navigate</mwc-list-item>
+                <mwc-list-item value="url">URL</mwc-list-item>
+                <mwc-list-item value="perform-action">Perform Action</mwc-list-item>
+                <mwc-list-item value="assist">Assist</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          ${this._config?.double_tap_action?.action === 'navigate' ? html`
+          <div class="form-row">
+            <span class="form-label">Navigation Path</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.double_tap_action?.navigation_path || ''}
+                placeholder="/lovelace/0"
+                @input=${(e: Event) => this._tapActionDataChanged('double_tap_action', 'navigation_path', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          ` : ''}
+          ${this._config?.double_tap_action?.action === 'url' ? html`
+          <div class="form-row">
+            <span class="form-label">URL Path</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.double_tap_action?.url_path || ''}
+                placeholder="https://example.com"
+                @input=${(e: Event) => this._tapActionDataChanged('double_tap_action', 'url_path', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -469,6 +599,50 @@ export class UnifiedRoomCardEditor extends LitElement {
       grid: Object.keys(grid).length > 0 ? grid : undefined,
     };
 
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Handle tap action type changes
+   */
+  private _tapActionChanged(actionKey: 'tap_action' | 'hold_action' | 'double_tap_action', action: string): void {
+    if (!this._config) return;
+
+    const newConfig = {
+      ...this._config,
+      [actionKey]: { action },
+    };
+
+    this._config = newConfig;
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Handle tap action data changes (navigation_path, url_path, etc.)
+   */
+  private _tapActionDataChanged(
+    actionKey: 'tap_action' | 'hold_action' | 'double_tap_action',
+    dataKey: string,
+    value: string
+  ): void {
+    if (!this._config) return;
+
+    const currentAction = this._config[actionKey] || { action: 'none' };
+    
+    const newConfig = {
+      ...this._config,
+      [actionKey]: {
+        ...currentAction,
+        [dataKey]: value || undefined,
+      },
+    };
+
+    // Clean up empty values
+    if (!value) {
+      delete (newConfig[actionKey] as Record<string, unknown>)[dataKey];
+    }
+
+    this._config = newConfig;
     this._dispatchConfigChanged();
   }
 

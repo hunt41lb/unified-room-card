@@ -127,6 +127,17 @@ export class UnifiedRoomCard extends LitElement {
   // UPDATE LIFECYCLE
   // ===========================================================================
 
+  protected override updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    
+    // Apply grid-area to host element for layout-card compatibility
+    if (this._config?.grid_area) {
+      this.style.gridArea = this._config.grid_area;
+    } else {
+      this.style.removeProperty('grid-area');
+    }
+  }
+
   protected override shouldUpdate(changedProps: PropertyValues): boolean {
     if (changedProps.has('_config')) {
       return true;
@@ -226,7 +237,8 @@ export class UnifiedRoomCard extends LitElement {
       : false;
 
     const cardClasses = {
-      active: isActive,
+      'state-on': isActive,
+      'state-off': !isActive && !!mainEntity,
     };
 
     const cardDynamicStyles = getCardDynamicStyles({
@@ -289,18 +301,36 @@ export class UnifiedRoomCard extends LitElement {
       : false;
 
     const showIcon = this._config?.show_icon !== false;
+    const showImgCell = this._config?.show_img_cell ?? true;
     const icon = this._config?.icon || this._getDefaultIcon(mainEntity);
 
     const iconContainerClasses = {
       'icon-container': true,
-      'with-img-cell': this._config?.show_img_cell ?? true, // Default to true
+      'with-img-cell': showImgCell,
       active: isActive,
       [getAnimationClass(this._config?.animate_icon && isActive ? 'pulse' : undefined)]: true,
     };
 
+    // Build icon container styles
+    const iconContainerStyles: Record<string, string> = {};
+    
+    // Apply dynamic background color for active state
+    if (isActive && showImgCell) {
+      const bgColor = this._getEntityBackgroundColor(mainEntity);
+      // Use background-color specifically to override CSS
+      iconContainerStyles['background-color'] = bgColor;
+      iconContainerStyles['background'] = bgColor;
+    }
+
+    // Icon styles
     const iconStyles: Record<string, string> = {};
     if (this._config?.icon_size) {
       iconStyles['--mdc-icon-size'] = this._config.icon_size;
+    }
+    
+    // Icon color for active state with img-cell
+    if (isActive && showImgCell) {
+      iconStyles['color'] = 'var(--text-primary-color, #fff)';
     }
 
     return html`
@@ -311,7 +341,10 @@ export class UnifiedRoomCard extends LitElement {
         <div class="icon-wrapper">
           ${showIcon
             ? html`
-                <div class=${classMap(iconContainerClasses)}>
+                <div 
+                  class=${classMap(iconContainerClasses)}
+                  style=${styleMap(iconContainerStyles)}
+                >
                   <ha-icon
                     .icon=${icon}
                     style=${styleMap(iconStyles)}
@@ -322,6 +355,62 @@ export class UnifiedRoomCard extends LitElement {
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Get background color for icon based on entity attributes
+   * Supports light entities with rgb_color attribute
+   */
+  private _getEntityBackgroundColor(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
+    const opacity = 0.3; // Opacity for icon background when active
+    
+    if (!entity) {
+      return `rgba(66, 133, 244, ${opacity})`;
+    }
+
+    // Check for rgb_color attribute (lights)
+    const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
+    if (rgbColor && Array.isArray(rgbColor) && rgbColor.length === 3) {
+      return `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, ${opacity})`;
+    }
+
+    // Check for hs_color and convert to rgb (lights)
+    const hsColor = entity.attributes.hs_color as [number, number] | undefined;
+    const brightness = entity.attributes.brightness as number | undefined;
+    if (hsColor && Array.isArray(hsColor) && hsColor.length === 2) {
+      const rgb = this._hsToRgb(hsColor[0], hsColor[1], brightness);
+      return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
+    }
+
+    // For non-light entities, default to amber
+    return `rgba(255, 167, 38, ${opacity})`;
+  }
+
+  /**
+   * Convert HS color to RGB
+   */
+  private _hsToRgb(h: number, s: number, brightness?: number): [number, number, number] {
+    const sat = s / 100;
+    const light = (brightness ?? 255) / 255 * 0.5;
+    
+    const c = (1 - Math.abs(2 * light - 1)) * sat;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = light - c / 2;
+    
+    let r = 0, g = 0, b = 0;
+    
+    if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+    else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+    else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+    else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+    else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+    else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
+    
+    return [
+      Math.round((r + m) * 255),
+      Math.round((g + m) * 255),
+      Math.round((b + m) * 255)
+    ];
   }
 
   /**
