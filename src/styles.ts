@@ -591,7 +591,8 @@ export const editorStyles = css`
   }
 
   ha-textfield,
-  ha-select {
+  ha-select,
+  ha-selector {
     width: 100%;
   }
 

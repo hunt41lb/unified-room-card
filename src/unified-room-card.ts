@@ -29,6 +29,8 @@ import {
   HomeAssistant,
   UnifiedRoomCardConfig,
   TapActionConfig,
+  ClimateEntitiesConfig,
+  PowerEntitiesConfig,
 } from './types';
 
 import {
@@ -414,20 +416,231 @@ export class UnifiedRoomCard extends LitElement {
   }
 
   /**
-   * Render climate section (temperature, humidity, etc.)
-   * Placeholder for Phase 3
+   * Render climate section (temperature, humidity, air quality, illuminance, power)
    */
   private _renderClimateSection(): TemplateResult | typeof nothing {
     if (!this._config?.climate_entities && !this._config?.power_entities) {
       return nothing;
     }
 
+    const climateConfig = this._config.climate_entities;
+    const powerConfig = this._config.power_entities;
+    const decimalPlaces = climateConfig?.decimal_places ?? 1;
+
+    // Calculate values
+    const temperature = this._getTemperatureValue(climateConfig, decimalPlaces);
+    const humidity = this._getHumidityValue(climateConfig, decimalPlaces);
+    const airQuality = this._getAirQualityValue(climateConfig, decimalPlaces);
+    const illuminance = this._getIlluminanceValue(climateConfig, decimalPlaces);
+    const power = this._getPowerValue(powerConfig);
+
+    // Build secondary values array
+    const secondaryValues: { label: string; value: string }[] = [];
+    
+    if (humidity) {
+      secondaryValues.push({ label: 'humidity', value: humidity });
+    }
+    if (airQuality) {
+      secondaryValues.push({ label: 'air quality', value: airQuality });
+    }
+    if (illuminance) {
+      secondaryValues.push({ label: 'illuminance', value: illuminance });
+    }
+    if (power) {
+      secondaryValues.push({ label: 'power', value: power });
+    }
+
     return html`
       <div class="climate-section">
-        <!-- Climate rendering will be implemented in Phase 3 -->
-        <span class="climate-primary">--°</span>
+        ${temperature ? html`
+          <span class="climate-primary">${temperature}</span>
+        ` : nothing}
+        ${secondaryValues.length > 0 ? html`
+          <div class="climate-secondary">
+            ${secondaryValues.map((item, index) => html`
+              ${index > 0 ? html`<span class="climate-divider"></span>` : nothing}
+              <span class="climate-value">${item.value}</span>
+            `)}
+          </div>
+        ` : nothing}
       </div>
     `;
+  }
+
+  /**
+   * Get temperature value from primary entity or averaged from multiple entities
+   */
+  private _getTemperatureValue(
+    config?: ClimateEntitiesConfig,
+    decimalPlaces: number = 1
+  ): string | null {
+    if (!config || !this.hass) return null;
+
+    // Check for primary entity first
+    if (config.primary_entity) {
+      const entity = this.hass.states[config.primary_entity];
+      if (entity && !this._isUnavailable(entity)) {
+        const value = parseFloat(entity.state);
+        if (!isNaN(value)) {
+          const unit = entity.attributes.unit_of_measurement || '°';
+          return `${value.toFixed(decimalPlaces)}${unit}`;
+        }
+      }
+    }
+
+    // Fall back to temperature entities average
+    if (config.temperature_entities && config.temperature_entities.length > 0) {
+      const result = this._calculateAverage(config.temperature_entities, decimalPlaces);
+      if (result.value !== null) {
+        return `${result.value}${result.unit || '°'}`;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Get humidity value averaged from multiple entities
+   */
+  private _getHumidityValue(
+    config?: ClimateEntitiesConfig,
+    decimalPlaces: number = 0
+  ): string | null {
+    if (!config?.humidity_entities || config.humidity_entities.length === 0 || !this.hass) {
+      return null;
+    }
+
+    const result = this._calculateAverage(config.humidity_entities, decimalPlaces);
+    if (result.value !== null) {
+      return `${result.value}%`;
+    }
+
+    return null;
+  }
+
+  /**
+   * Get air quality value averaged from multiple entities
+   */
+  private _getAirQualityValue(
+    config?: ClimateEntitiesConfig,
+    decimalPlaces: number = 0
+  ): string | null {
+    if (!config?.air_quality_entities || config.air_quality_entities.length === 0 || !this.hass) {
+      return null;
+    }
+
+    const result = this._calculateAverage(config.air_quality_entities, decimalPlaces);
+    if (result.value !== null) {
+      const unit = result.unit ? ` ${result.unit}` : '';
+      return `${result.value}${unit}`;
+    }
+
+    return null;
+  }
+
+  /**
+   * Get illuminance value averaged from multiple entities
+   */
+  private _getIlluminanceValue(
+    config?: ClimateEntitiesConfig,
+    decimalPlaces: number = 0
+  ): string | null {
+    if (!config?.illuminance_entities || config.illuminance_entities.length === 0 || !this.hass) {
+      return null;
+    }
+
+    const result = this._calculateAverage(config.illuminance_entities, decimalPlaces);
+    if (result.value !== null) {
+      return `${result.value} lx`;
+    }
+
+    return null;
+  }
+
+  /**
+   * Get power consumption value summed from multiple entities
+   */
+  private _getPowerValue(config?: PowerEntitiesConfig): string | null {
+    if (!config?.entities || config.entities.length === 0 || !this.hass) {
+      return null;
+    }
+
+    let totalWatts = 0;
+    let validCount = 0;
+
+    for (const entityId of config.entities) {
+      const entity = this.hass.states[entityId];
+      if (!entity || this._isUnavailable(entity)) continue;
+
+      const value = parseFloat(entity.state);
+      if (isNaN(value)) continue;
+
+      const unit = (entity.attributes.unit_of_measurement || 'W').toLowerCase();
+      
+      // Normalize to watts
+      if (unit === 'kw') {
+        totalWatts += value * 1000;
+      } else if (unit === 'mw') {
+        totalWatts += value * 1000000;
+      } else if (unit === 'gw') {
+        totalWatts += value * 1000000000;
+      } else {
+        totalWatts += value;
+      }
+      validCount++;
+    }
+
+    if (validCount === 0) return null;
+
+    // Format with appropriate unit
+    if (totalWatts >= 1000) {
+      return `${(totalWatts / 1000).toFixed(2)} kW`;
+    }
+    return `${totalWatts.toFixed(1)} W`;
+  }
+
+  /**
+   * Calculate average from multiple entity states
+   */
+  private _calculateAverage(
+    entityIds: string[],
+    decimalPlaces: number = 1
+  ): { value: number | null; unit: string; count: number } {
+    if (!this.hass) return { value: null, unit: '', count: 0 };
+
+    const values: number[] = [];
+    let unit = '';
+
+    for (const entityId of entityIds) {
+      const entity = this.hass.states[entityId];
+      if (!entity || this._isUnavailable(entity)) continue;
+
+      const value = parseFloat(entity.state);
+      if (!isNaN(value)) {
+        values.push(value);
+        if (!unit && entity.attributes.unit_of_measurement) {
+          unit = entity.attributes.unit_of_measurement;
+        }
+      }
+    }
+
+    if (values.length === 0) {
+      return { value: null, unit: '', count: 0 };
+    }
+
+    const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+    return {
+      value: parseFloat(average.toFixed(decimalPlaces)),
+      unit,
+      count: values.length,
+    };
+  }
+
+  /**
+   * Check if entity is unavailable
+   */
+  private _isUnavailable(entity: { state: string }): boolean {
+    return ['unavailable', 'unknown'].includes(entity.state);
   }
 
   /**

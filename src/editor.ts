@@ -124,24 +124,24 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Entity</span>
             <div class="form-input">
-              <ha-entity-picker
+              <ha-selector
                 .hass=${this.hass}
+                .selector=${{ entity: {} }}
                 .value=${this._config?.entity || ''}
-                .configValue=${'entity'}
                 @value-changed=${(e: CustomEvent) => this._valueChanged('entity', e.detail.value)}
-                allow-custom-entity
-              ></ha-entity-picker>
+              ></ha-selector>
             </div>
           </div>
           <!-- Icon -->
           <div class="form-row">
             <span class="form-label">Icon</span>
             <div class="form-input">
-              <ha-icon-picker
+              <ha-selector
                 .hass=${this.hass}
+                .selector=${{ icon: {} }}
                 .value=${this._config?.icon || ''}
                 @value-changed=${(e: CustomEvent) => this._valueChanged('icon', e.detail.value)}
-              ></ha-icon-picker>
+              ></ha-selector>
             </div>
           </div>
           <!-- Show Name / Show Icon (dual row) -->
@@ -398,10 +398,11 @@ export class UnifiedRoomCardEditor extends LitElement {
   }
 
   /**
-   * Render climate entities section - Placeholder
+   * Render climate entities section
    */
   private _renderClimateSection(): TemplateResult {
     const expanded = this._accordionState.climate;
+    const climateConfig = this._config?.climate_entities || {};
 
     return html`
       <div class="accordion">
@@ -413,17 +414,89 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p>Climate entities configuration - Coming in Phase 6</p>
+          <!-- Primary Entity -->
+          <div class="form-row">
+            <span class="form-label">Primary Entity</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: ['sensor', 'climate', 'weather'] } }}
+                .value=${climateConfig.primary_entity || ''}
+                @value-changed=${(e: CustomEvent) => this._climateValueChanged('primary_entity', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Temperature Entities -->
+          <div class="form-row">
+            <span class="form-label">Temperature</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: 'sensor', device_class: 'temperature', multiple: true } }}
+                .value=${climateConfig.temperature_entities || []}
+                @value-changed=${(e: CustomEvent) => this._climateValueChanged('temperature_entities', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Humidity Entities -->
+          <div class="form-row">
+            <span class="form-label">Humidity</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: 'sensor', device_class: 'humidity', multiple: true } }}
+                .value=${climateConfig.humidity_entities || []}
+                @value-changed=${(e: CustomEvent) => this._climateValueChanged('humidity_entities', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Air Quality Entities -->
+          <div class="form-row">
+            <span class="form-label">Air Quality</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: 'sensor', device_class: ['aqi', 'pm25', 'pm10', 'co2', 'volatile_organic_compounds'], multiple: true } }}
+                .value=${climateConfig.air_quality_entities || []}
+                @value-changed=${(e: CustomEvent) => this._climateValueChanged('air_quality_entities', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Illuminance Entities -->
+          <div class="form-row">
+            <span class="form-label">Illuminance</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: 'sensor', device_class: 'illuminance', multiple: true } }}
+                .value=${climateConfig.illuminance_entities || []}
+                @value-changed=${(e: CustomEvent) => this._climateValueChanged('illuminance_entities', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Decimal Places -->
+          <div class="form-row">
+            <span class="form-label">Decimal Places</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ number: { min: 0, max: 3, mode: 'box' } }}
+                .value=${climateConfig.decimal_places ?? 1}
+                @value-changed=${(e: CustomEvent) => this._climateValueChanged('decimal_places', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
         </div>
       </div>
     `;
   }
 
   /**
-   * Render power entities section - Placeholder
+   * Render power entities section
    */
   private _renderPowerSection(): TemplateResult {
     const expanded = this._accordionState.power;
+    const powerConfig = this._config?.power_entities || {};
 
     return html`
       <div class="accordion">
@@ -435,7 +508,18 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p>Power entities configuration - Coming in Phase 6</p>
+          <!-- Power Entities -->
+          <div class="form-row">
+            <span class="form-label">Power Sensors</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: 'sensor', device_class: 'power', multiple: true } }}
+                .value=${powerConfig.entities || []}
+                @value-changed=${(e: CustomEvent) => this._powerValueChanged('entities', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -643,6 +727,56 @@ export class UnifiedRoomCardEditor extends LitElement {
     }
 
     this._config = newConfig;
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Handle climate entity value changes
+   */
+  private _climateValueChanged(key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const climateEntities = { ...this._config.climate_entities } || {};
+    
+    // Handle arrays vs single values
+    if (Array.isArray(value) && value.length === 0) {
+      delete (climateEntities as Record<string, unknown>)[key];
+    } else if (value === '' || value === undefined || value === null) {
+      delete (climateEntities as Record<string, unknown>)[key];
+    } else {
+      (climateEntities as Record<string, unknown>)[key] = value;
+    }
+
+    this._config = {
+      ...this._config,
+      climate_entities: Object.keys(climateEntities).length > 0 ? climateEntities : undefined,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Handle power entity value changes
+   */
+  private _powerValueChanged(key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const powerEntities = { ...this._config.power_entities } || {};
+    
+    // Handle arrays vs single values
+    if (Array.isArray(value) && value.length === 0) {
+      delete (powerEntities as Record<string, unknown>)[key];
+    } else if (value === '' || value === undefined || value === null) {
+      delete (powerEntities as Record<string, unknown>)[key];
+    } else {
+      (powerEntities as Record<string, unknown>)[key] = value;
+    }
+
+    this._config = {
+      ...this._config,
+      power_entities: Object.keys(powerEntities).length > 0 ? powerEntities : undefined,
+    };
+
     this._dispatchConfigChanged();
   }
 
