@@ -438,6 +438,15 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-selector>
             </div>
           </div>
+          <div class="form-row">
+            <span class="form-label">Show Temperature Unit</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${climateConfig.show_temperature_unit !== false}
+                @change=${(e: Event) => this._climateValueChanged('show_temperature_unit', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
           <!-- Humidity Entities -->
           <div class="form-row">
             <span class="form-label">Humidity</span>
@@ -448,6 +457,15 @@ export class UnifiedRoomCardEditor extends LitElement {
                 .value=${climateConfig.humidity_entities || []}
                 @value-changed=${(e: CustomEvent) => this._climateValueChanged('humidity_entities', e.detail.value)}
               ></ha-selector>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">Show Humidity Unit</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${climateConfig.show_humidity_unit !== false}
+                @change=${(e: Event) => this._climateValueChanged('show_humidity_unit', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
             </div>
           </div>
           <!-- Air Quality Entities -->
@@ -462,6 +480,15 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-selector>
             </div>
           </div>
+          <div class="form-row">
+            <span class="form-label">Show Air Quality Unit</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${climateConfig.show_air_quality_unit !== false}
+                @change=${(e: Event) => this._climateValueChanged('show_air_quality_unit', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
           <!-- Illuminance Entities -->
           <div class="form-row">
             <span class="form-label">Illuminance</span>
@@ -474,6 +501,15 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-selector>
             </div>
           </div>
+          <div class="form-row">
+            <span class="form-label">Show Illuminance Unit</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${climateConfig.show_illuminance_unit !== false}
+                @change=${(e: Event) => this._climateValueChanged('show_illuminance_unit', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
           <!-- Decimal Places -->
           <div class="form-row">
             <span class="form-label">Decimal Places</span>
@@ -481,7 +517,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               <ha-selector
                 .hass=${this.hass}
                 .selector=${{ number: { min: 0, max: 3, mode: 'box' } }}
-                .value=${climateConfig.decimal_places ?? 1}
+                .value=${climateConfig.decimal_places ?? 0}
                 @value-changed=${(e: CustomEvent) => this._climateValueChanged('decimal_places', e.detail.value)}
               ></ha-selector>
             </div>
@@ -518,6 +554,28 @@ export class UnifiedRoomCardEditor extends LitElement {
                 .value=${powerConfig.entities || []}
                 @value-changed=${(e: CustomEvent) => this._powerValueChanged('entities', e.detail.value)}
               ></ha-selector>
+            </div>
+          </div>
+          <!-- Decimal Places -->
+          <div class="form-row">
+            <span class="form-label">Decimal Places</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ number: { min: 0, max: 3, mode: 'box' } }}
+                .value=${powerConfig.decimal_places ?? 0}
+                @value-changed=${(e: CustomEvent) => this._powerValueChanged('decimal_places', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Show Unit -->
+          <div class="form-row">
+            <span class="form-label">Show Unit</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${powerConfig.show_unit !== false}
+                @change=${(e: Event) => this._powerValueChanged('show_unit', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
             </div>
           </div>
         </div>

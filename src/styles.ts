@@ -265,36 +265,38 @@ export const climateStyles = css`
   .climate-section {
     grid-area: climate;
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: baseline;
+    justify-self: start;
+    line-height: 30px;
+    font-weight: 300;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
   }
 
   .climate-primary {
-    font-size: ${unsafeCSS(DEFAULT_PRIMARY_FONT_SIZE)};
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 400;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
+    margin-right: 4px;
   }
 
   .climate-secondary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    display: inline;
   }
 
   .climate-value {
-    font-size: ${unsafeCSS(DEFAULT_SECONDARY_FONT_SIZE)};
-    font-weight: ${unsafeCSS(DEFAULT_SECONDARY_FONT_WEIGHT)};
-    opacity: ${unsafeCSS(DEFAULT_SECONDARY_OPACITY)};
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.7;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
-    white-space: nowrap;
+    margin-right: 4px;
+  }
+
+  .climate-value:last-child {
+    margin-right: 0;
   }
 
   .climate-divider {
-    width: 1px;
-    height: 12px;
-    background: ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
-    opacity: 0.5;
+    display: none;
   }
 `;
 

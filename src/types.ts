@@ -132,6 +132,10 @@ export interface ClimateEntitiesConfig {
   air_quality_entities?: string[];
   illuminance_entities?: string[];
   decimal_places?: number;
+  show_temperature_unit?: boolean;
+  show_humidity_unit?: boolean;
+  show_air_quality_unit?: boolean;
+  show_illuminance_unit?: boolean;
 }
 
 // =============================================================================
@@ -141,6 +145,8 @@ export interface ClimateEntitiesConfig {
 export interface PowerEntitiesConfig {
   entities?: string[];
   unit_handling?: UnitHandlingType;
+  decimal_places?: number;
+  show_unit?: boolean;
 }
 
 // =============================================================================

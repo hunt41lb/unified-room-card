@@ -52,7 +52,7 @@ export const DEFAULT_PRIMARY_FONT_SIZE = '18px';
 export const DEFAULT_SECONDARY_FONT_SIZE = '12px';
 export const DEFAULT_SECONDARY_FONT_WEIGHT = '400';
 export const DEFAULT_SECONDARY_OPACITY = '0.7';
-export const DEFAULT_CLIMATE_DECIMAL_PLACES = 1;
+export const DEFAULT_CLIMATE_DECIMAL_PLACES = 0;
 
 // =============================================================================
 // DEFAULT BATTERY THRESHOLDS

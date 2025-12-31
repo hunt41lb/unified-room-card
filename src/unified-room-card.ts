@@ -425,14 +425,22 @@ export class UnifiedRoomCard extends LitElement {
 
     const climateConfig = this._config.climate_entities;
     const powerConfig = this._config.power_entities;
-    const decimalPlaces = climateConfig?.decimal_places ?? 1;
+    const decimalPlaces = climateConfig?.decimal_places ?? 0;
+    const powerDecimalPlaces = powerConfig?.decimal_places ?? 0;
+
+    // Individual show unit settings (default to true)
+    const showTempUnit = climateConfig?.show_temperature_unit !== false;
+    const showHumidityUnit = climateConfig?.show_humidity_unit !== false;
+    const showAirQualityUnit = climateConfig?.show_air_quality_unit !== false;
+    const showIlluminanceUnit = climateConfig?.show_illuminance_unit !== false;
+    const showPowerUnit = powerConfig?.show_unit !== false;
 
     // Calculate values
-    const temperature = this._getTemperatureValue(climateConfig, decimalPlaces);
-    const humidity = this._getHumidityValue(climateConfig, decimalPlaces);
-    const airQuality = this._getAirQualityValue(climateConfig, decimalPlaces);
-    const illuminance = this._getIlluminanceValue(climateConfig, decimalPlaces);
-    const power = this._getPowerValue(powerConfig);
+    const temperature = this._getTemperatureValue(climateConfig, decimalPlaces, showTempUnit);
+    const humidity = this._getHumidityValue(climateConfig, decimalPlaces, showHumidityUnit);
+    const airQuality = this._getAirQualityValue(climateConfig, decimalPlaces, showAirQualityUnit);
+    const illuminance = this._getIlluminanceValue(climateConfig, decimalPlaces, showIlluminanceUnit);
+    const power = this._getPowerValue(powerConfig, powerDecimalPlaces, showPowerUnit);
 
     // Build secondary values array
     const secondaryValues: { label: string; value: string }[] = [];
@@ -457,8 +465,7 @@ export class UnifiedRoomCard extends LitElement {
         ` : nothing}
         ${secondaryValues.length > 0 ? html`
           <div class="climate-secondary">
-            ${secondaryValues.map((item, index) => html`
-              ${index > 0 ? html`<span class="climate-divider"></span>` : nothing}
+            ${secondaryValues.map((item) => html`
               <span class="climate-value">${item.value}</span>
             `)}
           </div>
@@ -472,7 +479,8 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getTemperatureValue(
     config?: ClimateEntitiesConfig,
-    decimalPlaces: number = 1
+    decimalPlaces: number = 0,
+    showUnits: boolean = true
   ): string | null {
     if (!config || !this.hass) return null;
 
@@ -482,7 +490,7 @@ export class UnifiedRoomCard extends LitElement {
       if (entity && !this._isUnavailable(entity)) {
         const value = parseFloat(entity.state);
         if (!isNaN(value)) {
-          const unit = entity.attributes.unit_of_measurement || '°';
+          const unit = showUnits ? (entity.attributes.unit_of_measurement || '°') : '';
           return `${value.toFixed(decimalPlaces)}${unit}`;
         }
       }
@@ -492,7 +500,8 @@ export class UnifiedRoomCard extends LitElement {
     if (config.temperature_entities && config.temperature_entities.length > 0) {
       const result = this._calculateAverage(config.temperature_entities, decimalPlaces);
       if (result.value !== null) {
-        return `${result.value}${result.unit || '°'}`;
+        const unit = showUnits ? (result.unit || '°') : '';
+        return `${result.value}${unit}`;
       }
     }
 
@@ -504,7 +513,8 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getHumidityValue(
     config?: ClimateEntitiesConfig,
-    decimalPlaces: number = 0
+    decimalPlaces: number = 0,
+    showUnits: boolean = true
   ): string | null {
     if (!config?.humidity_entities || config.humidity_entities.length === 0 || !this.hass) {
       return null;
@@ -512,7 +522,8 @@ export class UnifiedRoomCard extends LitElement {
 
     const result = this._calculateAverage(config.humidity_entities, decimalPlaces);
     if (result.value !== null) {
-      return `${result.value}%`;
+      const unit = showUnits ? '%' : '';
+      return `${result.value}${unit}`;
     }
 
     return null;
@@ -523,7 +534,8 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getAirQualityValue(
     config?: ClimateEntitiesConfig,
-    decimalPlaces: number = 0
+    decimalPlaces: number = 0,
+    showUnits: boolean = true
   ): string | null {
     if (!config?.air_quality_entities || config.air_quality_entities.length === 0 || !this.hass) {
       return null;
@@ -531,7 +543,7 @@ export class UnifiedRoomCard extends LitElement {
 
     const result = this._calculateAverage(config.air_quality_entities, decimalPlaces);
     if (result.value !== null) {
-      const unit = result.unit ? ` ${result.unit}` : '';
+      const unit = showUnits && result.unit ? ` ${result.unit}` : '';
       return `${result.value}${unit}`;
     }
 
@@ -543,7 +555,8 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getIlluminanceValue(
     config?: ClimateEntitiesConfig,
-    decimalPlaces: number = 0
+    decimalPlaces: number = 0,
+    showUnits: boolean = true
   ): string | null {
     if (!config?.illuminance_entities || config.illuminance_entities.length === 0 || !this.hass) {
       return null;
@@ -551,7 +564,8 @@ export class UnifiedRoomCard extends LitElement {
 
     const result = this._calculateAverage(config.illuminance_entities, decimalPlaces);
     if (result.value !== null) {
-      return `${result.value} lx`;
+      const unit = showUnits ? ' lx' : '';
+      return `${result.value}${unit}`;
     }
 
     return null;
@@ -560,7 +574,11 @@ export class UnifiedRoomCard extends LitElement {
   /**
    * Get power consumption value summed from multiple entities
    */
-  private _getPowerValue(config?: PowerEntitiesConfig): string | null {
+  private _getPowerValue(
+    config?: PowerEntitiesConfig,
+    decimalPlaces: number = 0,
+    showUnits: boolean = true
+  ): string | null {
     if (!config?.entities || config.entities.length === 0 || !this.hass) {
       return null;
     }
@@ -575,7 +593,8 @@ export class UnifiedRoomCard extends LitElement {
       const value = parseFloat(entity.state);
       if (isNaN(value)) continue;
 
-      const unit = (entity.attributes.unit_of_measurement || 'W').toLowerCase();
+      const unitRaw = entity.attributes.unit_of_measurement;
+      const unit = (typeof unitRaw === 'string' ? unitRaw : 'W').toLowerCase();
       
       // Normalize to watts
       if (unit === 'kw') {
@@ -594,9 +613,11 @@ export class UnifiedRoomCard extends LitElement {
 
     // Format with appropriate unit
     if (totalWatts >= 1000) {
-      return `${(totalWatts / 1000).toFixed(2)} kW`;
+      const kwValue = (totalWatts / 1000).toFixed(decimalPlaces);
+      return showUnits ? `${kwValue} kW` : kwValue;
     }
-    return `${totalWatts.toFixed(1)} W`;
+    const wValue = totalWatts.toFixed(decimalPlaces);
+    return showUnits ? `${wValue} W` : wValue;
   }
 
   /**
