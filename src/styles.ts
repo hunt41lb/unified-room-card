@@ -218,8 +218,13 @@ export const iconStyles = css`
     width: ${unsafeCSS(DEFAULT_IMG_CELL_WIDTH)};
     height: ${unsafeCSS(DEFAULT_IMG_CELL_HEIGHT)};
     border-radius: 50%;
-    background: ${unsafeCSS(HA_CSS_VARIABLES.cardBackground)};
+    background: var(--secondary-background-color, rgba(0, 0, 0, 0.06));
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease;
+  }
+
+  .icon-container.with-img-cell.active {
+    background: ${unsafeCSS(HA_CSS_VARIABLES.stateActiveColor)};
   }
 
   .icon-container ha-icon {
@@ -230,6 +235,10 @@ export const iconStyles = css`
 
   .icon-container.active ha-icon {
     color: ${unsafeCSS(HA_CSS_VARIABLES.iconActiveColor)};
+  }
+
+  .icon-container.with-img-cell.active ha-icon {
+    color: var(--text-primary-color, #fff);
   }
 
   .state-text {
@@ -468,7 +477,7 @@ export const editorStyles = css`
   .form-row {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .form-row:last-child {
@@ -478,8 +487,12 @@ export const editorStyles = css`
   .form-row-dual {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
-    gap: 16px;
+    margin-bottom: 16px;
+    gap: 24px;
+  }
+
+  .form-row-dual:last-child {
+    margin-bottom: 0;
   }
 
   .form-row-dual .form-item {
@@ -491,12 +504,18 @@ export const editorStyles = css`
 
   .form-row-dual .form-label {
     flex: 0 0 auto;
-    margin-right: 8px;
-    font-size: 13px;
+    margin-right: 12px;
+    font-size: 14px;
+    white-space: nowrap;
   }
 
   .form-row-dual .form-input {
-    flex: 0 0 auto;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-row-dual .form-input ha-textfield {
+    width: 100%;
   }
 
   .form-label {

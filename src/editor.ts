@@ -204,7 +204,6 @@ export class UnifiedRoomCardEditor extends LitElement {
                   .value=${this._config?.card_height || ''}
                   placeholder="97px"
                   @input=${(e: Event) => this._valueChanged('card_height', (e.target as HTMLInputElement).value)}
-                  style="width: 80px;"
                 ></ha-textfield>
               </div>
             </div>
@@ -215,7 +214,6 @@ export class UnifiedRoomCardEditor extends LitElement {
                   .value=${this._config?.card_width || ''}
                   placeholder="auto"
                   @input=${(e: Event) => this._valueChanged('card_width', (e.target as HTMLInputElement).value)}
-                  style="width: 80px;"
                 ></ha-textfield>
               </div>
             </div>
