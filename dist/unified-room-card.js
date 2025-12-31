@@ -72,7 +72,7 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
     grid-area: name;
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: ${a(Rt)};
     overflow: hidden;
@@ -350,21 +350,24 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
   }
 
   .form-row-dual .form-label {
-    flex: 0 0 110px;
+    flex: 1;
     font-size: 14px;
     white-space: nowrap;
     color: ${a(Rt)};
   }
 
   .form-row-dual .form-input {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    justify-content: flex-start;
+    flex: 0 0 auto;
   }
 
   .form-row-dual .form-input ha-textfield {
     width: 100%;
+  }
+
+  /* For dual rows with text inputs, the input should expand */
+  .form-row-dual.expand-inputs .form-input {
+    flex: 1;
+    min-width: 0;
   }
 
   .form-label {
@@ -547,7 +550,7 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
             </div>
           </div>
           <!-- Card Height / Card Width (dual row) -->
-          <div class="form-row-dual">
+          <div class="form-row-dual expand-inputs">
             <div class="form-item">
               <span class="form-label">Height</span>
               <div class="form-input">
@@ -736,7 +739,7 @@ function t(t,e,i,s){var n,o=arguments.length,r=o<3?e:null===s?s=Object.getOwnPro
               `:F}
         </div>
       </div>
-    `}_getEntityBackgroundColor(t){if(!t)return"rgba(var(--rgb-primary-color, 3, 169, 244), 0.7)";const e=t.attributes.rgb_color;if(e&&Array.isArray(e)&&3===e.length)return`rgba(${e[0]}, ${e[1]}, ${e[2]}, 0.7)`;const i=t.attributes.hs_color,s=t.attributes.brightness;if(i&&Array.isArray(i)&&2===i.length){const t=this._hsToRgb(i[0],i[1],s);return`rgba(${t[0]}, ${t[1]}, ${t[2]}, 0.7)`}return"rgba(var(--rgb-primary-color, 3, 169, 244), 0.7)"}_hsToRgb(t,e,i){const s=e/100,n=(i??255)/255*.5,o=(1-Math.abs(2*n-1))*s,r=o*(1-Math.abs(t/60%2-1)),a=n-o/2;let c=0,d=0,h=0;return t>=0&&t<60?(c=o,d=r,h=0):t>=60&&t<120?(c=r,d=o,h=0):t>=120&&t<180?(c=0,d=o,h=r):t>=180&&t<240?(c=0,d=r,h=o):t>=240&&t<300?(c=r,d=0,h=o):t>=300&&t<360&&(c=o,d=0,h=r),[Math.round(255*(c+a)),Math.round(255*(d+a)),Math.round(255*(h+a))]}_renderClimateSection(){return this._config?.climate_entities||this._config?.power_entities?q`
+    `}_getEntityBackgroundColor(t){if(!t)return"rgba(3, 169, 244, 0.7)";const e=t.attributes.rgb_color;if(e&&Array.isArray(e)&&3===e.length)return`rgba(${e[0]}, ${e[1]}, ${e[2]}, 0.7)`;const i=t.attributes.hs_color,s=t.attributes.brightness;if(i&&Array.isArray(i)&&2===i.length){const t=this._hsToRgb(i[0],i[1],s);return`rgba(${t[0]}, ${t[1]}, ${t[2]}, 0.7)`}return"rgba(3, 169, 244, 0.7)"}_hsToRgb(t,e,i){const s=e/100,n=(i??255)/255*.5,o=(1-Math.abs(2*n-1))*s,r=o*(1-Math.abs(t/60%2-1)),a=n-o/2;let c=0,d=0,h=0;return t>=0&&t<60?(c=o,d=r,h=0):t>=60&&t<120?(c=r,d=o,h=0):t>=120&&t<180?(c=0,d=o,h=r):t>=180&&t<240?(c=0,d=r,h=o):t>=240&&t<300?(c=r,d=0,h=o):t>=300&&t<360&&(c=o,d=0,h=r),[Math.round(255*(c+a)),Math.round(255*(d+a)),Math.round(255*(h+a))]}_renderClimateSection(){return this._config?.climate_entities||this._config?.power_entities?q`
       <div class="climate-section">
         <!-- Climate rendering will be implemented in Phase 3 -->
         <span class="climate-primary">--°</span>
