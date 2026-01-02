@@ -233,6 +233,29 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-switch>
             </div>
           </div>
+          <!-- Icon Size / Background Size (dual row) -->
+          <div class="form-row-dual expand-inputs">
+            <div class="form-item">
+              <span class="form-label">Icon Size</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${this._config?.icon_size || ''}
+                  placeholder="35px"
+                  @input=${(e: Event) => this._valueChanged('icon_size', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+            <div class="form-item">
+              <span class="form-label">Background Size</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${this._config?.img_cell_size || ''}
+                  placeholder="50px"
+                  @input=${(e: Event) => this._valueChanged('img_cell_size', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+          </div>
           <!-- Card Height / Card Width (dual row) -->
           <div class="form-row-dual expand-inputs">
             <div class="form-item">

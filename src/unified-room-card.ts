@@ -323,6 +323,12 @@ export class UnifiedRoomCard extends LitElement {
     // Build icon container styles
     const iconContainerStyles: Record<string, string> = {};
     
+    // Apply custom img_cell size if specified
+    if (showImgCell && this._config?.img_cell_size) {
+      iconContainerStyles['width'] = this._config.img_cell_size;
+      iconContainerStyles['height'] = this._config.img_cell_size;
+    }
+    
     // Apply dynamic background color for active state with img_cell
     if (isActive && showImgCell) {
       const bgColor = this._getEntityBackgroundColor(mainEntity);
@@ -334,6 +340,11 @@ export class UnifiedRoomCard extends LitElement {
     const iconStyles: Record<string, string> = {};
     if (this._config?.icon_size) {
       iconStyles['--mdc-icon-size'] = this._config.icon_size;
+      // Also apply size to container when no img_cell
+      if (!showImgCell) {
+        iconContainerStyles['width'] = this._config.icon_size;
+        iconContainerStyles['height'] = this._config.icon_size;
+      }
     }
     
     // Determine icon color based on state and configuration
