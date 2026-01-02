@@ -621,19 +621,46 @@ export const editorStyles = css`
 
   .state-config-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
-    padding: 4px 0;
+    padding: 8px 0;
+    flex-wrap: wrap;
   }
 
-  .state-config-row ha-icon {
+  .state-config-row > ha-textfield,
+  .state-config-row > ha-selector {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .state-config-row > .color-select-wrapper {
+    flex: 1.5;
+    min-width: 150px;
+  }
+
+  .state-config-row > ha-icon {
     cursor: pointer;
     color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
     flex-shrink: 0;
+    margin-top: 12px;
   }
 
-  .state-config-row ha-icon:hover {
+  .state-config-row > ha-icon:hover {
     color: var(--error-color, #db4437);
+  }
+
+  .color-select-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .color-select-wrapper ha-select {
+    width: 100%;
+  }
+
+  .color-select-wrapper ha-textfield {
+    width: 100%;
   }
 
   ha-textfield,

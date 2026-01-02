@@ -19,6 +19,7 @@ import {
   POSITION_DROPDOWN_OPTIONS,
   ICON_HORIZONTAL_DROPDOWN_OPTIONS,
   ICON_VERTICAL_DROPDOWN_OPTIONS,
+  HA_COLOR_OPTIONS,
 } from './constants';
 
 import {
@@ -52,6 +53,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     grid: false,
   };
   @state() private _persistentEntityExpanded: number = -1;
+  @state() private _customColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input
 
   // ===========================================================================
   // STATIC STYLES
@@ -608,30 +610,50 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">State-based Icons & Colors</span>
           </div>
-          ${(entityConfig.states || []).map((stateConfig, stateIndex) => html`
-            <div class="state-config-row">
-              <ha-textfield
-                .value=${stateConfig.state || ''}
-                placeholder="State (e.g., locked)"
-                @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'state', (e.target as HTMLInputElement).value)}
-                style="flex: 1;"
-              ></ha-textfield>
-              <ha-selector
-                .hass=${this.hass}
-                .selector=${{ icon: {} }}
-                .value=${stateConfig.icon || ''}
-                @value-changed=${(e: CustomEvent) => this._updatePersistentEntityState(index, stateIndex, 'icon', e.detail.value)}
-                style="flex: 1;"
-              ></ha-selector>
-              <ha-textfield
-                .value=${stateConfig.color || ''}
-                placeholder="Color (CSS)"
-                @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'color', (e.target as HTMLInputElement).value)}
-                style="flex: 1;"
-              ></ha-textfield>
-              <ha-icon icon="mdi:delete" @click=${() => this._removePersistentEntityState(index, stateIndex)}></ha-icon>
-            </div>
-          `)}
+          ${(entityConfig.states || []).map((stateConfig, stateIndex) => {
+            const colorKey = `${index}-${stateIndex}`;
+            const currentColor = stateConfig.color || '';
+            const isCustomColor = this._customColorInputs.has(colorKey) || 
+              (currentColor && !HA_COLOR_OPTIONS.some(opt => opt.value === currentColor));
+            const dropdownValue = isCustomColor ? 'custom' : currentColor;
+            
+            return html`
+              <div class="state-config-row">
+                <ha-textfield
+                  .value=${stateConfig.state || ''}
+                  placeholder="State (e.g., locked)"
+                  @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'state', (e.target as HTMLInputElement).value)}
+                  style="flex: 1;"
+                ></ha-textfield>
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ icon: {} }}
+                  .value=${stateConfig.icon || ''}
+                  @value-changed=${(e: CustomEvent) => this._updatePersistentEntityState(index, stateIndex, 'icon', e.detail.value)}
+                  style="flex: 1;"
+                ></ha-selector>
+                <div class="color-select-wrapper" style="flex: 1.5; display: flex; flex-direction: column; gap: 4px;">
+                  <ha-select
+                    .value=${dropdownValue}
+                    @selected=${(e: CustomEvent) => this._handleColorSelect(index, stateIndex, (e.target as HTMLSelectElement).value)}
+                    @closed=${(e: Event) => e.stopPropagation()}
+                    style="width: 100%;"
+                  >
+                    ${this._renderColorOptions()}
+                  </ha-select>
+                  ${isCustomColor ? html`
+                    <ha-textfield
+                      .value=${currentColor}
+                      placeholder="CSS color value"
+                      @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'color', (e.target as HTMLInputElement).value)}
+                      style="width: 100%;"
+                    ></ha-textfield>
+                  ` : nothing}
+                </div>
+                <ha-icon icon="mdi:delete" @click=${() => this._removePersistentEntityState(index, stateIndex)}></ha-icon>
+              </div>
+            `;
+          })}
           <div class="add-state-btn" @click=${() => this._addPersistentEntityState(index)}>
             <ha-icon icon="mdi:plus"></ha-icon>
             <span>Add State Config</span>
@@ -1287,6 +1309,52 @@ export class UnifiedRoomCardEditor extends LitElement {
     };
 
     this._dispatchConfigChanged();
+  }
+
+  /**
+   * Render color dropdown options grouped by category
+   */
+  private _renderColorOptions(): TemplateResult[] {
+    const options: TemplateResult[] = [];
+    let currentCategory = '';
+
+    for (const opt of HA_COLOR_OPTIONS) {
+      // Add category header (optgroup-like behavior)
+      if (opt.category !== currentCategory) {
+        currentCategory = opt.category;
+        // Use a disabled item as a category header
+        if (currentCategory !== 'Default') {
+          options.push(html`
+            <mwc-list-item disabled noninteractive style="font-weight: 500; opacity: 0.7; font-size: 12px; text-transform: uppercase;">
+              ${currentCategory}
+            </mwc-list-item>
+          `);
+        }
+      }
+      
+      options.push(html`
+        <mwc-list-item value=${opt.value}>${opt.label}</mwc-list-item>
+      `);
+    }
+
+    return options;
+  }
+
+  /**
+   * Handle color dropdown selection
+   */
+  private _handleColorSelect(entityIndex: number, stateIndex: number, value: string): void {
+    const colorKey = `${entityIndex}-${stateIndex}`;
+    
+    if (value === 'custom') {
+      // Show custom input
+      this._customColorInputs = new Set([...this._customColorInputs, colorKey]);
+    } else {
+      // Hide custom input and set the value
+      this._customColorInputs.delete(colorKey);
+      this._customColorInputs = new Set(this._customColorInputs);
+      this._updatePersistentEntityState(entityIndex, stateIndex, 'color', value);
+    }
   }
 
   /**
