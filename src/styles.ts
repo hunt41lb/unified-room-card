@@ -172,7 +172,9 @@ export const cardBaseStyles = css`
 
 export const nameStyles = css`
   .name-section {
-    grid-area: name;
+    /* Position in row 1, spanning first 2 columns */
+    grid-row: 1;
+    grid-column: 1 / 3;
     justify-self: start;
     align-self: start;
     text-align: left;
@@ -183,6 +185,7 @@ export const nameStyles = css`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    z-index: 1; /* Ensure name is above icon area */
   }
 `;
 
@@ -193,8 +196,7 @@ export const nameStyles = css`
 export const iconStyles = css`
   .icon-section {
     grid-area: icon;
-    justify-self: end;
-    align-self: start;
+    /* Position is set via inline styles for flexibility */
   }
 
   .icon-wrapper {

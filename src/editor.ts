@@ -17,7 +17,8 @@ import {
   ANIMATION_OPTIONS,
   TAP_ACTION_OPTIONS,
   POSITION_DROPDOWN_OPTIONS,
-  ICON_POSITION_DROPDOWN_OPTIONS,
+  ICON_HORIZONTAL_DROPDOWN_OPTIONS,
+  ICON_VERTICAL_DROPDOWN_OPTIONS,
 } from './constants';
 
 import {
@@ -145,21 +146,39 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-selector>
             </div>
           </div>
-          <!-- Icon Position -->
-          <div class="form-row">
-            <span class="form-label">Icon Position</span>
-            <div class="form-input">
-              <ha-select
-                .value=${this._config?.icon_position || 'auto'}
-                @selected=${(e: Event) => this._valueChanged('icon_position', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${ICON_POSITION_DROPDOWN_OPTIONS.map(
-                  (option) => html`
-                    <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
-                  `
-                )}
-              </ha-select>
+          <!-- Icon Position (Horizontal / Vertical) -->
+          <div class="form-row-dual expand-inputs">
+            <div class="form-item">
+              <span class="form-label">Horizontal</span>
+              <div class="form-input">
+                <ha-select
+                  .value=${this._config?.icon_horizontal_position || 'right'}
+                  @selected=${(e: Event) => this._valueChanged('icon_horizontal_position', (e.target as HTMLSelectElement).value)}
+                  @closed=${(e: Event) => e.stopPropagation()}
+                >
+                  ${ICON_HORIZONTAL_DROPDOWN_OPTIONS.map(
+                    (option) => html`
+                      <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                    `
+                  )}
+                </ha-select>
+              </div>
+            </div>
+            <div class="form-item">
+              <span class="form-label">Vertical</span>
+              <div class="form-input">
+                <ha-select
+                  .value=${this._config?.icon_vertical_position || 'top'}
+                  @selected=${(e: Event) => this._valueChanged('icon_vertical_position', (e.target as HTMLSelectElement).value)}
+                  @closed=${(e: Event) => e.stopPropagation()}
+                >
+                  ${ICON_VERTICAL_DROPDOWN_OPTIONS.map(
+                    (option) => html`
+                      <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                    `
+                  )}
+                </ha-select>
+              </div>
             </div>
           </div>
           <!-- Show Name / Show Icon (dual row) -->

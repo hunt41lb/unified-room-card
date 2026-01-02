@@ -22,8 +22,9 @@ export const CARD_EDITOR_TAG = 'unified-room-card-editor';
 // DEFAULT GRID LAYOUT
 // =============================================================================
 
-export const DEFAULT_GRID_TEMPLATE_AREAS = '"name name icon icon" "climate climate persistent intermittent"';
-export const DEFAULT_GRID_TEMPLATE_COLUMNS = 'min-content 1fr';
+// Icon spans all columns in row 1, name overlays on top
+export const DEFAULT_GRID_TEMPLATE_AREAS = '"icon icon icon icon" "climate climate persistent intermittent"';
+export const DEFAULT_GRID_TEMPLATE_COLUMNS = '1fr 1fr 1fr 1fr';
 export const DEFAULT_GRID_TEMPLATE_ROWS = '1fr min-content';
 
 // =============================================================================
@@ -201,66 +202,33 @@ export const COMMON_STATES = {
 // ICON POSITION OPTIONS
 // =============================================================================
 
-export const ICON_POSITION_OPTIONS = {
-  AUTO: 'auto',
-  TOP_RIGHT: 'top-right',
-  TOP_LEFT: 'top-left',
+export const ICON_HORIZONTAL_POSITION_OPTIONS = {
+  LEFT: 'left',
   CENTER: 'center',
-  BOTTOM_RIGHT: 'bottom-right',
-  BOTTOM_LEFT: 'bottom-left',
+  RIGHT: 'right',
 } as const;
 
-export type IconPositionType = typeof ICON_POSITION_OPTIONS[keyof typeof ICON_POSITION_OPTIONS];
+export type IconHorizontalPositionType = typeof ICON_HORIZONTAL_POSITION_OPTIONS[keyof typeof ICON_HORIZONTAL_POSITION_OPTIONS];
 
-export const ICON_POSITION_DROPDOWN_OPTIONS = [
-  { value: ICON_POSITION_OPTIONS.AUTO, label: 'Auto' },
-  { value: ICON_POSITION_OPTIONS.TOP_RIGHT, label: 'Top Right' },
-  { value: ICON_POSITION_OPTIONS.TOP_LEFT, label: 'Top Left' },
-  { value: ICON_POSITION_OPTIONS.CENTER, label: 'Center' },
-  { value: ICON_POSITION_OPTIONS.BOTTOM_RIGHT, label: 'Bottom Right' },
-  { value: ICON_POSITION_OPTIONS.BOTTOM_LEFT, label: 'Bottom Left' },
+export const ICON_HORIZONTAL_DROPDOWN_OPTIONS = [
+  { value: ICON_HORIZONTAL_POSITION_OPTIONS.LEFT, label: 'Left' },
+  { value: ICON_HORIZONTAL_POSITION_OPTIONS.CENTER, label: 'Center' },
+  { value: ICON_HORIZONTAL_POSITION_OPTIONS.RIGHT, label: 'Right' },
 ];
 
-// Grid template areas for each icon position
-export const ICON_POSITION_GRIDS: Record<IconPositionType, { areas: string; columns: string; rows: string }> = {
-  [ICON_POSITION_OPTIONS.AUTO]: {
-    areas: '"name name icon icon" "climate climate persistent intermittent"',
-    columns: 'min-content 1fr',
-    rows: '1fr min-content',
-  },
-  [ICON_POSITION_OPTIONS.TOP_RIGHT]: {
-    areas: '"name name icon icon" "climate climate persistent intermittent"',
-    columns: 'min-content 1fr',
-    rows: '1fr min-content',
-  },
-  [ICON_POSITION_OPTIONS.TOP_LEFT]: {
-    areas: '"icon icon name name" "climate climate persistent intermittent"',
-    columns: 'min-content 1fr',
-    rows: '1fr min-content',
-  },
-  [ICON_POSITION_OPTIONS.CENTER]: {
-    areas: '". icon icon ." "climate climate persistent intermittent"',
-    columns: '1fr 1fr 1fr 1fr',
-    rows: '1fr min-content',
-  },
-  [ICON_POSITION_OPTIONS.BOTTOM_RIGHT]: {
-    areas: '"name name name name" "climate climate persistent icon"',
-    columns: 'min-content 1fr 1fr 1fr',
-    rows: '1fr min-content',
-  },
-  [ICON_POSITION_OPTIONS.BOTTOM_LEFT]: {
-    areas: '"name name name name" "icon climate persistent intermittent"',
-    columns: 'min-content 1fr 1fr 1fr',
-    rows: '1fr min-content',
-  },
-};
+export const ICON_VERTICAL_POSITION_OPTIONS = {
+  TOP: 'top',
+  CENTER: 'center',
+  BOTTOM: 'bottom',
+} as const;
 
-// Icon-only centered grid (used when auto and name is hidden)
-export const ICON_ONLY_CENTERED_GRID = {
-  areas: '"icon icon icon icon" "climate climate persistent intermittent"',
-  columns: '1fr',
-  rows: '1fr min-content',
-};
+export type IconVerticalPositionType = typeof ICON_VERTICAL_POSITION_OPTIONS[keyof typeof ICON_VERTICAL_POSITION_OPTIONS];
+
+export const ICON_VERTICAL_DROPDOWN_OPTIONS = [
+  { value: ICON_VERTICAL_POSITION_OPTIONS.TOP, label: 'Top' },
+  { value: ICON_VERTICAL_POSITION_OPTIONS.CENTER, label: 'Center' },
+  { value: ICON_VERTICAL_POSITION_OPTIONS.BOTTOM, label: 'Bottom' },
+];
 
 // =============================================================================
 // ENTITY DOMAIN CONFIGURATION
@@ -290,7 +258,7 @@ export const DOMAIN_ACTIVE_STATES: Record<string, string[]> = {
   [ENTITY_DOMAINS.LIGHT]: ['on'],
   [ENTITY_DOMAINS.SWITCH]: ['on'],
   [ENTITY_DOMAINS.CLIMATE]: ['cooling', 'heating', 'drying', 'fan_only', 'heat_cool', 'auto'],
-  [ENTITY_DOMAINS.LOCK]: ['unlocked'],
+  [ENTITY_DOMAINS.LOCK]: ['unlocked', 'unlocking', 'locking', 'open', 'opening'],
   [ENTITY_DOMAINS.COVER]: ['open', 'opening'],
   [ENTITY_DOMAINS.FAN]: ['on'],
   [ENTITY_DOMAINS.BINARY_SENSOR]: ['on'],
@@ -325,6 +293,8 @@ export const DOMAIN_STATE_ICONS: Record<string, Record<string, string>> = {
     jammed: 'mdi:lock-alert',
     locking: 'mdi:lock-clock',
     unlocking: 'mdi:lock-clock',
+    open: 'mdi:lock-open-variant',
+    opening: 'mdi:lock-open-variant',
   },
   [ENTITY_DOMAINS.CLIMATE]: {
     off: 'mdi:thermostat',
@@ -344,16 +314,20 @@ export const DOMAIN_STATE_ICONS: Record<string, Record<string, string>> = {
   },
 };
 
-// State-specific colors for certain domains
+// State-specific colors for certain domains using HA CSS variables
 export const DOMAIN_STATE_COLORS: Record<string, Record<string, string>> = {
   [ENTITY_DOMAINS.LOCK]: {
-    locked: 'var(--success-color, #4caf50)',
-    unlocked: 'var(--warning-color, #ff9800)',
-    jammed: 'var(--error-color, #f44336)',
+    jammed: 'var(--state-lock-jammed-color)',
+    locked: 'var(--state-lock-locked-color)',
+    locking: 'var(--state-lock-locking-color)',
+    unlocked: 'var(--state-lock-unlocked-color)',
+    unlocking: 'var(--state-lock-unlocking-color)',
+    open: 'var(--state-lock-open-color)',
+    opening: 'var(--state-lock-opening-color)',
   },
   [ENTITY_DOMAINS.CLIMATE]: {
-    heating: 'var(--error-color, #f44336)',
-    cooling: 'var(--info-color, #2196f3)',
+    heating: 'var(--state-climate-heat-color)',
+    cooling: 'var(--state-climate-cool-color)',
     idle: 'var(--primary-text-color)',
     off: 'var(--primary-text-color)',
   },

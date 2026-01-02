@@ -23,9 +23,8 @@ import {
   DEFAULT_HOLD_ACTION,
   DEFAULT_DOUBLE_TAP_ACTION,
   COMMON_STATES,
-  ICON_POSITION_OPTIONS,
-  ICON_POSITION_GRIDS,
-  ICON_ONLY_CENTERED_GRID,
+  ICON_HORIZONTAL_POSITION_OPTIONS,
+  ICON_VERTICAL_POSITION_OPTIONS,
   DOMAIN_ACTIVE_STATES,
   DOMAIN_DEFAULT_ICONS,
   DOMAIN_STATE_ICONS,
@@ -250,15 +249,12 @@ export class UnifiedRoomCard extends LitElement {
       'state-off': !isActive && !!mainEntity,
     };
 
-    // Calculate grid layout based on icon_position and visibility
-    const gridLayout = this._calculateGridLayout();
-
     const cardDynamicStyles = getCardDynamicStyles({
       cardHeight: this._config.card_height,
       cardWidth: this._config.card_width,
-      gridTemplateAreas: this._config.grid?.template_areas || gridLayout.areas,
-      gridTemplateColumns: this._config.grid?.template_columns || gridLayout.columns,
-      gridTemplateRows: this._config.grid?.template_rows || gridLayout.rows,
+      gridTemplateAreas: this._config.grid?.template_areas,
+      gridTemplateColumns: this._config.grid?.template_columns,
+      gridTemplateRows: this._config.grid?.template_rows,
       backgroundColor: this._config.background_color,
       activeBackgroundColor: isActive ? this._config.active_background_color : undefined,
       backgroundGradient: this._config.background_gradient,
@@ -279,31 +275,6 @@ export class UnifiedRoomCard extends LitElement {
         ${this._renderIntermittentEntities()}
       </ha-card>
     `;
-  }
-
-  /**
-   * Calculate grid layout based on icon_position and element visibility
-   */
-  private _calculateGridLayout(): { areas: string; columns: string; rows: string } {
-    if (!this._config) {
-      return ICON_POSITION_GRIDS[ICON_POSITION_OPTIONS.AUTO];
-    }
-
-    const iconPosition = this._config.icon_position || ICON_POSITION_OPTIONS.AUTO;
-    const showName = this._config.show_name !== false && !!this._config.name;
-
-    // If auto position, check what's visible
-    if (iconPosition === ICON_POSITION_OPTIONS.AUTO) {
-      // If name is hidden, center the icon
-      if (!showName) {
-        return ICON_ONLY_CENTERED_GRID;
-      }
-      // Otherwise, use top-right (default)
-      return ICON_POSITION_GRIDS[ICON_POSITION_OPTIONS.TOP_RIGHT];
-    }
-
-    // Use the specified position
-    return ICON_POSITION_GRIDS[iconPosition] || ICON_POSITION_GRIDS[ICON_POSITION_OPTIONS.TOP_RIGHT];
   }
 
   // ===========================================================================
@@ -354,7 +325,6 @@ export class UnifiedRoomCard extends LitElement {
     // Apply dynamic background color for active state
     if (isActive && showImgCell) {
       const bgColor = this._getEntityBackgroundColor(mainEntity);
-      // Use background-color specifically to override CSS
       iconContainerStyles['background-color'] = bgColor;
       iconContainerStyles['background'] = bgColor;
     }
@@ -365,13 +335,52 @@ export class UnifiedRoomCard extends LitElement {
       iconStyles['--mdc-icon-size'] = this._config.icon_size;
     }
     
-    // Icon color for active state with img-cell
+    // Determine icon color
     if (isActive && showImgCell) {
+      // For active state with img-cell, use white/contrast color
       iconStyles['color'] = 'var(--text-primary-color, #fff)';
+    } else if (mainEntity) {
+      // Check for domain-specific state color
+      const stateColor = this._getEntityStateColor(mainEntity);
+      if (stateColor) {
+        iconStyles['color'] = stateColor;
+      }
+    }
+
+    // Build icon section styles for positioning
+    const iconSectionStyles: Record<string, string> = {};
+    
+    // Horizontal positioning
+    const hPos = this._config?.icon_horizontal_position || ICON_HORIZONTAL_POSITION_OPTIONS.RIGHT;
+    switch (hPos) {
+      case ICON_HORIZONTAL_POSITION_OPTIONS.LEFT:
+        iconSectionStyles['justify-self'] = 'start';
+        break;
+      case ICON_HORIZONTAL_POSITION_OPTIONS.CENTER:
+        iconSectionStyles['justify-self'] = 'center';
+        break;
+      case ICON_HORIZONTAL_POSITION_OPTIONS.RIGHT:
+      default:
+        iconSectionStyles['justify-self'] = 'end';
+        break;
+    }
+    
+    // Vertical positioning
+    const vPos = this._config?.icon_vertical_position || ICON_VERTICAL_POSITION_OPTIONS.TOP;
+    switch (vPos) {
+      case ICON_VERTICAL_POSITION_OPTIONS.TOP:
+        iconSectionStyles['align-self'] = 'start';
+        break;
+      case ICON_VERTICAL_POSITION_OPTIONS.CENTER:
+        iconSectionStyles['align-self'] = 'center';
+        break;
+      case ICON_VERTICAL_POSITION_OPTIONS.BOTTOM:
+        iconSectionStyles['align-self'] = 'end';
+        break;
     }
 
     return html`
-      <div class="icon-section">
+      <div class="icon-section" style=${styleMap(iconSectionStyles)}>
         ${this._config?.show_state && mainEntity
           ? html`<span class="state-text">${mainEntity.state}</span>`
           : nothing}
