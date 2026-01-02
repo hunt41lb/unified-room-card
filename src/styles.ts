@@ -287,15 +287,35 @@ export const climateStyles = css`
 `;
 
 // =============================================================================
+// STATUS SECTION STYLES (Combined persistent + intermittent)
+// =============================================================================
+
+export const statusStyles = css`
+  .status-section {
+    grid-area: status;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 0 0 1px 2px;
+    margin: 0 3px 0 0;
+  }
+`;
+
+// =============================================================================
 // PERSISTENT ENTITIES STYLES
 // =============================================================================
 
 export const persistentStyles = css`
   .persistent-section {
-    grid-area: persistent;
     display: flex;
     align-items: center;
     /* padding, gap, and justify-self are set via inline styles for flexibility */
+  }
+
+  /* When using legacy grid with separate persistent area */
+  .persistent-section.legacy-grid {
+    grid-area: persistent;
   }
 
   .persistent-entity {
@@ -326,29 +346,31 @@ export const persistentStyles = css`
 
 export const intermittentStyles = css`
   .intermittent-section {
-    grid-area: intermittent;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
+    gap: 4px;
   }
 
-  .intermittent-section.position-left {
-    justify-content: flex-start;
-  }
-
-  .intermittent-section.position-center {
-    justify-content: center;
-  }
-
-  .intermittent-section.position-right {
-    justify-content: flex-end;
+  /* When using legacy grid with separate intermittent area */
+  .intermittent-section.legacy-grid {
+    grid-area: intermittent;
   }
 
   .intermittent-entity {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .intermittent-entity:hover {
+    transform: scale(1.1);
+  }
+
+  .intermittent-entity:active {
+    transform: scale(0.95);
   }
 
   .intermittent-entity ha-icon {
@@ -402,6 +424,7 @@ export const cardStyles = css`
   ${nameStyles}
   ${iconStyles}
   ${climateStyles}
+  ${statusStyles}
   ${persistentStyles}
   ${intermittentStyles}
   ${overflowStyles}

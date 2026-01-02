@@ -9,7 +9,7 @@
 // CARD METADATA
 // =============================================================================
 
-export const CARD_VERSION = '1.0.7';
+export const CARD_VERSION = '1.0.8';
 export const CARD_NAME = 'unified-room-card';
 export const CARD_DESCRIPTION = 'A comprehensive room status card for Home Assistant with support for climate, persistent, and intermittent entities.';
 export const CARD_EDITOR_NAME = 'unified-room-card-editor';
@@ -23,7 +23,7 @@ export const CARD_EDITOR_TAG = 'unified-room-card-editor';
 // =============================================================================
 
 // Icon spans all columns in row 1, name overlays on top
-export const DEFAULT_GRID_TEMPLATE_AREAS = '"icon icon icon icon" "climate climate persistent intermittent"';
+export const DEFAULT_GRID_TEMPLATE_AREAS = '"icon icon icon icon" "climate climate status status"';
 export const DEFAULT_GRID_TEMPLATE_COLUMNS = '1fr 1fr 1fr 1fr';
 export const DEFAULT_GRID_TEMPLATE_ROWS = '1fr min-content';
 

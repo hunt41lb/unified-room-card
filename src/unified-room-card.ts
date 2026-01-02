@@ -264,6 +264,9 @@ export class UnifiedRoomCard extends LitElement {
       borderStyle: borderStyle,
     });
 
+    // Check if user has custom grid with legacy persistent/intermittent areas
+    const useLegacyGrid = this._usesLegacyGridAreas();
+
     return html`
       <ha-card
         class=${classMap(cardClasses)}
@@ -275,9 +278,46 @@ export class UnifiedRoomCard extends LitElement {
         ${this._renderName()}
         ${this._renderIcon()}
         ${this._renderClimateSection()}
-        ${this._renderPersistentEntities()}
-        ${this._renderIntermittentEntities()}
+        ${useLegacyGrid
+          ? html`
+              ${this._renderPersistentEntities(true)}
+              ${this._renderIntermittentEntities(true)}
+            `
+          : this._renderStatusSection()
+        }
       </ha-card>
+    `;
+  }
+
+  /**
+   * Check if user is using legacy grid areas (separate persistent/intermittent)
+   */
+  private _usesLegacyGridAreas(): boolean {
+    const customAreas = this._config?.grid?.template_areas;
+    if (!customAreas) {
+      return false; // Using default grid with "status" area
+    }
+    // If user specified custom grid with persistent or intermittent, use legacy mode
+    return customAreas.includes('persistent') || customAreas.includes('intermittent');
+  }
+
+  /**
+   * Render combined status section (persistent + intermittent)
+   * Used with default grid layout
+   */
+  private _renderStatusSection(): TemplateResult | typeof nothing {
+    const hasPersistent = this._config?.persistent_entities?.entities?.length;
+    const hasIntermittent = this._config?.intermittent_entities?.entities?.length;
+
+    if (!hasPersistent && !hasIntermittent) {
+      return nothing;
+    }
+
+    return html`
+      <div class="status-section">
+        ${this._renderPersistentEntities(false)}
+        ${this._renderIntermittentEntities(false)}
+      </div>
     `;
   }
 
@@ -901,8 +941,9 @@ export class UnifiedRoomCard extends LitElement {
   /**
    * Render persistent entities section
    * These entities are always visible regardless of state
+   * @param legacyGrid - If true, uses grid-area: persistent for custom grid layouts
    */
-  private _renderPersistentEntities(): TemplateResult | typeof nothing {
+  private _renderPersistentEntities(legacyGrid: boolean = false): TemplateResult | typeof nothing {
     if (!this._config?.persistent_entities?.entities?.length || !this.hass) {
       return nothing;
     }
@@ -912,55 +953,61 @@ export class UnifiedRoomCard extends LitElement {
     const defaultIconSize = config.icon_size || '21px';
     const gap = config.gap || '4px';
 
-    // Build section styles for positioning
+    // Build section styles
     const sectionStyles: Record<string, string> = {
       'gap': gap,
     };
 
-    // Handle custom padding or use smart defaults based on position
-    if (config.padding) {
-      sectionStyles['padding'] = config.padding;
-    } else {
-      // Smart defaults: left position gets climate-like padding, right gets minimal
+    // Only apply positioning styles in legacy grid mode or when position is explicitly set
+    if (legacyGrid) {
+      // Handle custom padding or use smart defaults based on position
+      if (config.padding) {
+        sectionStyles['padding'] = config.padding;
+      } else {
+        switch (position) {
+          case 'left':
+            sectionStyles['padding'] = '0 0 1px 14px';
+            break;
+          case 'center':
+            sectionStyles['padding'] = '0 0 1px 0';
+            break;
+          case 'right':
+          default:
+            sectionStyles['padding'] = '0 0 1px 2px';
+            if (!config.margin) {
+              sectionStyles['margin'] = '0 3px 0 0';
+            }
+            break;
+        }
+      }
+
+      // Handle custom margin
+      if (config.margin) {
+        sectionStyles['margin'] = config.margin;
+      }
+
       switch (position) {
         case 'left':
-          sectionStyles['padding'] = '0 0 1px 14px';
+          sectionStyles['justify-self'] = 'start';
           break;
         case 'center':
-          sectionStyles['padding'] = '0 0 1px 0';
+          sectionStyles['justify-self'] = 'center';
           break;
         case 'right':
         default:
-          sectionStyles['padding'] = '0 0 1px 2px';
-          if (!config.margin) {
-            sectionStyles['margin'] = '0 3px 0 0';
-          }
+          sectionStyles['justify-self'] = 'end';
           break;
       }
     }
 
-    // Handle custom margin
-    if (config.margin) {
-      sectionStyles['margin'] = config.margin;
-    }
-
-    switch (position) {
-      case 'left':
-        sectionStyles['justify-self'] = 'start';
-        break;
-      case 'center':
-        sectionStyles['justify-self'] = 'center';
-        break;
-      case 'right':
-      default:
-        sectionStyles['justify-self'] = 'end';
-        break;
-    }
-
     const entities = config.entities || [];
+    const classes = {
+      'persistent-section': true,
+      'legacy-grid': legacyGrid,
+    };
 
     return html`
-      <div class="persistent-section" style=${styleMap(sectionStyles)}>
+      <div class=${classMap(classes)} style=${styleMap(sectionStyles)}>
         ${entities.map((entityConfig) => 
           this._renderPersistentEntity(entityConfig, defaultIconSize)
         )}
@@ -1207,14 +1254,20 @@ export class UnifiedRoomCard extends LitElement {
   /**
    * Render intermittent entities section
    * Placeholder for Phase 5
+   * @param legacyGrid - If true, uses grid-area: intermittent for custom grid layouts
    */
-  private _renderIntermittentEntities(): TemplateResult | typeof nothing {
+  private _renderIntermittentEntities(legacyGrid: boolean = false): TemplateResult | typeof nothing {
     if (!this._config?.intermittent_entities?.entities?.length) {
       return nothing;
     }
 
+    const classes = {
+      'intermittent-section': true,
+      'legacy-grid': legacyGrid,
+    };
+
     return html`
-      <div class="intermittent-section">
+      <div class=${classMap(classes)}>
         <!-- Intermittent entities will be implemented in Phase 5 -->
       </div>
     `;
