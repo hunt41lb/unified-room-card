@@ -1186,17 +1186,7 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p class="section-description">Shows an indicator when any battery is below threshold</p>
-          <!-- Auto Discover -->
-          <div class="form-row">
-            <span class="form-label">Auto-discover battery entities</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${batteryConfig.auto_discover !== false}
-                @change=${(e: Event) => this._batteryValueChanged('auto_discover', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
-            </div>
-          </div>
+          <p class="section-description">Shows icons for entities with low battery (only when below threshold)</p>
           <!-- Low Threshold -->
           <div class="form-row">
             <span class="form-label">Low Battery Threshold (%)</span>
@@ -1216,19 +1206,9 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-input">
               <ha-textfield
                 .value=${batteryConfig.icon_size || ''}
-                placeholder="18px"
+                placeholder="21px"
                 @input=${(e: Event) => this._batteryValueChanged('icon_size', (e.target as HTMLInputElement).value)}
               ></ha-textfield>
-            </div>
-          </div>
-          <!-- Show Count -->
-          <div class="form-row">
-            <span class="form-label">Show count badge</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${batteryConfig.show_count !== false}
-                @change=${(e: Event) => this._batteryValueChanged('show_count', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
             </div>
           </div>
           <!-- Tap Action -->
@@ -1246,9 +1226,24 @@ export class UnifiedRoomCardEditor extends LitElement {
               </ha-select>
             </div>
           </div>
-          <!-- Specific Entities (optional) -->
+          <!-- Hold Action -->
           <div class="form-row">
-            <span class="form-label">Specific Entities (optional)</span>
+            <span class="form-label">Hold Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${batteryConfig.hold_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._batteryActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="navigate">Navigate</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Entities -->
+          <div class="form-row">
+            <span class="form-label">Entities</span>
           </div>
           ${entities.map((entityId, index) => html`
             <div class="entity-list-item">
@@ -1288,20 +1283,10 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p class="section-description">Shows an indicator when updates are available</p>
-          <!-- Auto Discover -->
-          <div class="form-row">
-            <span class="form-label">Auto-discover update entities</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${updateConfig.auto_discover !== false}
-                @change=${(e: Event) => this._updateValueChanged('auto_discover', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
-            </div>
-          </div>
+          <p class="section-description">Shows icons for entities with available updates (only when updates pending)</p>
           <!-- Icon -->
           <div class="form-row">
-            <span class="form-label">Icon</span>
+            <span class="form-label">Default Icon</span>
             <div class="form-input">
               <ha-selector
                 .hass=${this.hass}
@@ -1318,7 +1303,7 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-input">
               <ha-textfield
                 .value=${updateConfig.icon_size || ''}
-                placeholder="18px"
+                placeholder="21px"
                 @input=${(e: Event) => this._updateValueChanged('icon_size', (e.target as HTMLInputElement).value)}
               ></ha-textfield>
             </div>
@@ -1336,16 +1321,6 @@ export class UnifiedRoomCardEditor extends LitElement {
               </ha-select>
             </div>
           </div>
-          <!-- Show Count -->
-          <div class="form-row">
-            <span class="form-label">Show count badge</span>
-            <div class="form-input">
-              <ha-switch
-                .checked=${updateConfig.show_count !== false}
-                @change=${(e: Event) => this._updateValueChanged('show_count', (e.target as HTMLInputElement).checked)}
-              ></ha-switch>
-            </div>
-          </div>
           <!-- Tap Action -->
           <div class="form-row">
             <span class="form-label">Tap Action</span>
@@ -1361,9 +1336,24 @@ export class UnifiedRoomCardEditor extends LitElement {
               </ha-select>
             </div>
           </div>
-          <!-- Specific Entities (optional) -->
+          <!-- Hold Action -->
           <div class="form-row">
-            <span class="form-label">Specific Entities (optional)</span>
+            <span class="form-label">Hold Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${updateConfig.hold_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._updateActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="navigate">Navigate</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Entities -->
+          <div class="form-row">
+            <span class="form-label">Entities</span>
           </div>
           ${entities.map((entityId, index) => html`
             <div class="entity-list-item">

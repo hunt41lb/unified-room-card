@@ -340,8 +340,8 @@ export class UnifiedRoomCard extends LitElement {
       <div class="status-section">
         ${this._renderPersistentEntities(false)}
         ${this._renderIntermittentEntities(false)}
-        ${hasBattery ? this._renderBatteryIndicator(lowBatteryCount) : nothing}
-        ${hasUpdate ? this._renderUpdateIndicator(pendingUpdateCount) : nothing}
+        ${hasBattery ? this._renderBatteryEntities() : nothing}
+        ${hasUpdate ? this._renderUpdateEntities() : nothing}
       </div>
     `;
   }
@@ -1547,56 +1547,34 @@ export class UnifiedRoomCard extends LitElement {
   // ===========================================================================
 
   /**
-   * Get count of entities with low battery
+   * Get list of entities with low battery
    */
-  private _getLowBatteryCount(): number {
-    if (!this.hass || !this._config?.battery_entities) return 0;
+  private _getLowBatteryEntities(): string[] {
+    if (!this.hass || !this._config?.battery_entities) return [];
 
     const config = this._config.battery_entities;
     const lowThreshold = config.low_threshold ?? 20;
-    
-    // Get entities to check
-    let entities: string[] = config.entities || [];
-    
-    // Auto-discover if no entities specified or auto_discover is true
-    if (entities.length === 0 || config.auto_discover) {
-      const discovered = this._discoverBatteryEntities();
-      entities = [...new Set([...entities, ...discovered])];
-    }
+    const entities = config.entities || [];
 
-    let lowCount = 0;
+    const lowBatteryEntities: string[] = [];
     for (const entityId of entities) {
       const entity = this.hass.states[entityId];
       if (!entity) continue;
       
       const level = this._getBatteryLevel(entity);
       if (level !== null && level <= lowThreshold) {
-        lowCount++;
+        lowBatteryEntities.push(entityId);
       }
     }
 
-    return lowCount;
+    return lowBatteryEntities;
   }
 
   /**
-   * Discover battery entities automatically
+   * Get count of entities with low battery (for status section check)
    */
-  private _discoverBatteryEntities(): string[] {
-    if (!this.hass) return [];
-
-    const batteryEntities: string[] = [];
-    
-    for (const [entityId, entity] of Object.entries(this.hass.states)) {
-      // Check for battery domain
-      if (entityId.startsWith('sensor.') && 
-          (entity.attributes.device_class === 'battery' ||
-           entityId.includes('battery') ||
-           entity.attributes.unit_of_measurement === '%' && entityId.toLowerCase().includes('batt'))) {
-        batteryEntities.push(entityId);
-      }
-    }
-
-    return batteryEntities;
+  private _getLowBatteryCount(): number {
+    return this._getLowBatteryEntities().length;
   }
 
   /**
@@ -1611,21 +1589,39 @@ export class UnifiedRoomCard extends LitElement {
   }
 
   /**
-   * Render battery indicator
+   * Render battery entities (like intermittent - only shows low batteries)
    */
-  private _renderBatteryIndicator(count: number): TemplateResult | typeof nothing {
-    if (count === 0) return nothing;
+  private _renderBatteryEntities(): TemplateResult | typeof nothing {
+    const lowBatteryEntities = this._getLowBatteryEntities();
+    if (lowBatteryEntities.length === 0) return nothing;
 
     const config = this._config?.battery_entities;
     if (!config) return nothing;
 
-    const iconSize = config.icon_size || '18px';
-    const showCount = config.show_count !== false;
-    const lowThreshold = config.low_threshold ?? 20;
-    
-    // Determine icon based on severity
-    let icon = 'mdi:battery-alert';
-    let color = 'var(--error-color, #db4437)';
+    const iconSize = config.icon_size || '21px';
+    const color = 'var(--state-sensor-battery-low-color, var(--error-color, #db4437))';
+
+    return html`
+      ${lowBatteryEntities.map(entityId => this._renderBatteryEntity(entityId, iconSize, color, config))}
+    `;
+  }
+
+  /**
+   * Render a single battery entity
+   */
+  private _renderBatteryEntity(
+    entityId: string, 
+    iconSize: string, 
+    color: string,
+    config: { tap_action?: TapActionConfig; hold_action?: TapActionConfig }
+  ): TemplateResult | typeof nothing {
+    if (!this.hass) return nothing;
+
+    const entity = this.hass.states[entityId];
+    if (!entity) return nothing;
+
+    const level = this._getBatteryLevel(entity);
+    const icon = this._getBatteryIcon(level);
 
     const iconStyles: Record<string, string> = {
       '--mdc-icon-size': iconSize,
@@ -1633,65 +1629,49 @@ export class UnifiedRoomCard extends LitElement {
     };
 
     const tapAction = config.tap_action || { action: 'more-info' as const };
-    const holdAction = config.hold_action || { action: 'none' as const };
-
-    // Get first low battery entity for more-info
-    const firstLowBattery = this._getFirstLowBatteryEntity(lowThreshold);
+    const holdAction = config.hold_action || { action: 'more-info' as const };
 
     return html`
       <div 
-        class="battery-indicator status-indicator"
-        @click=${(e: Event) => { e.stopPropagation(); this._handleBatteryAction(tapAction, firstLowBattery); }}
-        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleBatteryAction(holdAction, firstLowBattery); }}
-        title="Low battery: ${count} device${count > 1 ? 's' : ''}"
+        class="intermittent-entity"
+        @click=${(e: Event) => { e.stopPropagation(); this._handleBatteryAction(tapAction, entityId); }}
+        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleBatteryAction(holdAction, entityId); }}
+        title="${entity.attributes.friendly_name || entityId}: ${level}%"
       >
         <ha-icon
           .icon=${icon}
           style=${styleMap(iconStyles)}
         ></ha-icon>
-        ${showCount && count > 1 ? html`<span class="indicator-count">${count}</span>` : nothing}
       </div>
     `;
   }
 
   /**
-   * Get first entity with low battery
+   * Get battery icon based on level
    */
-  private _getFirstLowBatteryEntity(lowThreshold: number): string | undefined {
-    if (!this.hass || !this._config?.battery_entities) return undefined;
-
-    const config = this._config.battery_entities;
-    let entities: string[] = config.entities || [];
-    
-    if (entities.length === 0 || config.auto_discover) {
-      const discovered = this._discoverBatteryEntities();
-      entities = [...new Set([...entities, ...discovered])];
-    }
-
-    for (const entityId of entities) {
-      const entity = this.hass.states[entityId];
-      if (!entity) continue;
-      
-      const level = this._getBatteryLevel(entity);
-      if (level !== null && level <= lowThreshold) {
-        return entityId;
-      }
-    }
-
-    return undefined;
+  private _getBatteryIcon(level: number | null): string {
+    if (level === null) return 'mdi:battery-unknown';
+    if (level <= 10) return 'mdi:battery-alert';
+    if (level <= 20) return 'mdi:battery-10';
+    if (level <= 30) return 'mdi:battery-20';
+    if (level <= 40) return 'mdi:battery-30';
+    if (level <= 50) return 'mdi:battery-40';
+    if (level <= 60) return 'mdi:battery-50';
+    if (level <= 70) return 'mdi:battery-60';
+    if (level <= 80) return 'mdi:battery-70';
+    if (level <= 90) return 'mdi:battery-80';
+    return 'mdi:battery';
   }
 
   /**
-   * Handle battery indicator action
+   * Handle battery entity action
    */
-  private _handleBatteryAction(action: TapActionConfig, entityId?: string): void {
+  private _handleBatteryAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
 
     switch (action.action) {
       case 'more-info':
-        if (entityId) {
-          this._fireMoreInfo(entityId);
-        }
+        this._fireMoreInfo(entityId);
         break;
       case 'navigate':
         if (action.navigation_path) {
@@ -1715,66 +1695,71 @@ export class UnifiedRoomCard extends LitElement {
   // ===========================================================================
 
   /**
-   * Get count of entities with pending updates
+   * Get list of entities with pending updates
    */
-  private _getPendingUpdateCount(): number {
-    if (!this.hass || !this._config?.update_entities) return 0;
+  private _getPendingUpdateEntities(): string[] {
+    if (!this.hass || !this._config?.update_entities) return [];
 
     const config = this._config.update_entities;
-    
-    // Get entities to check
-    let entities: string[] = config.entities || [];
-    
-    // Auto-discover if no entities specified or auto_discover is true
-    if (entities.length === 0 || config.auto_discover) {
-      const discovered = this._discoverUpdateEntities();
-      entities = [...new Set([...entities, ...discovered])];
-    }
+    const entities = config.entities || [];
 
-    let updateCount = 0;
+    const pendingUpdateEntities: string[] = [];
     for (const entityId of entities) {
       const entity = this.hass.states[entityId];
       if (!entity) continue;
       
       // Update entities have state 'on' when update is available
       if (entity.state === 'on') {
-        updateCount++;
+        pendingUpdateEntities.push(entityId);
       }
     }
 
-    return updateCount;
+    return pendingUpdateEntities;
   }
 
   /**
-   * Discover update entities automatically
+   * Get count of entities with pending updates (for status section check)
    */
-  private _discoverUpdateEntities(): string[] {
-    if (!this.hass) return [];
-
-    const updateEntities: string[] = [];
-    
-    for (const entityId of Object.keys(this.hass.states)) {
-      if (entityId.startsWith('update.')) {
-        updateEntities.push(entityId);
-      }
-    }
-
-    return updateEntities;
+  private _getPendingUpdateCount(): number {
+    return this._getPendingUpdateEntities().length;
   }
 
   /**
-   * Render update indicator
+   * Render update entities (like intermittent - only shows pending updates)
    */
-  private _renderUpdateIndicator(count: number): TemplateResult | typeof nothing {
-    if (count === 0) return nothing;
+  private _renderUpdateEntities(): TemplateResult | typeof nothing {
+    const pendingUpdateEntities = this._getPendingUpdateEntities();
+    if (pendingUpdateEntities.length === 0) return nothing;
 
     const config = this._config?.update_entities;
     if (!config) return nothing;
 
+    const iconSize = config.icon_size || '21px';
+    const color = config.color || 'var(--state-update-active-color, var(--info-color, #039be5))';
     const icon = config.icon || 'mdi:package-up';
-    const iconSize = config.icon_size || '18px';
-    const color = config.color || 'var(--info-color, #039be5)';
-    const showCount = config.show_count !== false;
+
+    return html`
+      ${pendingUpdateEntities.map(entityId => this._renderUpdateEntity(entityId, iconSize, color, icon, config))}
+    `;
+  }
+
+  /**
+   * Render a single update entity
+   */
+  private _renderUpdateEntity(
+    entityId: string, 
+    iconSize: string, 
+    color: string,
+    icon: string,
+    config: { tap_action?: TapActionConfig; hold_action?: TapActionConfig }
+  ): TemplateResult | typeof nothing {
+    if (!this.hass) return nothing;
+
+    const entity = this.hass.states[entityId];
+    if (!entity) return nothing;
+
+    // Use entity icon if available, otherwise use config icon
+    const displayIcon = (entity.attributes.icon as string) || icon;
 
     const iconStyles: Record<string, string> = {
       '--mdc-icon-size': iconSize,
@@ -1782,62 +1767,35 @@ export class UnifiedRoomCard extends LitElement {
     };
 
     const tapAction = config.tap_action || { action: 'more-info' as const };
-    const holdAction = config.hold_action || { action: 'none' as const };
+    const holdAction = config.hold_action || { action: 'more-info' as const };
 
-    // Get first update entity for more-info
-    const firstUpdate = this._getFirstPendingUpdateEntity();
+    const title = entity.attributes.friendly_name || entityId;
+    const version = entity.attributes.latest_version || 'available';
 
     return html`
       <div 
-        class="update-indicator status-indicator"
-        @click=${(e: Event) => { e.stopPropagation(); this._handleUpdateAction(tapAction, firstUpdate); }}
-        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleUpdateAction(holdAction, firstUpdate); }}
-        title="Updates available: ${count}"
+        class="intermittent-entity"
+        @click=${(e: Event) => { e.stopPropagation(); this._handleUpdateAction(tapAction, entityId); }}
+        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleUpdateAction(holdAction, entityId); }}
+        title="${title}: Update ${version}"
       >
         <ha-icon
-          .icon=${icon}
+          .icon=${displayIcon}
           style=${styleMap(iconStyles)}
         ></ha-icon>
-        ${showCount && count > 1 ? html`<span class="indicator-count">${count}</span>` : nothing}
       </div>
     `;
   }
 
   /**
-   * Get first entity with pending update
+   * Handle update entity action
    */
-  private _getFirstPendingUpdateEntity(): string | undefined {
-    if (!this.hass || !this._config?.update_entities) return undefined;
-
-    const config = this._config.update_entities;
-    let entities: string[] = config.entities || [];
-    
-    if (entities.length === 0 || config.auto_discover) {
-      const discovered = this._discoverUpdateEntities();
-      entities = [...new Set([...entities, ...discovered])];
-    }
-
-    for (const entityId of entities) {
-      const entity = this.hass.states[entityId];
-      if (entity?.state === 'on') {
-        return entityId;
-      }
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Handle update indicator action
-   */
-  private _handleUpdateAction(action: TapActionConfig, entityId?: string): void {
+  private _handleUpdateAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
 
     switch (action.action) {
       case 'more-info':
-        if (entityId) {
-          this._fireMoreInfo(entityId);
-        }
+        this._fireMoreInfo(entityId);
         break;
       case 'navigate':
         if (action.navigation_path) {
