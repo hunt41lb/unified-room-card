@@ -219,6 +219,7 @@ export interface UnifiedRoomCardConfig {
   // Border Indicator Entity
   border_entity?: string;  // Entity that controls border color
   border_width?: string;   // Border width (default: 2px)
+  border_style?: string;   // Border style (default: solid)
   
   // Tap Actions
   tap_action?: TapActionConfig;

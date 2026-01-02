@@ -9,7 +9,7 @@
 // CARD METADATA
 // =============================================================================
 
-export const CARD_VERSION = '1.0.4';
+export const CARD_VERSION = '1.0.5';
 export const CARD_NAME = 'unified-room-card';
 export const CARD_DESCRIPTION = 'A comprehensive room status card for Home Assistant with support for climate, persistent, and intermittent entities.';
 export const CARD_EDITOR_NAME = 'unified-room-card-editor';
@@ -228,6 +228,27 @@ export const ICON_VERTICAL_DROPDOWN_OPTIONS = [
   { value: ICON_VERTICAL_POSITION_OPTIONS.TOP, label: 'Top' },
   { value: ICON_VERTICAL_POSITION_OPTIONS.CENTER, label: 'Center' },
   { value: ICON_VERTICAL_POSITION_OPTIONS.BOTTOM, label: 'Bottom' },
+];
+
+// =============================================================================
+// BORDER OPTIONS
+// =============================================================================
+
+export const BORDER_WIDTH_OPTIONS = [
+  { value: '1px', label: '1px' },
+  { value: '2px', label: '2px' },
+  { value: '3px', label: '3px' },
+  { value: '4px', label: '4px' },
+  { value: '5px', label: '5px' },
+];
+
+export const BORDER_STYLE_OPTIONS = [
+  { value: 'solid', label: 'Solid' },
+  { value: 'dashed', label: 'Dashed' },
+  { value: 'dotted', label: 'Dotted' },
+  { value: 'double', label: 'Double' },
+  { value: 'groove', label: 'Groove' },
+  { value: 'ridge', label: 'Ridge' },
 ];
 
 // =============================================================================

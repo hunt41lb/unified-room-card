@@ -295,13 +295,14 @@ export class UnifiedRoomCard extends LitElement {
     }
 
     const borderWidth = this._config.border_width || '2px';
+    const borderStyle = this._config.border_style || 'solid';
     const borderColor = this._getBorderEntityColor(entity);
 
     if (!borderColor) {
       return undefined;
     }
 
-    return `${borderWidth} solid ${borderColor}`;
+    return `${borderWidth} ${borderStyle} ${borderColor}`;
   }
 
   /**

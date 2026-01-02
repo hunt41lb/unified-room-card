@@ -292,14 +292,39 @@ export class UnifiedRoomCardEditor extends LitElement {
             </div>
           </div>
           ${this._config?.border_entity ? html`
-          <div class="form-row">
-            <span class="form-label">Border Width</span>
-            <div class="form-input">
-              <ha-textfield
-                .value=${this._config?.border_width || ''}
-                placeholder="2px"
-                @input=${(e: Event) => this._valueChanged('border_width', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+          <div class="form-row-dual expand-inputs">
+            <div class="form-item">
+              <span class="form-label">Border Width</span>
+              <div class="form-input">
+                <ha-select
+                  .value=${this._config?.border_width || '2px'}
+                  @selected=${(e: CustomEvent) => this._valueChanged('border_width', (e.target as HTMLSelectElement).value)}
+                  @closed=${(e: Event) => e.stopPropagation()}
+                >
+                  <mwc-list-item value="1px">1px</mwc-list-item>
+                  <mwc-list-item value="2px">2px</mwc-list-item>
+                  <mwc-list-item value="3px">3px</mwc-list-item>
+                  <mwc-list-item value="4px">4px</mwc-list-item>
+                  <mwc-list-item value="5px">5px</mwc-list-item>
+                </ha-select>
+              </div>
+            </div>
+            <div class="form-item">
+              <span class="form-label">Border Style</span>
+              <div class="form-input">
+                <ha-select
+                  .value=${this._config?.border_style || 'solid'}
+                  @selected=${(e: CustomEvent) => this._valueChanged('border_style', (e.target as HTMLSelectElement).value)}
+                  @closed=${(e: Event) => e.stopPropagation()}
+                >
+                  <mwc-list-item value="solid">Solid</mwc-list-item>
+                  <mwc-list-item value="dashed">Dashed</mwc-list-item>
+                  <mwc-list-item value="dotted">Dotted</mwc-list-item>
+                  <mwc-list-item value="double">Double</mwc-list-item>
+                  <mwc-list-item value="groove">Groove</mwc-list-item>
+                  <mwc-list-item value="ridge">Ridge</mwc-list-item>
+                </ha-select>
+              </div>
             </div>
           </div>
           ` : ''}
