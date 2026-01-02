@@ -268,15 +268,14 @@ export const climateStyles = css`
     align-items: baseline;
     justify-self: start;
     line-height: 30px;
-    font-weight: 300;
+    font-weight: 300px;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
+    padding: 0 0 1px 14px;
   }
 
   .climate-primary {
     font-size: 18px;
-    font-weight: 400;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
-    margin-right: 4px;
   }
 
   .climate-secondary {
@@ -288,11 +287,6 @@ export const climateStyles = css`
     font-weight: 400;
     opacity: 0.7;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
-    margin-right: 4px;
-  }
-
-  .climate-value:last-child {
-    margin-right: 0;
   }
 
   .climate-divider {
