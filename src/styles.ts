@@ -384,6 +384,73 @@ export const intermittentStyles = css`
 `;
 
 // =============================================================================
+// BATTERY & UPDATE INDICATOR STYLES
+// =============================================================================
+
+export const indicatorStyles = css`
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .status-indicator:hover {
+    transform: scale(1.1);
+  }
+
+  .status-indicator:active {
+    transform: scale(0.95);
+  }
+
+  .status-indicator ha-icon {
+    transition: color 0.3s ease;
+  }
+
+  .indicator-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--error-color, #db4437);
+    color: white;
+    font-size: 9px;
+    font-weight: 600;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+  }
+
+  .battery-indicator .indicator-count {
+    background: var(--error-color, #db4437);
+  }
+
+  .update-indicator .indicator-count {
+    background: var(--info-color, #039be5);
+  }
+
+  /* Animation for indicators */
+  .battery-indicator ha-icon {
+    animation: pulse-subtle 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+`;
+
+// =============================================================================
 // OVERFLOW INDICATOR STYLES
 // =============================================================================
 
@@ -427,6 +494,7 @@ export const cardStyles = css`
   ${statusStyles}
   ${persistentStyles}
   ${intermittentStyles}
+  ${indicatorStyles}
   ${overflowStyles}
   ${unavailableStyles}
 `;
@@ -604,6 +672,27 @@ export const editorStyles = css`
   .add-entity-btn:hover {
     border-color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+  }
+
+  .entity-list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .entity-list-item ha-selector {
+    flex: 1;
+  }
+
+  .entity-list-item ha-icon {
+    cursor: pointer;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    transition: color 0.2s ease;
+  }
+
+  .entity-list-item ha-icon:hover {
+    color: var(--error-color, #db4437);
   }
 
   .add-state-btn {

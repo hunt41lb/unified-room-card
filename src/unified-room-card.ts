@@ -325,8 +325,14 @@ export class UnifiedRoomCard extends LitElement {
   private _renderStatusSection(): TemplateResult | typeof nothing {
     const hasPersistent = this._config?.persistent_entities?.entities?.length;
     const hasIntermittent = this._config?.intermittent_entities?.entities?.length;
+    const hasBattery = this._config?.battery_entities;
+    const hasUpdate = this._config?.update_entities;
 
-    if (!hasPersistent && !hasIntermittent) {
+    // Check if any status content exists
+    const lowBatteryCount = this._getLowBatteryCount();
+    const pendingUpdateCount = this._getPendingUpdateCount();
+    
+    if (!hasPersistent && !hasIntermittent && lowBatteryCount === 0 && pendingUpdateCount === 0) {
       return nothing;
     }
 
@@ -334,6 +340,8 @@ export class UnifiedRoomCard extends LitElement {
       <div class="status-section">
         ${this._renderPersistentEntities(false)}
         ${this._renderIntermittentEntities(false)}
+        ${hasBattery ? this._renderBatteryIndicator(lowBatteryCount) : nothing}
+        ${hasUpdate ? this._renderUpdateIndicator(pendingUpdateCount) : nothing}
       </div>
     `;
   }
@@ -1526,6 +1534,320 @@ export class UnifiedRoomCard extends LitElement {
         if (action.service) {
           const [serviceDomain, service] = action.service.split('.');
           this.hass.callService(serviceDomain, service, action.service_data || {});
+        }
+        break;
+      case 'none':
+      default:
+        break;
+    }
+  }
+
+  // ===========================================================================
+  // BATTERY ENTITIES
+  // ===========================================================================
+
+  /**
+   * Get count of entities with low battery
+   */
+  private _getLowBatteryCount(): number {
+    if (!this.hass || !this._config?.battery_entities) return 0;
+
+    const config = this._config.battery_entities;
+    const lowThreshold = config.low_threshold ?? 20;
+    
+    // Get entities to check
+    let entities: string[] = config.entities || [];
+    
+    // Auto-discover if no entities specified or auto_discover is true
+    if (entities.length === 0 || config.auto_discover) {
+      const discovered = this._discoverBatteryEntities();
+      entities = [...new Set([...entities, ...discovered])];
+    }
+
+    let lowCount = 0;
+    for (const entityId of entities) {
+      const entity = this.hass.states[entityId];
+      if (!entity) continue;
+      
+      const level = this._getBatteryLevel(entity);
+      if (level !== null && level <= lowThreshold) {
+        lowCount++;
+      }
+    }
+
+    return lowCount;
+  }
+
+  /**
+   * Discover battery entities automatically
+   */
+  private _discoverBatteryEntities(): string[] {
+    if (!this.hass) return [];
+
+    const batteryEntities: string[] = [];
+    
+    for (const [entityId, entity] of Object.entries(this.hass.states)) {
+      // Check for battery domain
+      if (entityId.startsWith('sensor.') && 
+          (entity.attributes.device_class === 'battery' ||
+           entityId.includes('battery') ||
+           entity.attributes.unit_of_measurement === '%' && entityId.toLowerCase().includes('batt'))) {
+        batteryEntities.push(entityId);
+      }
+    }
+
+    return batteryEntities;
+  }
+
+  /**
+   * Get battery level from entity
+   */
+  private _getBatteryLevel(entity: { state: string; attributes: Record<string, unknown> }): number | null {
+    const state = parseFloat(entity.state);
+    if (!isNaN(state)) {
+      return state;
+    }
+    return null;
+  }
+
+  /**
+   * Render battery indicator
+   */
+  private _renderBatteryIndicator(count: number): TemplateResult | typeof nothing {
+    if (count === 0) return nothing;
+
+    const config = this._config?.battery_entities;
+    if (!config) return nothing;
+
+    const iconSize = config.icon_size || '18px';
+    const showCount = config.show_count !== false;
+    const lowThreshold = config.low_threshold ?? 20;
+    
+    // Determine icon based on severity
+    let icon = 'mdi:battery-alert';
+    let color = 'var(--error-color, #db4437)';
+
+    const iconStyles: Record<string, string> = {
+      '--mdc-icon-size': iconSize,
+      'color': color,
+    };
+
+    const tapAction = config.tap_action || { action: 'more-info' as const };
+    const holdAction = config.hold_action || { action: 'none' as const };
+
+    // Get first low battery entity for more-info
+    const firstLowBattery = this._getFirstLowBatteryEntity(lowThreshold);
+
+    return html`
+      <div 
+        class="battery-indicator status-indicator"
+        @click=${(e: Event) => { e.stopPropagation(); this._handleBatteryAction(tapAction, firstLowBattery); }}
+        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleBatteryAction(holdAction, firstLowBattery); }}
+        title="Low battery: ${count} device${count > 1 ? 's' : ''}"
+      >
+        <ha-icon
+          .icon=${icon}
+          style=${styleMap(iconStyles)}
+        ></ha-icon>
+        ${showCount && count > 1 ? html`<span class="indicator-count">${count}</span>` : nothing}
+      </div>
+    `;
+  }
+
+  /**
+   * Get first entity with low battery
+   */
+  private _getFirstLowBatteryEntity(lowThreshold: number): string | undefined {
+    if (!this.hass || !this._config?.battery_entities) return undefined;
+
+    const config = this._config.battery_entities;
+    let entities: string[] = config.entities || [];
+    
+    if (entities.length === 0 || config.auto_discover) {
+      const discovered = this._discoverBatteryEntities();
+      entities = [...new Set([...entities, ...discovered])];
+    }
+
+    for (const entityId of entities) {
+      const entity = this.hass.states[entityId];
+      if (!entity) continue;
+      
+      const level = this._getBatteryLevel(entity);
+      if (level !== null && level <= lowThreshold) {
+        return entityId;
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Handle battery indicator action
+   */
+  private _handleBatteryAction(action: TapActionConfig, entityId?: string): void {
+    if (!this.hass) return;
+
+    switch (action.action) {
+      case 'more-info':
+        if (entityId) {
+          this._fireMoreInfo(entityId);
+        }
+        break;
+      case 'navigate':
+        if (action.navigation_path) {
+          window.history.pushState(null, '', action.navigation_path);
+          window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+        }
+        break;
+      case 'url':
+        if (action.url_path) {
+          window.open(action.url_path, '_blank');
+        }
+        break;
+      case 'none':
+      default:
+        break;
+    }
+  }
+
+  // ===========================================================================
+  // UPDATE ENTITIES
+  // ===========================================================================
+
+  /**
+   * Get count of entities with pending updates
+   */
+  private _getPendingUpdateCount(): number {
+    if (!this.hass || !this._config?.update_entities) return 0;
+
+    const config = this._config.update_entities;
+    
+    // Get entities to check
+    let entities: string[] = config.entities || [];
+    
+    // Auto-discover if no entities specified or auto_discover is true
+    if (entities.length === 0 || config.auto_discover) {
+      const discovered = this._discoverUpdateEntities();
+      entities = [...new Set([...entities, ...discovered])];
+    }
+
+    let updateCount = 0;
+    for (const entityId of entities) {
+      const entity = this.hass.states[entityId];
+      if (!entity) continue;
+      
+      // Update entities have state 'on' when update is available
+      if (entity.state === 'on') {
+        updateCount++;
+      }
+    }
+
+    return updateCount;
+  }
+
+  /**
+   * Discover update entities automatically
+   */
+  private _discoverUpdateEntities(): string[] {
+    if (!this.hass) return [];
+
+    const updateEntities: string[] = [];
+    
+    for (const entityId of Object.keys(this.hass.states)) {
+      if (entityId.startsWith('update.')) {
+        updateEntities.push(entityId);
+      }
+    }
+
+    return updateEntities;
+  }
+
+  /**
+   * Render update indicator
+   */
+  private _renderUpdateIndicator(count: number): TemplateResult | typeof nothing {
+    if (count === 0) return nothing;
+
+    const config = this._config?.update_entities;
+    if (!config) return nothing;
+
+    const icon = config.icon || 'mdi:package-up';
+    const iconSize = config.icon_size || '18px';
+    const color = config.color || 'var(--info-color, #039be5)';
+    const showCount = config.show_count !== false;
+
+    const iconStyles: Record<string, string> = {
+      '--mdc-icon-size': iconSize,
+      'color': color,
+    };
+
+    const tapAction = config.tap_action || { action: 'more-info' as const };
+    const holdAction = config.hold_action || { action: 'none' as const };
+
+    // Get first update entity for more-info
+    const firstUpdate = this._getFirstPendingUpdateEntity();
+
+    return html`
+      <div 
+        class="update-indicator status-indicator"
+        @click=${(e: Event) => { e.stopPropagation(); this._handleUpdateAction(tapAction, firstUpdate); }}
+        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleUpdateAction(holdAction, firstUpdate); }}
+        title="Updates available: ${count}"
+      >
+        <ha-icon
+          .icon=${icon}
+          style=${styleMap(iconStyles)}
+        ></ha-icon>
+        ${showCount && count > 1 ? html`<span class="indicator-count">${count}</span>` : nothing}
+      </div>
+    `;
+  }
+
+  /**
+   * Get first entity with pending update
+   */
+  private _getFirstPendingUpdateEntity(): string | undefined {
+    if (!this.hass || !this._config?.update_entities) return undefined;
+
+    const config = this._config.update_entities;
+    let entities: string[] = config.entities || [];
+    
+    if (entities.length === 0 || config.auto_discover) {
+      const discovered = this._discoverUpdateEntities();
+      entities = [...new Set([...entities, ...discovered])];
+    }
+
+    for (const entityId of entities) {
+      const entity = this.hass.states[entityId];
+      if (entity?.state === 'on') {
+        return entityId;
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Handle update indicator action
+   */
+  private _handleUpdateAction(action: TapActionConfig, entityId?: string): void {
+    if (!this.hass) return;
+
+    switch (action.action) {
+      case 'more-info':
+        if (entityId) {
+          this._fireMoreInfo(entityId);
+        }
+        break;
+      case 'navigate':
+        if (action.navigation_path) {
+          window.history.pushState(null, '', action.navigation_path);
+          window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+        }
+        break;
+      case 'url':
+        if (action.url_path) {
+          window.open(action.url_path, '_blank');
         }
         break;
       case 'none':

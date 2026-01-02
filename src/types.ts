@@ -158,14 +158,19 @@ export interface PowerEntitiesConfig {
 
 export interface BatteryThresholdConfig {
   threshold: number;
-  icon: string;
+  icon?: string;
   color?: string;
 }
 
 export interface BatteryEntitiesConfig {
-  entities?: string[];
-  low_threshold?: BatteryThresholdConfig;
-  medium_threshold?: BatteryThresholdConfig;
+  entities?: string[];              // Specific entities to monitor
+  auto_discover?: boolean;          // Auto-discover all battery entities (default: true if no entities specified)
+  low_threshold?: number;           // Low battery threshold (default: 20)
+  medium_threshold?: number;        // Medium battery threshold (default: 50)
+  icon_size?: string;               // Icon size (default: 18px)
+  show_count?: boolean;             // Show count of low batteries (default: true)
+  tap_action?: TapActionConfig;
+  hold_action?: TapActionConfig;
 }
 
 // =============================================================================
@@ -173,9 +178,14 @@ export interface BatteryEntitiesConfig {
 // =============================================================================
 
 export interface UpdateEntitiesConfig {
-  entities?: string[];
-  icon?: string;
-  color?: string;
+  entities?: string[];              // Specific entities to monitor
+  auto_discover?: boolean;          // Auto-discover all update entities (default: true if no entities specified)
+  icon?: string;                    // Custom icon (default: mdi:package-up)
+  icon_size?: string;               // Icon size (default: 18px)
+  color?: string;                   // Icon color when updates available
+  show_count?: boolean;             // Show count of pending updates (default: true)
+  tap_action?: TapActionConfig;
+  hold_action?: TapActionConfig;
 }
 
 // =============================================================================

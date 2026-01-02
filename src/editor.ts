@@ -1173,6 +1173,8 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _renderBatterySection(): TemplateResult {
     const expanded = this._accordionState.battery;
+    const batteryConfig = this._config?.battery_entities || {};
+    const entities = batteryConfig.entities || [];
 
     return html`
       <div class="accordion">
@@ -1184,17 +1186,97 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p>Battery entities configuration - Coming in Phase 6</p>
+          <p class="section-description">Shows an indicator when any battery is below threshold</p>
+          <!-- Auto Discover -->
+          <div class="form-row">
+            <span class="form-label">Auto-discover battery entities</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${batteryConfig.auto_discover !== false}
+                @change=${(e: Event) => this._batteryValueChanged('auto_discover', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
+          <!-- Low Threshold -->
+          <div class="form-row">
+            <span class="form-label">Low Battery Threshold (%)</span>
+            <div class="form-input">
+              <ha-textfield
+                type="number"
+                min="0"
+                max="100"
+                .value=${String(batteryConfig.low_threshold ?? 20)}
+                @input=${(e: Event) => this._batteryValueChanged('low_threshold', parseInt((e.target as HTMLInputElement).value) || 20)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Icon Size -->
+          <div class="form-row">
+            <span class="form-label">Icon Size</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${batteryConfig.icon_size || ''}
+                placeholder="18px"
+                @input=${(e: Event) => this._batteryValueChanged('icon_size', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Show Count -->
+          <div class="form-row">
+            <span class="form-label">Show count badge</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${batteryConfig.show_count !== false}
+                @change=${(e: Event) => this._batteryValueChanged('show_count', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
+          <!-- Tap Action -->
+          <div class="form-row">
+            <span class="form-label">Tap Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${batteryConfig.tap_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._batteryActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="navigate">Navigate</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Specific Entities (optional) -->
+          <div class="form-row">
+            <span class="form-label">Specific Entities (optional)</span>
+          </div>
+          ${entities.map((entityId, index) => html`
+            <div class="entity-list-item">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: 'sensor' } }}
+                .value=${entityId}
+                @value-changed=${(e: CustomEvent) => this._updateBatteryEntity(index, e.detail.value)}
+              ></ha-selector>
+              <ha-icon icon="mdi:delete" @click=${() => this._removeBatteryEntity(index)}></ha-icon>
+            </div>
+          `)}
+          <div class="add-entity-btn" @click=${this._addBatteryEntity}>
+            <ha-icon icon="mdi:plus"></ha-icon>
+            <span>Add Entity</span>
+          </div>
         </div>
       </div>
     `;
   }
 
   /**
-   * Render update entities section - Placeholder
+   * Render update entities section
    */
   private _renderUpdateSection(): TemplateResult {
     const expanded = this._accordionState.update;
+    const updateConfig = this._config?.update_entities || {};
+    const entities = updateConfig.entities || [];
 
     return html`
       <div class="accordion">
@@ -1206,7 +1288,98 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p>Update entities configuration - Coming in Phase 6</p>
+          <p class="section-description">Shows an indicator when updates are available</p>
+          <!-- Auto Discover -->
+          <div class="form-row">
+            <span class="form-label">Auto-discover update entities</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${updateConfig.auto_discover !== false}
+                @change=${(e: Event) => this._updateValueChanged('auto_discover', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
+          <!-- Icon -->
+          <div class="form-row">
+            <span class="form-label">Icon</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ icon: {} }}
+                .value=${updateConfig.icon || ''}
+                placeholder="mdi:package-up"
+                @value-changed=${(e: CustomEvent) => this._updateValueChanged('icon', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Icon Size -->
+          <div class="form-row">
+            <span class="form-label">Icon Size</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${updateConfig.icon_size || ''}
+                placeholder="18px"
+                @input=${(e: Event) => this._updateValueChanged('icon_size', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Color -->
+          <div class="form-row">
+            <span class="form-label">Color</span>
+            <div class="form-input">
+              <ha-select
+                .value=${updateConfig.color || ''}
+                @selected=${(e: CustomEvent) => this._updateValueChanged('color', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                ${this._renderColorOptions()}
+              </ha-select>
+            </div>
+          </div>
+          <!-- Show Count -->
+          <div class="form-row">
+            <span class="form-label">Show count badge</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${updateConfig.show_count !== false}
+                @change=${(e: Event) => this._updateValueChanged('show_count', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
+          <!-- Tap Action -->
+          <div class="form-row">
+            <span class="form-label">Tap Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${updateConfig.tap_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._updateActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="navigate">Navigate</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Specific Entities (optional) -->
+          <div class="form-row">
+            <span class="form-label">Specific Entities (optional)</span>
+          </div>
+          ${entities.map((entityId, index) => html`
+            <div class="entity-list-item">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: { domain: 'update' } }}
+                .value=${entityId}
+                @value-changed=${(e: CustomEvent) => this._updateUpdateEntity(index, e.detail.value)}
+              ></ha-selector>
+              <ha-icon icon="mdi:delete" @click=${() => this._removeUpdateEntity(index)}></ha-icon>
+            </div>
+          `)}
+          <div class="add-entity-btn" @click=${this._addUpdateEntity}>
+            <ha-icon icon="mdi:plus"></ha-icon>
+            <span>Add Entity</span>
+          </div>
         </div>
       </div>
     `;
@@ -2052,6 +2225,212 @@ export class UnifiedRoomCardEditor extends LitElement {
       return 'background-color: transparent; border: 1px dashed var(--secondary-text-color);';
     }
     return `background-color: ${color};`;
+  }
+
+  // ===========================================================================
+  // BATTERY ENTITY METHODS
+  // ===========================================================================
+
+  /**
+   * Update battery config property
+   */
+  private _batteryValueChanged(key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const batteryEntities = { ...this._config.battery_entities } || {};
+    
+    if (value !== undefined && value !== '' && value !== null) {
+      (batteryEntities as Record<string, unknown>)[key] = value;
+    } else {
+      delete (batteryEntities as Record<string, unknown>)[key];
+    }
+
+    this._config = {
+      ...this._config,
+      battery_entities: batteryEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update battery action config
+   */
+  private _batteryActionChanged(actionKey: string, actionValue: string): void {
+    if (!this._config) return;
+
+    const batteryEntities = { ...this._config.battery_entities } || {};
+    (batteryEntities as Record<string, unknown>)[actionKey] = { action: actionValue };
+
+    this._config = {
+      ...this._config,
+      battery_entities: batteryEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Add battery entity
+   */
+  private _addBatteryEntity(): void {
+    if (!this._config) return;
+
+    const batteryEntities = { ...this._config.battery_entities } || {};
+    const entities = [...(batteryEntities.entities || [])];
+    
+    entities.push('');
+    batteryEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      battery_entities: batteryEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove battery entity
+   */
+  private _removeBatteryEntity(index: number): void {
+    if (!this._config) return;
+
+    const batteryEntities = { ...this._config.battery_entities } || {};
+    const entities = [...(batteryEntities.entities || [])];
+    
+    entities.splice(index, 1);
+    batteryEntities.entities = entities.length > 0 ? entities : undefined;
+
+    this._config = {
+      ...this._config,
+      battery_entities: batteryEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update battery entity
+   */
+  private _updateBatteryEntity(index: number, value: string): void {
+    if (!this._config) return;
+
+    const batteryEntities = { ...this._config.battery_entities } || {};
+    const entities = [...(batteryEntities.entities || [])];
+    
+    entities[index] = value;
+    batteryEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      battery_entities: batteryEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  // ===========================================================================
+  // UPDATE ENTITY METHODS
+  // ===========================================================================
+
+  /**
+   * Update update config property
+   */
+  private _updateValueChanged(key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const updateEntities = { ...this._config.update_entities } || {};
+    
+    if (value !== undefined && value !== '' && value !== null) {
+      (updateEntities as Record<string, unknown>)[key] = value;
+    } else {
+      delete (updateEntities as Record<string, unknown>)[key];
+    }
+
+    this._config = {
+      ...this._config,
+      update_entities: updateEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update update action config
+   */
+  private _updateActionChanged(actionKey: string, actionValue: string): void {
+    if (!this._config) return;
+
+    const updateEntities = { ...this._config.update_entities } || {};
+    (updateEntities as Record<string, unknown>)[actionKey] = { action: actionValue };
+
+    this._config = {
+      ...this._config,
+      update_entities: updateEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Add update entity
+   */
+  private _addUpdateEntity(): void {
+    if (!this._config) return;
+
+    const updateEntities = { ...this._config.update_entities } || {};
+    const entities = [...(updateEntities.entities || [])];
+    
+    entities.push('');
+    updateEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      update_entities: updateEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove update entity
+   */
+  private _removeUpdateEntity(index: number): void {
+    if (!this._config) return;
+
+    const updateEntities = { ...this._config.update_entities } || {};
+    const entities = [...(updateEntities.entities || [])];
+    
+    entities.splice(index, 1);
+    updateEntities.entities = entities.length > 0 ? entities : undefined;
+
+    this._config = {
+      ...this._config,
+      update_entities: updateEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update update entity
+   */
+  private _updateUpdateEntity(index: number, value: string): void {
+    if (!this._config) return;
+
+    const updateEntities = { ...this._config.update_entities } || {};
+    const entities = [...(updateEntities.entities || [])];
+    
+    entities[index] = value;
+    updateEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      update_entities: updateEntities,
+    };
+
+    this._dispatchConfigChanged();
   }
 
   /**
