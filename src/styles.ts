@@ -605,6 +605,7 @@ export function getCardDynamicStyles(config: {
   backgroundColor?: string;
   activeBackgroundColor?: string;
   backgroundGradient?: string;
+  borderStyle?: string;
 }): string {
   const styles: string[] = [];
 
@@ -627,6 +628,9 @@ export function getCardDynamicStyles(config: {
     styles.push(`background: ${config.backgroundGradient};`);
   } else if (config.backgroundColor) {
     styles.push(`background-color: ${config.backgroundColor};`);
+  }
+  if (config.borderStyle) {
+    styles.push(`border: ${config.borderStyle};`);
   }
 
   return styles.join(' ');

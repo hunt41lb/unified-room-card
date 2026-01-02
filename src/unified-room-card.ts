@@ -249,6 +249,9 @@ export class UnifiedRoomCard extends LitElement {
       'state-off': !isActive && !!mainEntity,
     };
 
+    // Calculate border color from border_entity
+    const borderStyle = this._getBorderStyle();
+
     const cardDynamicStyles = getCardDynamicStyles({
       cardHeight: this._config.card_height,
       cardWidth: this._config.card_width,
@@ -258,6 +261,7 @@ export class UnifiedRoomCard extends LitElement {
       backgroundColor: this._config.background_color,
       activeBackgroundColor: isActive ? this._config.active_background_color : undefined,
       backgroundGradient: this._config.background_gradient,
+      borderStyle: borderStyle,
     });
 
     return html`
@@ -275,6 +279,77 @@ export class UnifiedRoomCard extends LitElement {
         ${this._renderIntermittentEntities()}
       </ha-card>
     `;
+  }
+
+  /**
+   * Get border style based on border_entity state
+   */
+  private _getBorderStyle(): string | undefined {
+    if (!this._config?.border_entity || !this.hass) {
+      return undefined;
+    }
+
+    const entity = this.hass.states[this._config.border_entity];
+    if (!entity) {
+      return undefined;
+    }
+
+    const borderWidth = this._config.border_width || '2px';
+    const borderColor = this._getBorderEntityColor(entity);
+
+    if (!borderColor) {
+      return undefined;
+    }
+
+    return `${borderWidth} solid ${borderColor}`;
+  }
+
+  /**
+   * Get border color for entity based on domain and state
+   */
+  private _getBorderEntityColor(entity: { entity_id: string; state: string; attributes: Record<string, unknown> }): string | undefined {
+    const domain = this._getDomain(entity.entity_id);
+
+    // Special handling for climate - use hvac_action
+    if (domain === 'climate') {
+      const hvacAction = entity.attributes.hvac_action as string | undefined;
+      if (hvacAction) {
+        switch (hvacAction) {
+          case 'heating':
+          case 'preheating':
+            return 'var(--state-climate-heat-color, #ff8c00)';
+          case 'cooling':
+            return 'var(--state-climate-cool-color, #2196f3)';
+          case 'drying':
+            return 'var(--state-climate-dry-color, #8bc34a)';
+          case 'fan':
+            return 'var(--state-climate-fan_only-color, #00bcd4)';
+          case 'idle':
+          case 'off':
+            return undefined; // No border for idle/off
+          default:
+            return undefined;
+        }
+      }
+    }
+
+    // Use domain state colors
+    const stateColors = DOMAIN_STATE_COLORS[domain];
+    if (stateColors && stateColors[entity.state]) {
+      // Don't show border for "off" or inactive states (they use primary-text-color)
+      const color = stateColors[entity.state];
+      if (color === 'var(--primary-text-color)') {
+        return undefined;
+      }
+      return color;
+    }
+
+    // Fallback for unknown domains - use active color for "on" states
+    if (entity.state === 'on') {
+      return 'var(--state-active-color, var(--amber-color, #ffc107))';
+    }
+
+    return undefined;
   }
 
   // ===========================================================================

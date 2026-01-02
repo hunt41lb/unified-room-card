@@ -216,6 +216,10 @@ export interface UnifiedRoomCardConfig {
   // Entity Domain/State Handling
   active_states?: string[];  // Custom states considered "active" (overrides domain defaults)
   
+  // Border Indicator Entity
+  border_entity?: string;  // Entity that controls border color
+  border_width?: string;   // Border width (default: 2px)
+  
   // Tap Actions
   tap_action?: TapActionConfig;
   hold_action?: TapActionConfig;

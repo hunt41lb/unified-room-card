@@ -9,7 +9,7 @@
 // CARD METADATA
 // =============================================================================
 
-export const CARD_VERSION = '1.0.3';
+export const CARD_VERSION = '1.0.4';
 export const CARD_NAME = 'unified-room-card';
 export const CARD_DESCRIPTION = 'A comprehensive room status card for Home Assistant with support for climate, persistent, and intermittent entities.';
 export const CARD_EDITOR_NAME = 'unified-room-card-editor';
@@ -321,13 +321,13 @@ export const DOMAIN_STATE_COLORS: Record<string, Record<string, string>> = {
     off: 'var(--primary-text-color)',
   },
   [ENTITY_DOMAINS.LOCK]: {
-    jammed: 'var(--state-lock-jammed-color)',
-    locked: 'var(--state-lock-locked-color)',
-    locking: 'var(--state-lock-locking-color)',
-    unlocked: 'var(--state-lock-unlocked-color)',
-    unlocking: 'var(--state-lock-unlocking-color)',
-    open: 'var(--state-lock-open-color)',
-    opening: 'var(--state-lock-opening-color)',
+    jammed: 'var(--state-lock-jammed-color, #db4437)',
+    locked: 'var(--state-lock-locked-color, #43a047)',
+    locking: 'var(--state-lock-locking-color, #ffc107)',
+    unlocked: 'var(--state-lock-unlocked-color, #ffc107)',
+    unlocking: 'var(--state-lock-unlocking-color, #ffc107)',
+    open: 'var(--state-lock-open-color, #db4437)',
+    opening: 'var(--state-lock-opening-color, #ffc107)',
   },
   [ENTITY_DOMAINS.CLIMATE]: {
     heating: 'var(--state-climate-heat-color, #ff8c00)',
@@ -338,6 +338,20 @@ export const DOMAIN_STATE_COLORS: Record<string, Record<string, string>> = {
     heat_cool: 'var(--state-climate-auto-color, #9c27b0)',
     idle: 'var(--primary-text-color)',
     off: 'var(--primary-text-color)',
+  },
+  [ENTITY_DOMAINS.BINARY_SENSOR]: {
+    on: 'var(--state-binary_sensor-active-color, var(--amber-color, #ffc107))',
+    off: 'var(--primary-text-color)',
+  },
+  [ENTITY_DOMAINS.SWITCH]: {
+    on: 'var(--state-switch-active-color, var(--amber-color, #ffc107))',
+    off: 'var(--primary-text-color)',
+  },
+  [ENTITY_DOMAINS.COVER]: {
+    open: 'var(--state-cover-open-color, #ffc107)',
+    opening: 'var(--state-cover-open-color, #ffc107)',
+    closed: 'var(--state-cover-closed-color, #43a047)',
+    closing: 'var(--state-cover-closed-color, #43a047)',
   },
 };
 

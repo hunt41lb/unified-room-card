@@ -279,6 +279,30 @@ export class UnifiedRoomCardEditor extends LitElement {
               </div>
             </div>
           </div>
+          <!-- Border Indicator Entity -->
+          <div class="form-row">
+            <span class="form-label">Border Entity</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: {} }}
+                .value=${this._config?.border_entity || ''}
+                @value-changed=${(e: CustomEvent) => this._valueChanged('border_entity', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          ${this._config?.border_entity ? html`
+          <div class="form-row">
+            <span class="form-label">Border Width</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.border_width || ''}
+                placeholder="2px"
+                @input=${(e: Event) => this._valueChanged('border_width', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          ` : ''}
           <!-- Tap Action -->
           <div class="form-row">
             <span class="form-label">Tap Action</span>
