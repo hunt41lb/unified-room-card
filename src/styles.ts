@@ -484,6 +484,13 @@ export const editorStyles = css`
     display: block;
   }
 
+  .section-description {
+    font-size: 12px;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    margin: 0 0 16px 0;
+    font-style: italic;
+  }
+
   .form-row {
     display: flex;
     align-items: center;

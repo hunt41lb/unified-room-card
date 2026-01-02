@@ -55,7 +55,9 @@ export class UnifiedRoomCardEditor extends LitElement {
     grid: false,
   };
   @state() private _persistentEntityExpanded: number = -1;
-  @state() private _customColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input
+  @state() private _intermittentEntityExpanded: number = -1;
+  @state() private _customColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input (persistent)
+  @state() private _intermittentCustomColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input (intermittent)
 
   // ===========================================================================
   // STATIC STYLES
@@ -725,6 +727,8 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _renderIntermittentSection(): TemplateResult {
     const expanded = this._accordionState.intermittent;
+    const intermittentConfig = this._config?.intermittent_entities || {};
+    const entities = intermittentConfig.entities || [];
 
     return html`
       <div class="accordion">
@@ -736,7 +740,243 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p>Intermittent entities configuration - Coming in Phase 6</p>
+          <p class="section-description">Entities that only appear when in an "active" state (e.g., motion detected)</p>
+          <!-- Default Icon Size -->
+          <div class="form-row">
+            <span class="form-label">Default Icon Size</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${intermittentConfig.icon_size || ''}
+                placeholder="21px"
+                @input=${(e: Event) => this._intermittentValueChanged('icon_size', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Gap -->
+          <div class="form-row">
+            <span class="form-label">Gap (between icons)</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${intermittentConfig.gap || ''}
+                placeholder="4px"
+                @input=${(e: Event) => this._intermittentValueChanged('gap', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Section Animation -->
+          <div class="form-row">
+            <span class="form-label">Animation (when active)</span>
+            <div class="form-input">
+              <ha-select
+                .value=${intermittentConfig.animation || ''}
+                @selected=${(e: CustomEvent) => this._intermittentValueChanged('animation', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="">None</mwc-list-item>
+                <mwc-list-item value="pulse">Pulse</mwc-list-item>
+                <mwc-list-item value="glow">Glow</mwc-list-item>
+                <mwc-list-item value="flash">Flash</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Entities List -->
+          <div class="form-row">
+            <span class="form-label">Entities</span>
+          </div>
+          ${entities.map((entityConfig, index) => this._renderIntermittentEntityConfig(entityConfig, index))}
+          <div class="add-entity-btn" @click=${this._addIntermittentEntity}>
+            <ha-icon icon="mdi:plus"></ha-icon>
+            <span>Add Entity</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Render configuration for a single intermittent entity
+   */
+  private _renderIntermittentEntityConfig(entityConfig: { entity: string; icon?: string; icon_size?: string; active_states?: string[]; tap_action?: { action: string }; hold_action?: { action: string }; animation?: string; states?: Array<{ state: string; icon?: string; color?: string }> }, index: number): TemplateResult {
+    const entityId = entityConfig.entity || '';
+    const entityExists = entityId && this.hass?.states[entityId];
+    const domain = entityId ? entityId.split('.')[0] : '';
+    const hasDomainDefaults = DOMAINS_WITH_DEFAULTS.includes(domain);
+
+    return html`
+      <div class="entity-row">
+        <div class="entity-header" @click=${() => this._toggleIntermittentEntityExpand(index)}>
+          <div class="entity-name-wrapper">
+            ${!entityExists && entityId ? html`
+              <ha-icon icon="mdi:alert-circle" class="entity-warning" title="Entity not found or unavailable"></ha-icon>
+            ` : nothing}
+            <span class="entity-name">${entityConfig.entity || 'New Entity'}</span>
+          </div>
+          <div class="entity-actions">
+            <ha-icon icon="mdi:chevron-down"></ha-icon>
+            <ha-icon icon="mdi:delete" @click=${(e: Event) => { e.stopPropagation(); this._removeIntermittentEntity(index); }}></ha-icon>
+          </div>
+        </div>
+        <div class="entity-config ${this._intermittentEntityExpanded === index ? 'expanded' : ''}">
+          <!-- Entity Selector -->
+          <div class="form-row">
+            <span class="form-label">Entity</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: {} }}
+                .value=${entityConfig.entity || ''}
+                @value-changed=${(e: CustomEvent) => this._updateIntermittentEntity(index, 'entity', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          ${!entityExists && entityId ? html`
+            <div class="validation-warning">
+              <ha-icon icon="mdi:alert"></ha-icon>
+              <span>Entity "${entityId}" not found or unavailable</span>
+            </div>
+          ` : nothing}
+          <!-- Default Icon -->
+          <div class="form-row">
+            <span class="form-label">Default Icon</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ icon: {} }}
+                .value=${entityConfig.icon || ''}
+                @value-changed=${(e: CustomEvent) => this._updateIntermittentEntity(index, 'icon', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Icon Size -->
+          <div class="form-row">
+            <span class="form-label">Icon Size</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${entityConfig.icon_size || ''}
+                placeholder="Inherit from section"
+                @input=${(e: Event) => this._updateIntermittentEntity(index, 'icon_size', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Active States (entity-specific override) -->
+          <div class="form-row">
+            <span class="form-label">Active States</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${(entityConfig.active_states || []).join(', ')}
+                placeholder="Default: domain-based (e.g., on)"
+                @input=${(e: Event) => this._updateIntermittentEntityActiveStates(index, (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Entity Animation -->
+          <div class="form-row">
+            <span class="form-label">Animation</span>
+            <div class="form-input">
+              <ha-select
+                .value=${entityConfig.animation || ''}
+                @selected=${(e: CustomEvent) => this._updateIntermittentEntity(index, 'animation', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="">Inherit from section</mwc-list-item>
+                <mwc-list-item value="pulse">Pulse</mwc-list-item>
+                <mwc-list-item value="glow">Glow</mwc-list-item>
+                <mwc-list-item value="flash">Flash</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Tap Action -->
+          <div class="form-row">
+            <span class="form-label">Tap Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${entityConfig.tap_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="toggle">Toggle</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Hold Action -->
+          <div class="form-row">
+            <span class="form-label">Hold Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${entityConfig.hold_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="toggle">Toggle</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- State Configuration Header with Apply Defaults -->
+          <div class="form-row state-header-row">
+            <span class="form-label">State-based Icons & Colors</span>
+            ${hasDomainDefaults ? html`
+              <button class="apply-defaults-btn" @click=${() => this._applyIntermittentDomainDefaults(index, domain)}>
+                <ha-icon icon="mdi:auto-fix"></ha-icon>
+                Apply ${this._getDomainDisplayName(domain)} Defaults
+              </button>
+            ` : nothing}
+          </div>
+          ${(entityConfig.states || []).map((stateConfig, stateIndex) => {
+            const colorKey = `i-${index}-${stateIndex}`;
+            const currentColor = stateConfig.color || '';
+            const isCustomColor = this._intermittentCustomColorInputs.has(colorKey) || 
+              (currentColor && !HA_COLOR_OPTIONS.some(opt => opt.value === currentColor));
+            const dropdownValue = isCustomColor ? 'custom' : currentColor;
+            
+            return html`
+              <div class="state-config-row">
+                <ha-textfield
+                  .value=${stateConfig.state || ''}
+                  placeholder="State (e.g., on)"
+                  @input=${(e: Event) => this._updateIntermittentEntityState(index, stateIndex, 'state', (e.target as HTMLInputElement).value)}
+                  style="flex: 1;"
+                ></ha-textfield>
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ icon: {} }}
+                  .value=${stateConfig.icon || ''}
+                  @value-changed=${(e: CustomEvent) => this._updateIntermittentEntityState(index, stateIndex, 'icon', e.detail.value)}
+                  style="flex: 1;"
+                ></ha-selector>
+                <div class="color-select-wrapper" style="flex: 1.5; display: flex; flex-direction: column; gap: 4px;">
+                  <div class="color-select-with-preview">
+                    <ha-select
+                      .value=${dropdownValue}
+                      @selected=${(e: CustomEvent) => this._handleIntermittentColorSelect(index, stateIndex, (e.target as HTMLSelectElement).value)}
+                      @closed=${(e: Event) => e.stopPropagation()}
+                      style="flex: 1;"
+                    >
+                      ${this._renderColorOptions()}
+                    </ha-select>
+                    <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
+                  </div>
+                  ${isCustomColor ? html`
+                    <ha-textfield
+                      .value=${currentColor}
+                      placeholder="CSS color value"
+                      @input=${(e: Event) => this._updateIntermittentEntityState(index, stateIndex, 'color', (e.target as HTMLInputElement).value)}
+                      style="width: 100%;"
+                    ></ha-textfield>
+                  ` : nothing}
+                </div>
+                <ha-icon icon="mdi:delete" @click=${() => this._removeIntermittentEntityState(index, stateIndex)}></ha-icon>
+              </div>
+            `;
+          })}
+          <div class="add-state-btn" @click=${() => this._addIntermittentEntityState(index)}>
+            <ha-icon icon="mdi:plus"></ha-icon>
+            <span>Add State Config</span>
+          </div>
         </div>
       </div>
     `;
@@ -1481,6 +1721,308 @@ export class UnifiedRoomCardEditor extends LitElement {
       }
     }
     this._customColorInputs = newCustomInputs;
+
+    this._dispatchConfigChanged();
+  }
+
+  // ===========================================================================
+  // INTERMITTENT ENTITY METHODS
+  // ===========================================================================
+
+  /**
+   * Toggle intermittent entity expand state
+   */
+  private _toggleIntermittentEntityExpand(index: number): void {
+    this._intermittentEntityExpanded = this._intermittentEntityExpanded === index ? -1 : index;
+  }
+
+  /**
+   * Add new intermittent entity
+   */
+  private _addIntermittentEntity(): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    entities.push({ entity: '' });
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._intermittentEntityExpanded = entities.length - 1;
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove intermittent entity
+   */
+  private _removeIntermittentEntity(index: number): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    entities.splice(index, 1);
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    if (this._intermittentEntityExpanded === index) {
+      this._intermittentEntityExpanded = -1;
+    }
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update intermittent section property
+   */
+  private _intermittentValueChanged(key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    
+    if (value) {
+      (intermittentEntities as Record<string, unknown>)[key] = value;
+    } else {
+      delete (intermittentEntities as Record<string, unknown>)[key];
+    }
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update intermittent entity property
+   */
+  private _updateIntermittentEntity(index: number, key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    if (entities[index]) {
+      (entities[index] as Record<string, unknown>)[key] = value || undefined;
+      if (!value) {
+        delete (entities[index] as Record<string, unknown>)[key];
+      }
+    }
+    
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update intermittent entity active_states from comma-separated string
+   */
+  private _updateIntermittentEntityActiveStates(index: number, value: string): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    if (entities[index]) {
+      const entity = { ...entities[index] };
+      if (value.trim()) {
+        entity.active_states = value.split(',').map(s => s.trim()).filter(s => s);
+      } else {
+        delete entity.active_states;
+      }
+      entities[index] = entity;
+    }
+    
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update tap/hold action for intermittent entity
+   */
+  private _updateIntermittentEntityAction(index: number, actionKey: 'tap_action' | 'hold_action', actionValue: string): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    if (entities[index]) {
+      const entity = { ...entities[index] };
+      entity[actionKey] = { action: actionValue };
+      entities[index] = entity;
+    }
+    
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Add state config to intermittent entity
+   */
+  private _addIntermittentEntityState(entityIndex: number): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    if (entities[entityIndex]) {
+      const entity = { ...entities[entityIndex] };
+      entity.states = [...(entity.states || []), { state: '', icon: '', color: '' }];
+      entities[entityIndex] = entity;
+    }
+    
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove state config from intermittent entity
+   */
+  private _removeIntermittentEntityState(entityIndex: number, stateIndex: number): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    if (entities[entityIndex]) {
+      const entity = { ...entities[entityIndex] };
+      const states = [...(entity.states || [])];
+      states.splice(stateIndex, 1);
+      entity.states = states;
+      entities[entityIndex] = entity;
+    }
+    
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update state config in intermittent entity
+   */
+  private _updateIntermittentEntityState(entityIndex: number, stateIndex: number, key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    if (entities[entityIndex]) {
+      const entity = { ...entities[entityIndex] };
+      const states = [...(entity.states || [])];
+      
+      if (states[stateIndex]) {
+        (states[stateIndex] as Record<string, unknown>)[key] = value || undefined;
+        if (!value) {
+          delete (states[stateIndex] as Record<string, unknown>)[key];
+        }
+      }
+      
+      entity.states = states;
+      entities[entityIndex] = entity;
+    }
+    
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Handle color dropdown selection for intermittent entity
+   */
+  private _handleIntermittentColorSelect(entityIndex: number, stateIndex: number, value: string): void {
+    const colorKey = `i-${entityIndex}-${stateIndex}`;
+    
+    if (value === 'custom') {
+      // Show custom input
+      this._intermittentCustomColorInputs = new Set([...this._intermittentCustomColorInputs, colorKey]);
+    } else {
+      // Hide custom input and set the value
+      this._intermittentCustomColorInputs.delete(colorKey);
+      this._intermittentCustomColorInputs = new Set(this._intermittentCustomColorInputs);
+      this._updateIntermittentEntityState(entityIndex, stateIndex, 'color', value);
+    }
+  }
+
+  /**
+   * Apply domain defaults to intermittent entity
+   */
+  private _applyIntermittentDomainDefaults(index: number, domain: string): void {
+    if (!this._config) return;
+
+    const defaults = DOMAIN_STATE_DEFAULTS[domain];
+    if (!defaults) return;
+
+    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const entities = [...(intermittentEntities.entities || [])];
+    
+    if (entities[index]) {
+      const entity = { ...entities[index] };
+      // Replace existing states with domain defaults
+      entity.states = defaults.map(d => ({
+        state: d.state,
+        icon: d.icon,
+        color: d.color,
+      }));
+      entities[index] = entity;
+    }
+    
+    intermittentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      intermittent_entities: intermittentEntities,
+    };
+
+    // Clear any custom color inputs for this entity
+    const newCustomInputs = new Set(this._intermittentCustomColorInputs);
+    for (const key of this._intermittentCustomColorInputs) {
+      if (key.startsWith(`i-${index}-`)) {
+        newCustomInputs.delete(key);
+      }
+    }
+    this._intermittentCustomColorInputs = newCustomInputs;
 
     this._dispatchConfigChanged();
   }

@@ -37,6 +37,7 @@ import {
   TapActionConfig,
   ClimateEntitiesConfig,
   PowerEntitiesConfig,
+  AnimationType,
 } from './types';
 
 import {
@@ -1253,13 +1254,33 @@ export class UnifiedRoomCard extends LitElement {
 
   /**
    * Render intermittent entities section
-   * Placeholder for Phase 5
+   * Only shows entities when they are in an "active" state
    * @param legacyGrid - If true, uses grid-area: intermittent for custom grid layouts
    */
   private _renderIntermittentEntities(legacyGrid: boolean = false): TemplateResult | typeof nothing {
-    if (!this._config?.intermittent_entities?.entities?.length) {
+    if (!this._config?.intermittent_entities?.entities?.length || !this.hass) {
       return nothing;
     }
+
+    const config = this._config.intermittent_entities;
+    const defaultIconSize = config.icon_size || '21px';
+    const gap = config.gap || '4px';
+    const sectionActiveStates = config.active_states;
+    const sectionAnimation = config.animation;
+
+    // Filter to only active entities
+    const activeEntities = (config.entities || []).filter(entityConfig => 
+      this._isIntermittentEntityActive(entityConfig, sectionActiveStates)
+    );
+
+    // Don't render section if no active entities
+    if (activeEntities.length === 0) {
+      return nothing;
+    }
+
+    const sectionStyles: Record<string, string> = {
+      'gap': gap,
+    };
 
     const classes = {
       'intermittent-section': true,
@@ -1267,10 +1288,234 @@ export class UnifiedRoomCard extends LitElement {
     };
 
     return html`
-      <div class=${classMap(classes)}>
-        <!-- Intermittent entities will be implemented in Phase 5 -->
+      <div class=${classMap(classes)} style=${styleMap(sectionStyles)}>
+        ${activeEntities.map((entityConfig) => 
+          this._renderIntermittentEntity(entityConfig, defaultIconSize, sectionAnimation)
+        )}
       </div>
     `;
+  }
+
+  /**
+   * Check if an intermittent entity should be displayed (is "active")
+   */
+  private _isIntermittentEntityActive(
+    entityConfig: { entity: string; active_states?: string[] },
+    sectionActiveStates?: string[]
+  ): boolean {
+    if (!this.hass) return false;
+    
+    const entity = this.hass.states[entityConfig.entity];
+    if (!entity) return false;
+    
+    // Check if unavailable - don't show
+    if (['unavailable', 'unknown'].includes(entity.state)) {
+      return false;
+    }
+
+    const state = entity.state;
+    const domain = entityConfig.entity.split('.')[0];
+    
+    // Priority: entity-specific > section-wide > domain defaults
+    const activeStates = entityConfig.active_states || sectionActiveStates || DOMAIN_ACTIVE_STATES[domain] || ['on'];
+    
+    return activeStates.includes(state);
+  }
+
+  /**
+   * Render a single intermittent entity
+   */
+  private _renderIntermittentEntity(
+    entityConfig: { 
+      entity: string; 
+      icon?: string; 
+      icon_size?: string; 
+      states?: Array<{ state: string; icon?: string; color?: string; animation?: string }>;
+      animation?: AnimationType;
+      tap_action?: TapActionConfig;
+      hold_action?: TapActionConfig;
+    },
+    defaultIconSize: string,
+    sectionAnimation?: AnimationType
+  ): TemplateResult | typeof nothing {
+    if (!this.hass) return nothing;
+
+    const entity = this.hass.states[entityConfig.entity];
+    if (!entity) return nothing;
+
+    const state = entity.state;
+    const domain = entityConfig.entity.split('.')[0];
+
+    // Determine icon
+    let icon = entityConfig.icon;
+    const stateConfig = entityConfig.states?.find(s => s.state === state);
+    if (stateConfig?.icon) {
+      icon = stateConfig.icon;
+    } else if (!icon) {
+      icon = this._getIntermittentEntityDefaultIcon(domain, state, entity);
+    }
+
+    // Determine color
+    let color = this._getIntermittentEntityColor(domain, state);
+    if (stateConfig?.color) {
+      color = stateConfig.color;
+    }
+
+    // Determine animation (state > entity > section)
+    const animation = stateConfig?.animation || entityConfig.animation || sectionAnimation;
+
+    // Determine icon size
+    const iconSize = entityConfig.icon_size || defaultIconSize;
+
+    // Handle tap action
+    const tapAction = entityConfig.tap_action || { action: 'more-info' as const };
+    const holdAction = entityConfig.hold_action || { action: 'more-info' as const };
+
+    const iconStyles: Record<string, string> = {
+      '--mdc-icon-size': iconSize,
+      'color': color,
+    };
+
+    const entityClasses = {
+      'intermittent-entity': true,
+      [`animation-${animation}`]: !!animation,
+    };
+
+    return html`
+      <div 
+        class=${classMap(entityClasses)}
+        @click=${(e: Event) => { e.stopPropagation(); this._handleIntermittentAction(tapAction, entityConfig.entity); }}
+        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleIntermittentAction(holdAction, entityConfig.entity); }}
+        title="${entity.attributes.friendly_name || entityConfig.entity}: ${state}"
+      >
+        <ha-icon
+          .icon=${icon}
+          style=${styleMap(iconStyles)}
+        ></ha-icon>
+      </div>
+    `;
+  }
+
+  /**
+   * Get default icon for intermittent entity based on domain and state
+   */
+  private _getIntermittentEntityDefaultIcon(domain: string, state: string, entity: { attributes: Record<string, unknown> }): string {
+    // Check for entity-provided icon
+    if (entity.attributes.icon) {
+      return entity.attributes.icon as string;
+    }
+
+    // Binary sensor has device_class-specific icons
+    if (domain === 'binary_sensor') {
+      const deviceClass = entity.attributes.device_class as string;
+      return this._getBinarySensorIcon(deviceClass, state);
+    }
+
+    // Check domain state icons
+    if (DOMAIN_STATE_ICONS[domain]?.[state]) {
+      return DOMAIN_STATE_ICONS[domain][state];
+    }
+
+    // Fall back to domain default
+    return DOMAIN_DEFAULT_ICONS[domain] || 'mdi:alert-circle';
+  }
+
+  /**
+   * Get binary sensor icon based on device_class and state
+   */
+  private _getBinarySensorIcon(deviceClass: string | undefined, state: string): string {
+    const isOn = state === 'on';
+    
+    const deviceClassIcons: Record<string, { on: string; off: string }> = {
+      motion: { on: 'mdi:motion-sensor', off: 'mdi:motion-sensor-off' },
+      occupancy: { on: 'mdi:home-account', off: 'mdi:home-outline' },
+      door: { on: 'mdi:door-open', off: 'mdi:door-closed' },
+      window: { on: 'mdi:window-open', off: 'mdi:window-closed' },
+      garage_door: { on: 'mdi:garage-open', off: 'mdi:garage' },
+      opening: { on: 'mdi:square-outline', off: 'mdi:square' },
+      lock: { on: 'mdi:lock-open', off: 'mdi:lock' },
+      moisture: { on: 'mdi:water', off: 'mdi:water-off' },
+      smoke: { on: 'mdi:smoke-detector-alert', off: 'mdi:smoke-detector' },
+      gas: { on: 'mdi:gas-cylinder', off: 'mdi:gas-cylinder' },
+      co: { on: 'mdi:molecule-co', off: 'mdi:molecule-co' },
+      safety: { on: 'mdi:shield-alert', off: 'mdi:shield-check' },
+      sound: { on: 'mdi:volume-high', off: 'mdi:volume-off' },
+      vibration: { on: 'mdi:vibrate', off: 'mdi:vibrate-off' },
+      presence: { on: 'mdi:home', off: 'mdi:home-outline' },
+      light: { on: 'mdi:brightness-7', off: 'mdi:brightness-5' },
+      battery: { on: 'mdi:battery-alert', off: 'mdi:battery' },
+      battery_charging: { on: 'mdi:battery-charging', off: 'mdi:battery' },
+      plug: { on: 'mdi:power-plug', off: 'mdi:power-plug-off' },
+      power: { on: 'mdi:flash', off: 'mdi:flash-off' },
+      running: { on: 'mdi:play', off: 'mdi:stop' },
+      problem: { on: 'mdi:alert-circle', off: 'mdi:check-circle' },
+      tamper: { on: 'mdi:alert', off: 'mdi:check' },
+      update: { on: 'mdi:package-up', off: 'mdi:package' },
+      connectivity: { on: 'mdi:wifi', off: 'mdi:wifi-off' },
+      cold: { on: 'mdi:snowflake', off: 'mdi:snowflake-off' },
+      heat: { on: 'mdi:fire', off: 'mdi:fire-off' },
+    };
+
+    if (deviceClass && deviceClassIcons[deviceClass]) {
+      return isOn ? deviceClassIcons[deviceClass].on : deviceClassIcons[deviceClass].off;
+    }
+
+    // Default binary sensor icon
+    return isOn ? 'mdi:checkbox-marked-circle' : 'mdi:checkbox-blank-circle-outline';
+  }
+
+  /**
+   * Get color for intermittent entity based on domain and state
+   */
+  private _getIntermittentEntityColor(domain: string, state: string): string {
+    // Check domain-specific colors
+    if (DOMAIN_STATE_COLORS[domain]?.[state]) {
+      return DOMAIN_STATE_COLORS[domain][state];
+    }
+
+    // Default: active states get amber, inactive get primary text
+    const activeStates = DOMAIN_ACTIVE_STATES[domain] || ['on'];
+    if (activeStates.includes(state)) {
+      return 'var(--state-active-color, var(--amber-color, #ffc107))';
+    }
+
+    return 'var(--primary-text-color)';
+  }
+
+  /**
+   * Handle action for intermittent entity
+   */
+  private _handleIntermittentAction(action: TapActionConfig, entityId: string): void {
+    if (!this.hass) return;
+
+    switch (action.action) {
+      case 'more-info':
+        this._fireMoreInfo(entityId);
+        break;
+      case 'toggle':
+        this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
+        break;
+      case 'navigate':
+        if (action.navigation_path) {
+          window.history.pushState(null, '', action.navigation_path);
+          window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+        }
+        break;
+      case 'url':
+        if (action.url_path) {
+          window.open(action.url_path, '_blank');
+        }
+        break;
+      case 'perform-action':
+        if (action.service) {
+          const [serviceDomain, service] = action.service.split('.');
+          this.hass.callService(serviceDomain, service, action.service_data || {});
+        }
+        break;
+      case 'none':
+      default:
+        break;
+    }
   }
 
   // ===========================================================================

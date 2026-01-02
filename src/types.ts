@@ -91,6 +91,7 @@ export interface EntityConfig {
   icon?: string;
   icon_size?: string;
   states?: StateConfig[];
+  active_states?: string[];    // Custom states considered "active" (for intermittent)
   animation?: AnimationType;
   unavailable_icon?: string;
   tap_action?: TapActionConfig;
@@ -116,12 +117,10 @@ export interface PersistentEntitiesConfig {
 // =============================================================================
 
 export interface IntermittentEntitiesConfig {
-  position?: PositionType;
-  icon_size?: string;
-  active_color?: string;
-  active_states?: string[];  // Which states are considered "active"
-  animation?: AnimationType;
-  unavailable_icon?: string;
+  icon_size?: string;         // Default icon size for all entities
+  gap?: string;               // Gap between entities (default: 4px)
+  active_states?: string[];   // Section-wide custom active states
+  animation?: AnimationType;  // Section-wide animation for active entities
   entities?: EntityConfig[];
 }
 
