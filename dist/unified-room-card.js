@@ -50,7 +50,7 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
   ha-card {
     display: grid;
     grid-template-areas: ${r('"name name icon icon" "climate climate persistent intermittent"')};
-    grid-template-columns: ${r("min-content 1fr 1fr 1fr")};
+    grid-template-columns: ${r("min-content 1fr")};
     grid-template-rows: ${r("1fr min-content")};
     height: ${r("97px")};
     width: ${r("auto")};
@@ -80,7 +80,7 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
     font-size: 16px;
     font-weight: 500;
     color: ${r(jt)};
-    padding: 8px 0 0 8px;
+    padding: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -91,7 +91,6 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
     grid-area: icon;
     justify-self: end;
     align-self: start;
-    padding: 8px 8px 0 0;
   }
 
   .icon-wrapper {
@@ -150,17 +149,15 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
   .climate-section {
     grid-area: climate;
     justify-self: start;
-    align-self: end;
     font-size: 30px;
     line-height: 30px;
     font-weight: 300;
     color: ${r(jt)};
-    padding: 0 0 4px 8px;
+    padding: 0 0 1px 14px;
   }
 
   .climate-primary {
     font-size: 18px;
-    margin-right: 6px;
   }
 
   .climate-secondary {
@@ -171,11 +168,6 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
     font-size: 12px;
     font-weight: 400;
     opacity: 0.7;
-    margin-right: 6px;
-  }
-
-  .climate-value:last-child {
-    margin-right: 0;
   }
 
   .climate-divider {
@@ -996,7 +988,7 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
         ${this._config?.show_state&&t?W`<span class="state-text">${t.state}</span>`:G}
         <div class="icon-wrapper">
           ${i?W`
-                <div
+                <div 
                   class=${vt(a)}
                   style=${wt(o)}
                 >
