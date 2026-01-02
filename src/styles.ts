@@ -267,6 +267,7 @@ export const climateStyles = css`
     display: flex;
     align-items: baseline;
     justify-self: start;
+    font-size: 30px;
     line-height: 30px;
     font-weight: 300px;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};

@@ -490,7 +490,8 @@ export class UnifiedRoomCard extends LitElement {
       if (entity && !this._isUnavailable(entity)) {
         const value = parseFloat(entity.state);
         if (!isNaN(value)) {
-          const unit = showUnits ? (entity.attributes.unit_of_measurement || '°') : '';
+          // Always show °, but hide F/C if showUnits is false
+          const unit = showUnits ? (entity.attributes.unit_of_measurement || '°') : '°';
           return `${value.toFixed(decimalPlaces)}${unit}`;
         }
       }
@@ -500,7 +501,8 @@ export class UnifiedRoomCard extends LitElement {
     if (config.temperature_entities && config.temperature_entities.length > 0) {
       const result = this._calculateAverage(config.temperature_entities, decimalPlaces);
       if (result.value !== null) {
-        const unit = showUnits ? (result.unit || '°') : '';
+        // Always show °, but hide F/C if showUnits is false
+        const unit = showUnits ? (result.unit || '°') : '°';
         return `${result.value}${unit}`;
       }
     }
