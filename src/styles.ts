@@ -663,6 +663,86 @@ export const editorStyles = css`
     width: 100%;
   }
 
+  /* Color select with preview */
+  .color-select-with-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .color-select-with-preview ha-select {
+    flex: 1;
+  }
+
+  .color-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  /* Entity validation warning */
+  .entity-name-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .entity-warning {
+    color: var(--warning-color, #ffc107);
+    --mdc-icon-size: 18px;
+  }
+
+  .validation-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid var(--warning-color, #ffc107);
+    border-radius: 4px;
+    margin: 4px 0 8px 0;
+    font-size: 12px;
+    color: var(--warning-color, #ffc107);
+  }
+
+  .validation-warning ha-icon {
+    --mdc-icon-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* State header row with apply defaults button */
+  .state-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .apply-defaults-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    border-radius: 4px;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .apply-defaults-btn:hover {
+    background: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    color: white;
+  }
+
+  .apply-defaults-btn ha-icon {
+    --mdc-icon-size: 14px;
+  }
+
   ha-textfield,
   ha-select,
   ha-selector {

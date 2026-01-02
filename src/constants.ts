@@ -9,7 +9,7 @@
 // CARD METADATA
 // =============================================================================
 
-export const CARD_VERSION = '1.0.9';
+export const CARD_VERSION = '1.0.10';
 export const CARD_NAME = 'unified-room-card';
 export const CARD_DESCRIPTION = 'A comprehensive room status card for Home Assistant with support for climate, persistent, and intermittent entities.';
 export const CARD_EDITOR_NAME = 'unified-room-card-editor';
@@ -459,3 +459,58 @@ export const DOMAIN_STATE_COLORS: Record<string, Record<string, string>> = {
 
 export const MAX_PERSISTENT_ENTITIES_DISPLAY = 4;
 export const MAX_INTERMITTENT_ENTITIES_DISPLAY = 4;
+
+// =============================================================================
+// DOMAIN STATE DEFAULTS (for "Apply Defaults" button in editor)
+// =============================================================================
+
+export interface DomainStateDefault {
+  state: string;
+  icon: string;
+  color: string;
+}
+
+export const DOMAIN_STATE_DEFAULTS: Record<string, DomainStateDefault[]> = {
+  [ENTITY_DOMAINS.LOCK]: [
+    { state: 'locked', icon: 'mdi:lock', color: 'var(--state-lock-locked-color)' },
+    { state: 'unlocked', icon: 'mdi:lock-open', color: 'var(--state-lock-unlocked-color)' },
+    { state: 'jammed', icon: 'mdi:lock-alert', color: 'var(--state-lock-jammed-color)' },
+    { state: 'locking', icon: 'mdi:lock-clock', color: 'var(--state-lock-pending-color)' },
+    { state: 'unlocking', icon: 'mdi:lock-clock', color: 'var(--state-lock-pending-color)' },
+  ],
+  [ENTITY_DOMAINS.BINARY_SENSOR]: [
+    { state: 'on', icon: 'mdi:motion-sensor', color: 'var(--state-binary_sensor-active-color)' },
+    { state: 'off', icon: 'mdi:motion-sensor-off', color: 'var(--primary-text-color)' },
+  ],
+  [ENTITY_DOMAINS.COVER]: [
+    { state: 'open', icon: 'mdi:window-shutter-open', color: 'var(--state-cover-open-color)' },
+    { state: 'closed', icon: 'mdi:window-shutter', color: 'var(--state-cover-closed-color)' },
+    { state: 'opening', icon: 'mdi:window-shutter-open', color: 'var(--warning-color)' },
+    { state: 'closing', icon: 'mdi:window-shutter', color: 'var(--warning-color)' },
+  ],
+  [ENTITY_DOMAINS.LIGHT]: [
+    { state: 'on', icon: 'mdi:lightbulb', color: 'var(--state-light-active-color)' },
+    { state: 'off', icon: 'mdi:lightbulb-off', color: 'var(--primary-text-color)' },
+  ],
+  [ENTITY_DOMAINS.SWITCH]: [
+    { state: 'on', icon: 'mdi:toggle-switch', color: 'var(--state-switch-active-color)' },
+    { state: 'off', icon: 'mdi:toggle-switch-off', color: 'var(--primary-text-color)' },
+  ],
+  [ENTITY_DOMAINS.FAN]: [
+    { state: 'on', icon: 'mdi:fan', color: 'var(--state-active-color)' },
+    { state: 'off', icon: 'mdi:fan-off', color: 'var(--primary-text-color)' },
+  ],
+  [ENTITY_DOMAINS.CLIMATE]: [
+    { state: 'heating', icon: 'mdi:fire', color: 'var(--state-climate-heat-color)' },
+    { state: 'cooling', icon: 'mdi:snowflake', color: 'var(--state-climate-cool-color)' },
+    { state: 'idle', icon: 'mdi:thermostat', color: 'var(--primary-text-color)' },
+    { state: 'off', icon: 'mdi:thermostat-off', color: 'var(--disabled-text-color)' },
+  ],
+  [ENTITY_DOMAINS.INPUT_BOOLEAN]: [
+    { state: 'on', icon: 'mdi:toggle-switch', color: 'var(--state-active-color)' },
+    { state: 'off', icon: 'mdi:toggle-switch-off', color: 'var(--primary-text-color)' },
+  ],
+};
+
+// Domains that have state defaults available
+export const DOMAINS_WITH_DEFAULTS = Object.keys(DOMAIN_STATE_DEFAULTS);

@@ -20,6 +20,8 @@ import {
   ICON_HORIZONTAL_DROPDOWN_OPTIONS,
   ICON_VERTICAL_DROPDOWN_OPTIONS,
   HA_COLOR_OPTIONS,
+  DOMAIN_STATE_DEFAULTS,
+  DOMAINS_WITH_DEFAULTS,
 } from './constants';
 
 import {
@@ -560,11 +562,21 @@ export class UnifiedRoomCardEditor extends LitElement {
   /**
    * Render configuration for a single persistent entity
    */
-  private _renderPersistentEntityConfig(entityConfig: { entity: string; icon?: string; icon_size?: string; states?: Array<{ state: string; icon?: string; color?: string }> }, index: number): TemplateResult {
+  private _renderPersistentEntityConfig(entityConfig: { entity: string; icon?: string; icon_size?: string; tap_action?: { action: string }; hold_action?: { action: string }; states?: Array<{ state: string; icon?: string; color?: string }> }, index: number): TemplateResult {
+    const entityId = entityConfig.entity || '';
+    const entityExists = entityId && this.hass?.states[entityId];
+    const domain = entityId ? entityId.split('.')[0] : '';
+    const hasDomainDefaults = DOMAINS_WITH_DEFAULTS.includes(domain);
+
     return html`
       <div class="entity-row">
         <div class="entity-header" @click=${() => this._togglePersistentEntityExpand(index)}>
-          <span class="entity-name">${entityConfig.entity || 'New Entity'}</span>
+          <div class="entity-name-wrapper">
+            ${!entityExists && entityId ? html`
+              <ha-icon icon="mdi:alert-circle" class="entity-warning" title="Entity not found or unavailable"></ha-icon>
+            ` : nothing}
+            <span class="entity-name">${entityConfig.entity || 'New Entity'}</span>
+          </div>
           <div class="entity-actions">
             <ha-icon icon="mdi:chevron-down"></ha-icon>
             <ha-icon icon="mdi:delete" @click=${(e: Event) => { e.stopPropagation(); this._removePersistentEntity(index); }}></ha-icon>
@@ -583,6 +595,12 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-selector>
             </div>
           </div>
+          ${!entityExists && entityId ? html`
+            <div class="validation-warning">
+              <ha-icon icon="mdi:alert"></ha-icon>
+              <span>Entity "${entityId}" not found or unavailable</span>
+            </div>
+          ` : nothing}
           <!-- Default Icon -->
           <div class="form-row">
             <span class="form-label">Default Icon</span>
@@ -606,9 +624,45 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-textfield>
             </div>
           </div>
-          <!-- State Configuration -->
+          <!-- Tap Action -->
           <div class="form-row">
+            <span class="form-label">Tap Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${entityConfig.tap_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="toggle">Toggle</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Hold Action -->
+          <div class="form-row">
+            <span class="form-label">Hold Action</span>
+            <div class="form-input">
+              <ha-select
+                .value=${entityConfig.hold_action?.action || 'more-info'}
+                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="more-info">More Info</mwc-list-item>
+                <mwc-list-item value="toggle">Toggle</mwc-list-item>
+                <mwc-list-item value="none">None</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- State Configuration Header with Apply Defaults -->
+          <div class="form-row state-header-row">
             <span class="form-label">State-based Icons & Colors</span>
+            ${hasDomainDefaults ? html`
+              <button class="apply-defaults-btn" @click=${() => this._applyDomainDefaults(index, domain)}>
+                <ha-icon icon="mdi:auto-fix"></ha-icon>
+                Apply ${this._getDomainDisplayName(domain)} Defaults
+              </button>
+            ` : nothing}
           </div>
           ${(entityConfig.states || []).map((stateConfig, stateIndex) => {
             const colorKey = `${index}-${stateIndex}`;
@@ -633,14 +687,17 @@ export class UnifiedRoomCardEditor extends LitElement {
                   style="flex: 1;"
                 ></ha-selector>
                 <div class="color-select-wrapper" style="flex: 1.5; display: flex; flex-direction: column; gap: 4px;">
-                  <ha-select
-                    .value=${dropdownValue}
-                    @selected=${(e: CustomEvent) => this._handleColorSelect(index, stateIndex, (e.target as HTMLSelectElement).value)}
-                    @closed=${(e: Event) => e.stopPropagation()}
-                    style="width: 100%;"
-                  >
-                    ${this._renderColorOptions()}
-                  </ha-select>
+                  <div class="color-select-with-preview">
+                    <ha-select
+                      .value=${dropdownValue}
+                      @selected=${(e: CustomEvent) => this._handleColorSelect(index, stateIndex, (e.target as HTMLSelectElement).value)}
+                      @closed=${(e: Event) => e.stopPropagation()}
+                      style="flex: 1;"
+                    >
+                      ${this._renderColorOptions()}
+                    </ha-select>
+                    <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
+                  </div>
                   ${isCustomColor ? html`
                     <ha-textfield
                       .value=${currentColor}
@@ -1355,6 +1412,104 @@ export class UnifiedRoomCardEditor extends LitElement {
       this._customColorInputs = new Set(this._customColorInputs);
       this._updatePersistentEntityState(entityIndex, stateIndex, 'color', value);
     }
+  }
+
+  /**
+   * Update tap/hold action for persistent entity
+   */
+  private _updatePersistentEntityAction(index: number, actionKey: 'tap_action' | 'hold_action', actionValue: string): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    if (entities[index]) {
+      const entity = { ...entities[index] };
+      if (actionValue === 'none' || actionValue === 'more-info') {
+        entity[actionKey] = { action: actionValue };
+      } else {
+        entity[actionKey] = { action: actionValue };
+      }
+      entities[index] = entity;
+    }
+    
+    persistentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: persistentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Apply domain defaults to persistent entity
+   */
+  private _applyDomainDefaults(index: number, domain: string): void {
+    if (!this._config) return;
+
+    const defaults = DOMAIN_STATE_DEFAULTS[domain];
+    if (!defaults) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    if (entities[index]) {
+      const entity = { ...entities[index] };
+      // Replace existing states with domain defaults
+      entity.states = defaults.map(d => ({
+        state: d.state,
+        icon: d.icon,
+        color: d.color,
+      }));
+      entities[index] = entity;
+    }
+    
+    persistentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: persistentEntities,
+    };
+
+    // Clear any custom color inputs for this entity
+    const newCustomInputs = new Set(this._customColorInputs);
+    for (const key of this._customColorInputs) {
+      if (key.startsWith(`${index}-`)) {
+        newCustomInputs.delete(key);
+      }
+    }
+    this._customColorInputs = newCustomInputs;
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Get human-readable domain name
+   */
+  private _getDomainDisplayName(domain: string): string {
+    const displayNames: Record<string, string> = {
+      'lock': 'Lock',
+      'binary_sensor': 'Binary Sensor',
+      'cover': 'Cover',
+      'light': 'Light',
+      'switch': 'Switch',
+      'fan': 'Fan',
+      'climate': 'Climate',
+      'input_boolean': 'Input Boolean',
+    };
+    return displayNames[domain] || domain;
+  }
+
+  /**
+   * Get color preview style - handles HA CSS variables
+   */
+  private _getColorPreviewStyle(color: string): string {
+    if (!color) {
+      return 'background-color: transparent; border: 1px dashed var(--secondary-text-color);';
+    }
+    return `background-color: ${color};`;
   }
 
   /**
