@@ -158,6 +158,7 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
     display: flex;
     align-items: baseline;
     justify-self: start;
+    font-size: 30px;
     line-height: 30px;
     font-weight: 300px;
     color: ${r(Mt)};
