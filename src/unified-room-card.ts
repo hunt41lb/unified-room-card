@@ -311,6 +311,7 @@ export class UnifiedRoomCard extends LitElement {
     const showIcon = this._config?.show_icon !== false;
     const showImgCell = this._config?.show_img_cell ?? true;
     const icon = this._config?.icon || this._getDefaultIcon(mainEntity);
+    const domain = mainEntity ? this._getDomain(mainEntity.entity_id) : '';
 
     const iconContainerClasses = {
       'icon-container': true,
@@ -322,7 +323,7 @@ export class UnifiedRoomCard extends LitElement {
     // Build icon container styles
     const iconContainerStyles: Record<string, string> = {};
     
-    // Apply dynamic background color for active state
+    // Apply dynamic background color for active state with img_cell
     if (isActive && showImgCell) {
       const bgColor = this._getEntityBackgroundColor(mainEntity);
       iconContainerStyles['background-color'] = bgColor;
@@ -335,12 +336,32 @@ export class UnifiedRoomCard extends LitElement {
       iconStyles['--mdc-icon-size'] = this._config.icon_size;
     }
     
-    // Determine icon color
+    // Determine icon color based on state and configuration
     if (isActive && showImgCell) {
       // For active state with img-cell, use white/contrast color
       iconStyles['color'] = 'var(--text-primary-color, #fff)';
+    } else if (mainEntity && isActive) {
+      // Active state WITHOUT img_cell - use domain-specific active colors
+      if (domain === 'light') {
+        // Use HA's light active color for lights without img_cell
+        iconStyles['color'] = 'var(--state-light-active-color, var(--amber-color, #ffc107))';
+      } else if (domain === 'climate') {
+        // Use climate state colors
+        const stateColor = this._getEntityStateColor(mainEntity);
+        if (stateColor) {
+          iconStyles['color'] = stateColor;
+        }
+      } else {
+        // Other domains - use generic active color
+        const stateColor = this._getEntityStateColor(mainEntity);
+        if (stateColor) {
+          iconStyles['color'] = stateColor;
+        } else {
+          iconStyles['color'] = 'var(--state-active-color, var(--amber-color, #ffc107))';
+        }
+      }
     } else if (mainEntity) {
-      // Check for domain-specific state color
+      // Inactive state - check for domain-specific state color (like lock states)
       const stateColor = this._getEntityStateColor(mainEntity);
       if (stateColor) {
         iconStyles['color'] = stateColor;
@@ -404,32 +425,67 @@ export class UnifiedRoomCard extends LitElement {
   }
 
   /**
-   * Get background color for icon based on entity attributes
-   * Supports light entities with rgb_color attribute
+   * Get background color for icon based on entity attributes and domain
+   * Supports light entities with rgb_color attribute and climate entities with state colors
    */
   private _getEntityBackgroundColor(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
-    const opacity = 0.3; // Opacity for icon background when active
-    
     if (!entity) {
-      return `rgba(66, 133, 244, ${opacity})`;
+      return 'var(--state-active-color, rgba(255, 167, 38, 0.3))';
     }
 
-    // Check for rgb_color attribute (lights)
-    const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
-    if (rgbColor && Array.isArray(rgbColor) && rgbColor.length === 3) {
-      return `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, ${opacity})`;
+    const domain = this._getDomain(entity.entity_id);
+
+    // Climate entities - use state-specific colors without opacity
+    if (domain === 'climate') {
+      switch (entity.state) {
+        case 'heating':
+          return 'var(--state-climate-heat-color, #ff8c00)';
+        case 'cooling':
+          return 'var(--state-climate-cool-color, #2196f3)';
+        case 'drying':
+          return 'var(--state-climate-dry-color, #8bc34a)';
+        case 'fan_only':
+          return 'var(--state-climate-fan_only-color, #00bcd4)';
+        case 'auto':
+        case 'heat_cool':
+          return 'var(--state-climate-auto-color, #9c27b0)';
+        default:
+          // idle or off - use secondary background (no colored background)
+          return 'var(--secondary-background-color)';
+      }
     }
 
-    // Check for hs_color and convert to rgb (lights)
-    const hsColor = entity.attributes.hs_color as [number, number] | undefined;
-    const brightness = entity.attributes.brightness as number | undefined;
-    if (hsColor && Array.isArray(hsColor) && hsColor.length === 2) {
-      const rgb = this._hsToRgb(hsColor[0], hsColor[1], brightness);
-      return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
+    // Light entities - check for color attributes
+    if (domain === 'light') {
+      // Check for rgb_color attribute
+      const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
+      if (rgbColor && Array.isArray(rgbColor) && rgbColor.length === 3) {
+        // Use full color without opacity for lights with color
+        return `rgb(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]})`;
+      }
+
+      // Check for hs_color and convert to rgb
+      const hsColor = entity.attributes.hs_color as [number, number] | undefined;
+      const brightness = entity.attributes.brightness as number | undefined;
+      if (hsColor && Array.isArray(hsColor) && hsColor.length === 2) {
+        const rgb = this._hsToRgb(hsColor[0], hsColor[1], brightness);
+        return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+      }
+
+      // Lights without color capability (warmth only) - use light active color
+      return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
     }
 
-    // For non-light entities, default to amber
-    return `rgba(255, 167, 38, ${opacity})`;
+    // Lock entities
+    if (domain === 'lock') {
+      const stateColor = DOMAIN_STATE_COLORS[domain]?.[entity.state];
+      if (stateColor) {
+        return stateColor;
+      }
+    }
+
+    // Default for other domains - amber active color
+    return 'var(--state-active-color, var(--amber-color, #ffc107))';
   }
 
   /**
@@ -657,13 +713,13 @@ export class UnifiedRoomCard extends LitElement {
 
     if (validCount === 0) return null;
 
-    // Format with appropriate unit
+    // Format with appropriate unit (no space between value and unit)
     if (totalWatts >= 1000) {
       const kwValue = (totalWatts / 1000).toFixed(decimalPlaces);
-      return showUnits ? `${kwValue} kW` : kwValue;
+      return showUnits ? `${kwValue}kW` : kwValue;
     }
     const wValue = totalWatts.toFixed(decimalPlaces);
-    return showUnits ? `${wValue} W` : wValue;
+    return showUnits ? `${wValue}W` : wValue;
   }
 
   /**

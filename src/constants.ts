@@ -316,6 +316,10 @@ export const DOMAIN_STATE_ICONS: Record<string, Record<string, string>> = {
 
 // State-specific colors for certain domains using HA CSS variables
 export const DOMAIN_STATE_COLORS: Record<string, Record<string, string>> = {
+  [ENTITY_DOMAINS.LIGHT]: {
+    on: 'var(--state-light-active-color, var(--amber-color, #ffc107))',
+    off: 'var(--primary-text-color)',
+  },
   [ENTITY_DOMAINS.LOCK]: {
     jammed: 'var(--state-lock-jammed-color)',
     locked: 'var(--state-lock-locked-color)',
@@ -326,8 +330,12 @@ export const DOMAIN_STATE_COLORS: Record<string, Record<string, string>> = {
     opening: 'var(--state-lock-opening-color)',
   },
   [ENTITY_DOMAINS.CLIMATE]: {
-    heating: 'var(--state-climate-heat-color)',
-    cooling: 'var(--state-climate-cool-color)',
+    heating: 'var(--state-climate-heat-color, #ff8c00)',
+    cooling: 'var(--state-climate-cool-color, #2196f3)',
+    drying: 'var(--state-climate-dry-color, #8bc34a)',
+    fan_only: 'var(--state-climate-fan_only-color, #00bcd4)',
+    auto: 'var(--state-climate-auto-color, #9c27b0)',
+    heat_cool: 'var(--state-climate-auto-color, #9c27b0)',
     idle: 'var(--primary-text-color)',
     off: 'var(--primary-text-color)',
   },
