@@ -241,7 +241,7 @@ export class UnifiedRoomCard extends LitElement {
       : undefined;
 
     const isActive = mainEntity
-      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state)
+      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state, mainEntity.attributes)
       : false;
 
     const cardClasses = {
@@ -305,7 +305,7 @@ export class UnifiedRoomCard extends LitElement {
       : undefined;
 
     const isActive = mainEntity
-      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state)
+      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state, mainEntity.attributes)
       : false;
 
     const showIcon = this._config?.show_icon !== false;
@@ -341,18 +341,15 @@ export class UnifiedRoomCard extends LitElement {
       // For active state with img-cell, use white/contrast color
       iconStyles['color'] = 'var(--text-primary-color, #fff)';
     } else if (mainEntity && isActive) {
-      // Active state WITHOUT img_cell - use domain-specific active colors
+      // Active state WITHOUT img_cell - use domain-specific colors
       if (domain === 'light') {
-        // Use HA's light active color for lights without img_cell
-        iconStyles['color'] = 'var(--state-light-active-color, var(--amber-color, #ffc107))';
+        // Use light's actual color (RGB/HS) or fallback to active color
+        iconStyles['color'] = this._getLightIconColor(mainEntity);
       } else if (domain === 'climate') {
-        // Use climate state colors
-        const stateColor = this._getEntityStateColor(mainEntity);
-        if (stateColor) {
-          iconStyles['color'] = stateColor;
-        }
+        // Use climate hvac_action colors
+        iconStyles['color'] = this._getClimateIconColor(mainEntity);
       } else {
-        // Other domains - use generic active color
+        // Other domains - use generic active color or state color
         const stateColor = this._getEntityStateColor(mainEntity);
         if (stateColor) {
           iconStyles['color'] = stateColor;
@@ -360,6 +357,9 @@ export class UnifiedRoomCard extends LitElement {
           iconStyles['color'] = 'var(--state-active-color, var(--amber-color, #ffc107))';
         }
       }
+    } else if (mainEntity && domain === 'climate') {
+      // Climate not active but may still be heating/cooling - check hvac_action
+      iconStyles['color'] = this._getClimateIconColor(mainEntity);
     } else if (mainEntity) {
       // Inactive state - check for domain-specific state color (like lock states)
       const stateColor = this._getEntityStateColor(mainEntity);
@@ -426,7 +426,7 @@ export class UnifiedRoomCard extends LitElement {
 
   /**
    * Get background color for icon based on entity attributes and domain
-   * Supports light entities with rgb_color attribute and climate entities with state colors
+   * Supports light entities with rgb_color attribute and climate entities with hvac_action
    */
   private _getEntityBackgroundColor(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
     if (!entity) {
@@ -435,33 +435,34 @@ export class UnifiedRoomCard extends LitElement {
 
     const domain = this._getDomain(entity.entity_id);
 
-    // Climate entities - use state-specific colors without opacity
+    // Climate entities - use hvac_action attribute for actual heating/cooling state
     if (domain === 'climate') {
-      switch (entity.state) {
+      const hvacAction = entity.attributes.hvac_action as string | undefined;
+      switch (hvacAction) {
         case 'heating':
           return 'var(--state-climate-heat-color, #ff8c00)';
         case 'cooling':
           return 'var(--state-climate-cool-color, #2196f3)';
         case 'drying':
           return 'var(--state-climate-dry-color, #8bc34a)';
-        case 'fan_only':
+        case 'fan':
           return 'var(--state-climate-fan_only-color, #00bcd4)';
-        case 'auto':
-        case 'heat_cool':
-          return 'var(--state-climate-auto-color, #9c27b0)';
+        case 'preheating':
+          return 'var(--state-climate-heat-color, #ff8c00)';
         default:
           // idle or off - use secondary background (no colored background)
           return 'var(--secondary-background-color)';
       }
     }
 
-    // Light entities - check for color attributes
+    // Light entities - check for color attributes (with opacity for img_cell background)
     if (domain === 'light') {
+      const opacity = 0.3; // Opacity for light background when active with img_cell
+      
       // Check for rgb_color attribute
       const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
       if (rgbColor && Array.isArray(rgbColor) && rgbColor.length === 3) {
-        // Use full color without opacity for lights with color
-        return `rgb(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]})`;
+        return `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, ${opacity})`;
       }
 
       // Check for hs_color and convert to rgb
@@ -469,11 +470,11 @@ export class UnifiedRoomCard extends LitElement {
       const brightness = entity.attributes.brightness as number | undefined;
       if (hsColor && Array.isArray(hsColor) && hsColor.length === 2) {
         const rgb = this._hsToRgb(hsColor[0], hsColor[1], brightness);
-        return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
       }
 
-      // Lights without color capability (warmth only) - use light active color
-      return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
+      // Lights without color capability (warmth only) - use amber with opacity
+      return `rgba(255, 193, 7, ${opacity})`; // Amber color with opacity
     }
 
     // Lock entities
@@ -484,8 +485,52 @@ export class UnifiedRoomCard extends LitElement {
       }
     }
 
-    // Default for other domains - amber active color
-    return 'var(--state-active-color, var(--amber-color, #ffc107))';
+    // Default for other domains - amber active color with opacity
+    return 'rgba(255, 167, 38, 0.3)';
+  }
+
+  /**
+   * Get icon color for light entity based on its color attributes
+   * Used when img_cell is disabled
+   */
+  private _getLightIconColor(entity: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
+    // Check for rgb_color attribute
+    const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
+    if (rgbColor && Array.isArray(rgbColor) && rgbColor.length === 3) {
+      return `rgb(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]})`;
+    }
+
+    // Check for hs_color and convert to rgb
+    const hsColor = entity.attributes.hs_color as [number, number] | undefined;
+    const brightness = entity.attributes.brightness as number | undefined;
+    if (hsColor && Array.isArray(hsColor) && hsColor.length === 2) {
+      const rgb = this._hsToRgb(hsColor[0], hsColor[1], brightness);
+      return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+    }
+
+    // Lights without color capability - use HA's light active color
+    return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
+  }
+
+  /**
+   * Get icon color for climate entity based on hvac_action attribute
+   */
+  private _getClimateIconColor(entity: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
+    const hvacAction = entity.attributes.hvac_action as string | undefined;
+    switch (hvacAction) {
+      case 'heating':
+      case 'preheating':
+        return 'var(--state-climate-heat-color, #ff8c00)';
+      case 'cooling':
+        return 'var(--state-climate-cool-color, #2196f3)';
+      case 'drying':
+        return 'var(--state-climate-dry-color, #8bc34a)';
+      case 'fan':
+        return 'var(--state-climate-fan_only-color, #00bcd4)';
+      default:
+        // idle or off - use primary text color
+        return 'var(--primary-text-color)';
+    }
   }
 
   /**
@@ -812,15 +857,26 @@ export class UnifiedRoomCard extends LitElement {
   /**
    * Check if entity is in an "active" state
    * Uses domain-specific active states, with config override
+   * For climate entities, checks hvac_action attribute
    */
-  private _isEntityActive(entityId: string, state: string): boolean {
+  private _isEntityActive(entityId: string, state: string, attributes?: Record<string, unknown>): boolean {
     // If custom active_states defined in config, use those
     if (this._config?.active_states && this._config.active_states.length > 0) {
       return this._config.active_states.includes(state);
     }
 
-    // Otherwise, use domain-specific defaults
     const domain = this._getDomain(entityId);
+    
+    // Special handling for climate - use hvac_action attribute
+    if (domain === 'climate' && attributes) {
+      const hvacAction = attributes.hvac_action as string | undefined;
+      if (hvacAction) {
+        // Active if actually heating, cooling, drying, or fan running
+        return ['heating', 'cooling', 'drying', 'fan', 'preheating'].includes(hvacAction);
+      }
+    }
+
+    // Otherwise, use domain-specific defaults
     const domainActiveStates = DOMAIN_ACTIVE_STATES[domain];
     
     if (domainActiveStates) {
@@ -841,6 +897,7 @@ export class UnifiedRoomCard extends LitElement {
 
   /**
    * Get default icon for entity based on domain and state
+   * For climate entities, uses hvac_action attribute
    */
   private _getDefaultIcon(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
     if (!entity) {
@@ -854,7 +911,27 @@ export class UnifiedRoomCard extends LitElement {
 
     const domain = this._getDomain(entity.entity_id);
     
-    // Check for state-specific icon first
+    // Special handling for climate - use hvac_action for icon
+    if (domain === 'climate') {
+      const hvacAction = entity.attributes.hvac_action as string | undefined;
+      if (hvacAction) {
+        switch (hvacAction) {
+          case 'heating':
+          case 'preheating':
+            return 'mdi:fire';
+          case 'cooling':
+            return 'mdi:snowflake';
+          case 'drying':
+            return 'mdi:water-percent';
+          case 'fan':
+            return 'mdi:fan';
+          default:
+            return 'mdi:thermostat';
+        }
+      }
+    }
+    
+    // Check for state-specific icon 
     const stateIcons = DOMAIN_STATE_ICONS[domain];
     if (stateIcons && stateIcons[entity.state]) {
       return stateIcons[entity.state];
