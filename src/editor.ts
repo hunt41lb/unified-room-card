@@ -507,6 +507,40 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-textfield>
             </div>
           </div>
+          <!-- Padding & Gap -->
+          <div class="form-row-dual expand-inputs">
+            <div class="form-item">
+              <span class="form-label">Padding</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${persistentConfig.padding || ''}
+                  placeholder="Auto (based on position)"
+                  @input=${(e: Event) => this._persistentValueChanged('padding', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+            <div class="form-item">
+              <span class="form-label">Margin</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${persistentConfig.margin || ''}
+                  placeholder="Auto"
+                  @input=${(e: Event) => this._persistentValueChanged('margin', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+          </div>
+          <!-- Gap -->
+          <div class="form-row">
+            <span class="form-label">Gap (between icons)</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${persistentConfig.gap || ''}
+                placeholder="4px"
+                @input=${(e: Event) => this._persistentValueChanged('gap', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
           <!-- Entities List -->
           <div class="form-row">
             <span class="form-label">Entities</span>

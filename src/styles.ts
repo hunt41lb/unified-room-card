@@ -295,9 +295,7 @@ export const persistentStyles = css`
     grid-area: persistent;
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 0 0 1px 2px;
-    margin: 0 3px 0 0;
+    /* padding, gap, and justify-self are set via inline styles for flexibility */
   }
 
   .persistent-entity {

@@ -105,6 +105,9 @@ export interface EntityConfig {
 export interface PersistentEntitiesConfig {
   position?: 'left' | 'center' | 'right';  // Horizontal position
   icon_size?: string;        // Default icon size for all entities
+  padding?: string;          // Custom padding (e.g., "0 0 1px 14px")
+  margin?: string;           // Custom margin
+  gap?: string;              // Gap between entities (default: 4px)
   entities?: EntityConfig[];
 }
 

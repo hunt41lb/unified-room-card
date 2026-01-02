@@ -910,9 +910,40 @@ export class UnifiedRoomCard extends LitElement {
     const config = this._config.persistent_entities;
     const position = config.position || 'right';
     const defaultIconSize = config.icon_size || '21px';
+    const gap = config.gap || '4px';
 
     // Build section styles for positioning
-    const sectionStyles: Record<string, string> = {};
+    const sectionStyles: Record<string, string> = {
+      'gap': gap,
+    };
+
+    // Handle custom padding or use smart defaults based on position
+    if (config.padding) {
+      sectionStyles['padding'] = config.padding;
+    } else {
+      // Smart defaults: left position gets climate-like padding, right gets minimal
+      switch (position) {
+        case 'left':
+          sectionStyles['padding'] = '0 0 1px 14px';
+          break;
+        case 'center':
+          sectionStyles['padding'] = '0 0 1px 0';
+          break;
+        case 'right':
+        default:
+          sectionStyles['padding'] = '0 0 1px 2px';
+          if (!config.margin) {
+            sectionStyles['margin'] = '0 3px 0 0';
+          }
+          break;
+      }
+    }
+
+    // Handle custom margin
+    if (config.margin) {
+      sectionStyles['margin'] = config.margin;
+    }
+
     switch (position) {
       case 'left':
         sectionStyles['justify-self'] = 'start';
