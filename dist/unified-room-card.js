@@ -159,15 +159,14 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
     align-items: baseline;
     justify-self: start;
     line-height: 30px;
-    font-weight: 300;
+    font-weight: 300px;
     color: ${r(Mt)};
+    padding: 0 0 1px 14px;
   }
 
   .climate-primary {
     font-size: 18px;
-    font-weight: 400;
     color: ${r(Mt)};
-    margin-right: 4px;
   }
 
   .climate-secondary {
@@ -179,11 +178,6 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
     font-weight: 400;
     opacity: 0.7;
     color: ${r(Mt)};
-    margin-right: 4px;
-  }
-
-  .climate-value:last-child {
-    margin-right: 0;
   }
 
   .climate-divider {
@@ -1029,7 +1023,7 @@ function t(t,e,i,s){var n,a=arguments.length,o=a<3?e:null===s?s=Object.getOwnPro
           </div>
         `:G}
       </div>
-    `}_getTemperatureValue(t,e=0,i=!0){if(!t||!this.hass)return null;if(t.primary_entity){const s=this.hass.states[t.primary_entity];if(s&&!this._isUnavailable(s)){const t=parseFloat(s.state);if(!isNaN(t)){const n=i?s.attributes.unit_of_measurement||"°":"";return`${t.toFixed(e)}${n}`}}}if(t.temperature_entities&&t.temperature_entities.length>0){const s=this._calculateAverage(t.temperature_entities,e);if(null!==s.value){const t=i?s.unit||"°":"";return`${s.value}${t}`}}return null}_getHumidityValue(t,e=0,i=!0){if(!t?.humidity_entities||0===t.humidity_entities.length||!this.hass)return null;const s=this._calculateAverage(t.humidity_entities,e);if(null!==s.value){const t=i?"%":"";return`${s.value}${t}`}return null}_getAirQualityValue(t,e=0,i=!0){if(!t?.air_quality_entities||0===t.air_quality_entities.length||!this.hass)return null;const s=this._calculateAverage(t.air_quality_entities,e);if(null!==s.value){const t=i&&s.unit?` ${s.unit}`:"";return`${s.value}${t}`}return null}_getIlluminanceValue(t,e=0,i=!0){if(!t?.illuminance_entities||0===t.illuminance_entities.length||!this.hass)return null;const s=this._calculateAverage(t.illuminance_entities,e);if(null!==s.value){const t=i?" lx":"";return`${s.value}${t}`}return null}_getPowerValue(t,e=0,i=!0){if(!t?.entities||0===t.entities.length||!this.hass)return null;let s=0,n=0;for(const e of t.entities){const t=this.hass.states[e];if(!t||this._isUnavailable(t))continue;const i=parseFloat(t.state);if(isNaN(i))continue;const a=t.attributes.unit_of_measurement,o=("string"==typeof a?a:"W").toLowerCase();s+="kw"===o?1e3*i:"mw"===o?1e6*i:"gw"===o?1e9*i:i,n++}if(0===n)return null;if(s>=1e3){const t=(s/1e3).toFixed(e);return i?`${t} kW`:t}const a=s.toFixed(e);return i?`${a} W`:a}_calculateAverage(t,e=1){if(!this.hass)return{value:null,unit:"",count:0};const i=[];let s="";for(const e of t){const t=this.hass.states[e];if(!t||this._isUnavailable(t))continue;const n=parseFloat(t.state);isNaN(n)||(i.push(n),!s&&t.attributes.unit_of_measurement&&(s=t.attributes.unit_of_measurement))}if(0===i.length)return{value:null,unit:"",count:0};const n=i.reduce((t,e)=>t+e,0)/i.length;return{value:parseFloat(n.toFixed(e)),unit:s,count:i.length}}_isUnavailable(t){return["unavailable","unknown"].includes(t.state)}_renderPersistentEntities(){return this._config?.persistent_entities?.entities?.length?W`
+    `}_getTemperatureValue(t,e=0,i=!0){if(!t||!this.hass)return null;if(t.primary_entity){const s=this.hass.states[t.primary_entity];if(s&&!this._isUnavailable(s)){const t=parseFloat(s.state);if(!isNaN(t)){const n=i&&s.attributes.unit_of_measurement||"°";return`${t.toFixed(e)}${n}`}}}if(t.temperature_entities&&t.temperature_entities.length>0){const s=this._calculateAverage(t.temperature_entities,e);if(null!==s.value){const t=i&&s.unit||"°";return`${s.value}${t}`}}return null}_getHumidityValue(t,e=0,i=!0){if(!t?.humidity_entities||0===t.humidity_entities.length||!this.hass)return null;const s=this._calculateAverage(t.humidity_entities,e);if(null!==s.value){const t=i?"%":"";return`${s.value}${t}`}return null}_getAirQualityValue(t,e=0,i=!0){if(!t?.air_quality_entities||0===t.air_quality_entities.length||!this.hass)return null;const s=this._calculateAverage(t.air_quality_entities,e);if(null!==s.value){const t=i&&s.unit?` ${s.unit}`:"";return`${s.value}${t}`}return null}_getIlluminanceValue(t,e=0,i=!0){if(!t?.illuminance_entities||0===t.illuminance_entities.length||!this.hass)return null;const s=this._calculateAverage(t.illuminance_entities,e);if(null!==s.value){const t=i?" lx":"";return`${s.value}${t}`}return null}_getPowerValue(t,e=0,i=!0){if(!t?.entities||0===t.entities.length||!this.hass)return null;let s=0,n=0;for(const e of t.entities){const t=this.hass.states[e];if(!t||this._isUnavailable(t))continue;const i=parseFloat(t.state);if(isNaN(i))continue;const a=t.attributes.unit_of_measurement,o=("string"==typeof a?a:"W").toLowerCase();s+="kw"===o?1e3*i:"mw"===o?1e6*i:"gw"===o?1e9*i:i,n++}if(0===n)return null;if(s>=1e3){const t=(s/1e3).toFixed(e);return i?`${t} kW`:t}const a=s.toFixed(e);return i?`${a} W`:a}_calculateAverage(t,e=1){if(!this.hass)return{value:null,unit:"",count:0};const i=[];let s="";for(const e of t){const t=this.hass.states[e];if(!t||this._isUnavailable(t))continue;const n=parseFloat(t.state);isNaN(n)||(i.push(n),!s&&t.attributes.unit_of_measurement&&(s=t.attributes.unit_of_measurement))}if(0===i.length)return{value:null,unit:"",count:0};const n=i.reduce((t,e)=>t+e,0)/i.length;return{value:parseFloat(n.toFixed(e)),unit:s,count:i.length}}_isUnavailable(t){return["unavailable","unknown"].includes(t.state)}_renderPersistentEntities(){return this._config?.persistent_entities?.entities?.length?W`
       <div class="persistent-section">
         <!-- Persistent entities will be implemented in Phase 4 -->
       </div>
