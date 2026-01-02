@@ -10,6 +10,7 @@ import {
   TapActionType,
   PositionType,
   UnitHandlingType,
+  IconPositionType,
 } from './constants';
 
 // =============================================================================
@@ -208,6 +209,10 @@ export interface UnifiedRoomCardConfig {
   icon?: string;
   icon_size?: string;
   img_cell_size?: string;
+  icon_position?: IconPositionType;
+  
+  // Entity Domain/State Handling
+  active_states?: string[];  // Custom states considered "active" (overrides domain defaults)
   
   // Tap Actions
   tap_action?: TapActionConfig;

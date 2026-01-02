@@ -23,6 +23,13 @@ import {
   DEFAULT_HOLD_ACTION,
   DEFAULT_DOUBLE_TAP_ACTION,
   COMMON_STATES,
+  ICON_POSITION_OPTIONS,
+  ICON_POSITION_GRIDS,
+  ICON_ONLY_CENTERED_GRID,
+  DOMAIN_ACTIVE_STATES,
+  DOMAIN_DEFAULT_ICONS,
+  DOMAIN_STATE_ICONS,
+  DOMAIN_STATE_COLORS,
 } from './constants';
 
 import {
@@ -235,7 +242,7 @@ export class UnifiedRoomCard extends LitElement {
       : undefined;
 
     const isActive = mainEntity
-      ? this._isEntityActive(mainEntity.state)
+      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state)
       : false;
 
     const cardClasses = {
@@ -243,12 +250,15 @@ export class UnifiedRoomCard extends LitElement {
       'state-off': !isActive && !!mainEntity,
     };
 
+    // Calculate grid layout based on icon_position and visibility
+    const gridLayout = this._calculateGridLayout();
+
     const cardDynamicStyles = getCardDynamicStyles({
       cardHeight: this._config.card_height,
       cardWidth: this._config.card_width,
-      gridTemplateAreas: this._config.grid?.template_areas,
-      gridTemplateColumns: this._config.grid?.template_columns,
-      gridTemplateRows: this._config.grid?.template_rows,
+      gridTemplateAreas: this._config.grid?.template_areas || gridLayout.areas,
+      gridTemplateColumns: this._config.grid?.template_columns || gridLayout.columns,
+      gridTemplateRows: this._config.grid?.template_rows || gridLayout.rows,
       backgroundColor: this._config.background_color,
       activeBackgroundColor: isActive ? this._config.active_background_color : undefined,
       backgroundGradient: this._config.background_gradient,
@@ -269,6 +279,31 @@ export class UnifiedRoomCard extends LitElement {
         ${this._renderIntermittentEntities()}
       </ha-card>
     `;
+  }
+
+  /**
+   * Calculate grid layout based on icon_position and element visibility
+   */
+  private _calculateGridLayout(): { areas: string; columns: string; rows: string } {
+    if (!this._config) {
+      return ICON_POSITION_GRIDS[ICON_POSITION_OPTIONS.AUTO];
+    }
+
+    const iconPosition = this._config.icon_position || ICON_POSITION_OPTIONS.AUTO;
+    const showName = this._config.show_name !== false && !!this._config.name;
+
+    // If auto position, check what's visible
+    if (iconPosition === ICON_POSITION_OPTIONS.AUTO) {
+      // If name is hidden, center the icon
+      if (!showName) {
+        return ICON_ONLY_CENTERED_GRID;
+      }
+      // Otherwise, use top-right (default)
+      return ICON_POSITION_GRIDS[ICON_POSITION_OPTIONS.TOP_RIGHT];
+    }
+
+    // Use the specified position
+    return ICON_POSITION_GRIDS[iconPosition] || ICON_POSITION_GRIDS[ICON_POSITION_OPTIONS.TOP_RIGHT];
   }
 
   // ===========================================================================
@@ -299,7 +334,7 @@ export class UnifiedRoomCard extends LitElement {
       : undefined;
 
     const isActive = mainEntity
-      ? this._isEntityActive(mainEntity.state)
+      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state)
       : false;
 
     const showIcon = this._config?.show_icon !== false;
@@ -703,10 +738,32 @@ export class UnifiedRoomCard extends LitElement {
   // ===========================================================================
 
   /**
-   * Check if entity is in an "active" state
+   * Extract domain from entity_id
    */
-  private _isEntityActive(state: string): boolean {
-    const activeStates = [
+  private _getDomain(entityId: string): string {
+    return entityId.split('.')[0];
+  }
+
+  /**
+   * Check if entity is in an "active" state
+   * Uses domain-specific active states, with config override
+   */
+  private _isEntityActive(entityId: string, state: string): boolean {
+    // If custom active_states defined in config, use those
+    if (this._config?.active_states && this._config.active_states.length > 0) {
+      return this._config.active_states.includes(state);
+    }
+
+    // Otherwise, use domain-specific defaults
+    const domain = this._getDomain(entityId);
+    const domainActiveStates = DOMAIN_ACTIVE_STATES[domain];
+    
+    if (domainActiveStates) {
+      return domainActiveStates.includes(state);
+    }
+
+    // Fallback to common active states
+    const fallbackActiveStates = [
       COMMON_STATES.ON,
       COMMON_STATES.UNLOCKED,
       COMMON_STATES.OPEN,
@@ -714,11 +771,11 @@ export class UnifiedRoomCard extends LitElement {
       COMMON_STATES.HEATING,
       COMMON_STATES.COOLING,
     ];
-    return activeStates.includes(state as typeof activeStates[number]);
+    return fallbackActiveStates.includes(state as typeof fallbackActiveStates[number]);
   }
 
   /**
-   * Get default icon for entity based on domain
+   * Get default icon for entity based on domain and state
    */
   private _getDefaultIcon(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
     if (!entity) {
@@ -730,22 +787,32 @@ export class UnifiedRoomCard extends LitElement {
       return entity.attributes.icon as string;
     }
 
-    // Fallback based on domain
-    const domain = entity.entity_id.split('.')[0];
-    const domainIcons: Record<string, string> = {
-      light: 'mdi:lightbulb',
-      switch: 'mdi:toggle-switch',
-      fan: 'mdi:fan',
-      climate: 'mdi:thermostat',
-      lock: 'mdi:lock',
-      binary_sensor: 'mdi:radiobox-blank',
-      sensor: 'mdi:eye',
-      cover: 'mdi:window-shutter',
-      camera: 'mdi:camera',
-      media_player: 'mdi:cast',
-    };
+    const domain = this._getDomain(entity.entity_id);
+    
+    // Check for state-specific icon first
+    const stateIcons = DOMAIN_STATE_ICONS[domain];
+    if (stateIcons && stateIcons[entity.state]) {
+      return stateIcons[entity.state];
+    }
 
-    return domainIcons[domain] || 'mdi:home';
+    // Fall back to domain default icon
+    return DOMAIN_DEFAULT_ICONS[domain] || 'mdi:home';
+  }
+
+  /**
+   * Get state-specific color for entity
+   */
+  private _getEntityStateColor(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string | undefined {
+    if (!entity) return undefined;
+
+    const domain = this._getDomain(entity.entity_id);
+    const stateColors = DOMAIN_STATE_COLORS[domain];
+    
+    if (stateColors && stateColors[entity.state]) {
+      return stateColors[entity.state];
+    }
+
+    return undefined;
   }
 
   // ===========================================================================

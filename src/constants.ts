@@ -23,8 +23,8 @@ export const CARD_EDITOR_TAG = 'unified-room-card-editor';
 // =============================================================================
 
 export const DEFAULT_GRID_TEMPLATE_AREAS = '"name name icon icon" "climate climate persistent intermittent"';
-export const DEFAULT_GRID_TEMPLATE_COLUMNS = '1fr 1fr 1fr 1fr';
-export const DEFAULT_GRID_TEMPLATE_ROWS = 'auto auto';
+export const DEFAULT_GRID_TEMPLATE_COLUMNS = 'min-content 1fr';
+export const DEFAULT_GRID_TEMPLATE_ROWS = '1fr min-content';
 
 // =============================================================================
 // DEFAULT CARD DIMENSIONS
@@ -196,6 +196,168 @@ export const COMMON_STATES = {
   HEATING: 'heating',
   COOLING: 'cooling',
 } as const;
+
+// =============================================================================
+// ICON POSITION OPTIONS
+// =============================================================================
+
+export const ICON_POSITION_OPTIONS = {
+  AUTO: 'auto',
+  TOP_RIGHT: 'top-right',
+  TOP_LEFT: 'top-left',
+  CENTER: 'center',
+  BOTTOM_RIGHT: 'bottom-right',
+  BOTTOM_LEFT: 'bottom-left',
+} as const;
+
+export type IconPositionType = typeof ICON_POSITION_OPTIONS[keyof typeof ICON_POSITION_OPTIONS];
+
+export const ICON_POSITION_DROPDOWN_OPTIONS = [
+  { value: ICON_POSITION_OPTIONS.AUTO, label: 'Auto' },
+  { value: ICON_POSITION_OPTIONS.TOP_RIGHT, label: 'Top Right' },
+  { value: ICON_POSITION_OPTIONS.TOP_LEFT, label: 'Top Left' },
+  { value: ICON_POSITION_OPTIONS.CENTER, label: 'Center' },
+  { value: ICON_POSITION_OPTIONS.BOTTOM_RIGHT, label: 'Bottom Right' },
+  { value: ICON_POSITION_OPTIONS.BOTTOM_LEFT, label: 'Bottom Left' },
+];
+
+// Grid template areas for each icon position
+export const ICON_POSITION_GRIDS: Record<IconPositionType, { areas: string; columns: string; rows: string }> = {
+  [ICON_POSITION_OPTIONS.AUTO]: {
+    areas: '"name name icon icon" "climate climate persistent intermittent"',
+    columns: 'min-content 1fr',
+    rows: '1fr min-content',
+  },
+  [ICON_POSITION_OPTIONS.TOP_RIGHT]: {
+    areas: '"name name icon icon" "climate climate persistent intermittent"',
+    columns: 'min-content 1fr',
+    rows: '1fr min-content',
+  },
+  [ICON_POSITION_OPTIONS.TOP_LEFT]: {
+    areas: '"icon icon name name" "climate climate persistent intermittent"',
+    columns: 'min-content 1fr',
+    rows: '1fr min-content',
+  },
+  [ICON_POSITION_OPTIONS.CENTER]: {
+    areas: '". icon icon ." "climate climate persistent intermittent"',
+    columns: '1fr 1fr 1fr 1fr',
+    rows: '1fr min-content',
+  },
+  [ICON_POSITION_OPTIONS.BOTTOM_RIGHT]: {
+    areas: '"name name name name" "climate climate persistent icon"',
+    columns: 'min-content 1fr 1fr 1fr',
+    rows: '1fr min-content',
+  },
+  [ICON_POSITION_OPTIONS.BOTTOM_LEFT]: {
+    areas: '"name name name name" "icon climate persistent intermittent"',
+    columns: 'min-content 1fr 1fr 1fr',
+    rows: '1fr min-content',
+  },
+};
+
+// Icon-only centered grid (used when auto and name is hidden)
+export const ICON_ONLY_CENTERED_GRID = {
+  areas: '"icon icon icon icon" "climate climate persistent intermittent"',
+  columns: '1fr',
+  rows: '1fr min-content',
+};
+
+// =============================================================================
+// ENTITY DOMAIN CONFIGURATION
+// =============================================================================
+
+export const ENTITY_DOMAINS = {
+  LIGHT: 'light',
+  SWITCH: 'switch',
+  CLIMATE: 'climate',
+  LOCK: 'lock',
+  COVER: 'cover',
+  FAN: 'fan',
+  BINARY_SENSOR: 'binary_sensor',
+  SENSOR: 'sensor',
+  MEDIA_PLAYER: 'media_player',
+  VACUUM: 'vacuum',
+  SCENE: 'scene',
+  SCRIPT: 'script',
+  AUTOMATION: 'automation',
+  INPUT_BOOLEAN: 'input_boolean',
+} as const;
+
+export type EntityDomainType = typeof ENTITY_DOMAINS[keyof typeof ENTITY_DOMAINS];
+
+// Default active states per entity domain
+export const DOMAIN_ACTIVE_STATES: Record<string, string[]> = {
+  [ENTITY_DOMAINS.LIGHT]: ['on'],
+  [ENTITY_DOMAINS.SWITCH]: ['on'],
+  [ENTITY_DOMAINS.CLIMATE]: ['cooling', 'heating', 'drying', 'fan_only', 'heat_cool', 'auto'],
+  [ENTITY_DOMAINS.LOCK]: ['unlocked'],
+  [ENTITY_DOMAINS.COVER]: ['open', 'opening'],
+  [ENTITY_DOMAINS.FAN]: ['on'],
+  [ENTITY_DOMAINS.BINARY_SENSOR]: ['on'],
+  [ENTITY_DOMAINS.MEDIA_PLAYER]: ['playing', 'paused', 'buffering', 'on'],
+  [ENTITY_DOMAINS.VACUUM]: ['cleaning', 'returning'],
+  [ENTITY_DOMAINS.INPUT_BOOLEAN]: ['on'],
+};
+
+// Default icon per entity domain
+export const DOMAIN_DEFAULT_ICONS: Record<string, string> = {
+  [ENTITY_DOMAINS.LIGHT]: 'mdi:lightbulb',
+  [ENTITY_DOMAINS.SWITCH]: 'mdi:toggle-switch',
+  [ENTITY_DOMAINS.CLIMATE]: 'mdi:thermostat',
+  [ENTITY_DOMAINS.LOCK]: 'mdi:lock',
+  [ENTITY_DOMAINS.COVER]: 'mdi:window-shutter',
+  [ENTITY_DOMAINS.FAN]: 'mdi:fan',
+  [ENTITY_DOMAINS.BINARY_SENSOR]: 'mdi:checkbox-blank-circle',
+  [ENTITY_DOMAINS.SENSOR]: 'mdi:eye',
+  [ENTITY_DOMAINS.MEDIA_PLAYER]: 'mdi:cast',
+  [ENTITY_DOMAINS.VACUUM]: 'mdi:robot-vacuum',
+  [ENTITY_DOMAINS.SCENE]: 'mdi:palette',
+  [ENTITY_DOMAINS.SCRIPT]: 'mdi:script',
+  [ENTITY_DOMAINS.AUTOMATION]: 'mdi:robot',
+  [ENTITY_DOMAINS.INPUT_BOOLEAN]: 'mdi:toggle-switch',
+};
+
+// State-specific icons for certain domains
+export const DOMAIN_STATE_ICONS: Record<string, Record<string, string>> = {
+  [ENTITY_DOMAINS.LOCK]: {
+    locked: 'mdi:lock',
+    unlocked: 'mdi:lock-open',
+    jammed: 'mdi:lock-alert',
+    locking: 'mdi:lock-clock',
+    unlocking: 'mdi:lock-clock',
+  },
+  [ENTITY_DOMAINS.CLIMATE]: {
+    off: 'mdi:thermostat',
+    idle: 'mdi:thermostat',
+    heating: 'mdi:fire',
+    cooling: 'mdi:snowflake',
+    drying: 'mdi:water-percent',
+    fan_only: 'mdi:fan',
+    auto: 'mdi:thermostat-auto',
+    heat_cool: 'mdi:thermostat-auto',
+  },
+  [ENTITY_DOMAINS.COVER]: {
+    open: 'mdi:window-shutter-open',
+    closed: 'mdi:window-shutter',
+    opening: 'mdi:window-shutter-open',
+    closing: 'mdi:window-shutter',
+  },
+};
+
+// State-specific colors for certain domains
+export const DOMAIN_STATE_COLORS: Record<string, Record<string, string>> = {
+  [ENTITY_DOMAINS.LOCK]: {
+    locked: 'var(--success-color, #4caf50)',
+    unlocked: 'var(--warning-color, #ff9800)',
+    jammed: 'var(--error-color, #f44336)',
+  },
+  [ENTITY_DOMAINS.CLIMATE]: {
+    heating: 'var(--error-color, #f44336)',
+    cooling: 'var(--info-color, #2196f3)',
+    idle: 'var(--primary-text-color)',
+    off: 'var(--primary-text-color)',
+  },
+};
 
 // =============================================================================
 // MAX DISPLAY LIMITS (before overflow indicator)

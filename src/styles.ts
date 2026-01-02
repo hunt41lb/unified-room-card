@@ -148,7 +148,7 @@ export const cardBaseStyles = css`
     grid-template-rows: ${unsafeCSS(DEFAULT_GRID_TEMPLATE_ROWS)};
     height: ${unsafeCSS(DEFAULT_CARD_HEIGHT)};
     width: ${unsafeCSS(DEFAULT_CARD_WIDTH)};
-    padding: 12px;
+    padding: 6px;
     box-sizing: border-box;
     cursor: pointer;
     overflow: hidden;
@@ -173,11 +173,13 @@ export const cardBaseStyles = css`
 export const nameStyles = css`
   .name-section {
     grid-area: name;
-    display: flex;
-    align-items: center;
+    justify-self: start;
+    align-self: start;
+    text-align: left;
     font-size: 16px;
     font-weight: 500;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
+    padding: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -191,22 +193,14 @@ export const nameStyles = css`
 export const iconStyles = css`
   .icon-section {
     grid-area: icon;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    /* Fixed minimum width to prevent layout shift */
-    min-width: ${unsafeCSS(DEFAULT_IMG_CELL_WIDTH)};
+    justify-self: end;
+    align-self: start;
   }
 
   .icon-wrapper {
-    /* Fixed size wrapper - always reserves space for img-cell size */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: ${unsafeCSS(DEFAULT_IMG_CELL_WIDTH)};
-    height: ${unsafeCSS(DEFAULT_IMG_CELL_HEIGHT)};
-    flex-shrink: 0;
   }
 
   .icon-container {
@@ -221,9 +215,8 @@ export const iconStyles = css`
   .icon-container.with-img-cell {
     width: ${unsafeCSS(DEFAULT_IMG_CELL_WIDTH)};
     height: ${unsafeCSS(DEFAULT_IMG_CELL_HEIGHT)};
-    border-radius: 50%;
-    background: var(--secondary-background-color, rgba(0, 0, 0, 0.06));
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 100%;
+    background: var(--secondary-background-color);
     transition: background 0.3s ease;
   }
 
@@ -231,7 +224,7 @@ export const iconStyles = css`
 
   .icon-container ha-icon {
     --mdc-icon-size: ${unsafeCSS(DEFAULT_ICON_WIDTH)};
-    color: ${unsafeCSS(HA_CSS_VARIABLES.iconColor)};
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
     transition: color 0.3s ease, transform 0.3s ease;
   }
 
@@ -264,19 +257,16 @@ export const iconStyles = css`
 export const climateStyles = css`
   .climate-section {
     grid-area: climate;
-    display: flex;
-    align-items: baseline;
     justify-self: start;
     font-size: 30px;
     line-height: 30px;
-    font-weight: 300px;
+    font-weight: 300;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
     padding: 0 0 1px 14px;
   }
 
   .climate-primary {
     font-size: 18px;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
   }
 
   .climate-secondary {
@@ -287,7 +277,6 @@ export const climateStyles = css`
     font-size: 12px;
     font-weight: 400;
     opacity: 0.7;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
   }
 
   .climate-divider {
