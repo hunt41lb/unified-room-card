@@ -51,6 +51,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     update: false,
     grid: false,
   };
+  @state() private _persistentEntityExpanded: number = -1;
 
   // ===========================================================================
   // STATIC STYLES
@@ -467,6 +468,8 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _renderPersistentSection(): TemplateResult {
     const expanded = this._accordionState.persistent;
+    const persistentConfig = this._config?.persistent_entities || {};
+    const entities = persistentConfig.entities || [];
 
     return html`
       <div class="accordion">
@@ -478,7 +481,127 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="accordion-content ${expanded ? 'expanded' : ''}">
-          <p>Persistent entities configuration - Coming in Phase 6</p>
+          <!-- Position -->
+          <div class="form-row">
+            <span class="form-label">Position</span>
+            <div class="form-input">
+              <ha-select
+                .value=${persistentConfig.position || 'right'}
+                @selected=${(e: CustomEvent) => this._persistentValueChanged('position', (e.target as HTMLSelectElement).value)}
+                @closed=${(e: Event) => e.stopPropagation()}
+              >
+                <mwc-list-item value="left">Left</mwc-list-item>
+                <mwc-list-item value="center">Center</mwc-list-item>
+                <mwc-list-item value="right">Right</mwc-list-item>
+              </ha-select>
+            </div>
+          </div>
+          <!-- Default Icon Size -->
+          <div class="form-row">
+            <span class="form-label">Default Icon Size</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${persistentConfig.icon_size || ''}
+                placeholder="21px"
+                @input=${(e: Event) => this._persistentValueChanged('icon_size', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- Entities List -->
+          <div class="form-row">
+            <span class="form-label">Entities</span>
+          </div>
+          ${entities.map((entityConfig, index) => this._renderPersistentEntityConfig(entityConfig, index))}
+          <div class="add-entity-btn" @click=${this._addPersistentEntity}>
+            <ha-icon icon="mdi:plus"></ha-icon>
+            <span>Add Entity</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Render configuration for a single persistent entity
+   */
+  private _renderPersistentEntityConfig(entityConfig: { entity: string; icon?: string; icon_size?: string; states?: Array<{ state: string; icon?: string; color?: string }> }, index: number): TemplateResult {
+    return html`
+      <div class="entity-row">
+        <div class="entity-header" @click=${() => this._togglePersistentEntityExpand(index)}>
+          <span class="entity-name">${entityConfig.entity || 'New Entity'}</span>
+          <div class="entity-actions">
+            <ha-icon icon="mdi:chevron-down"></ha-icon>
+            <ha-icon icon="mdi:delete" @click=${(e: Event) => { e.stopPropagation(); this._removePersistentEntity(index); }}></ha-icon>
+          </div>
+        </div>
+        <div class="entity-config ${this._persistentEntityExpanded === index ? 'expanded' : ''}">
+          <!-- Entity Selector -->
+          <div class="form-row">
+            <span class="form-label">Entity</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ entity: {} }}
+                .value=${entityConfig.entity || ''}
+                @value-changed=${(e: CustomEvent) => this._updatePersistentEntity(index, 'entity', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Default Icon -->
+          <div class="form-row">
+            <span class="form-label">Default Icon</span>
+            <div class="form-input">
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ icon: {} }}
+                .value=${entityConfig.icon || ''}
+                @value-changed=${(e: CustomEvent) => this._updatePersistentEntity(index, 'icon', e.detail.value)}
+              ></ha-selector>
+            </div>
+          </div>
+          <!-- Icon Size -->
+          <div class="form-row">
+            <span class="form-label">Icon Size</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${entityConfig.icon_size || ''}
+                placeholder="Inherit from section"
+                @input=${(e: Event) => this._updatePersistentEntity(index, 'icon_size', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+          <!-- State Configuration -->
+          <div class="form-row">
+            <span class="form-label">State-based Icons & Colors</span>
+          </div>
+          ${(entityConfig.states || []).map((stateConfig, stateIndex) => html`
+            <div class="state-config-row">
+              <ha-textfield
+                .value=${stateConfig.state || ''}
+                placeholder="State (e.g., locked)"
+                @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'state', (e.target as HTMLInputElement).value)}
+                style="flex: 1;"
+              ></ha-textfield>
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ icon: {} }}
+                .value=${stateConfig.icon || ''}
+                @value-changed=${(e: CustomEvent) => this._updatePersistentEntityState(index, stateIndex, 'icon', e.detail.value)}
+                style="flex: 1;"
+              ></ha-selector>
+              <ha-textfield
+                .value=${stateConfig.color || ''}
+                placeholder="Color (CSS)"
+                @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'color', (e.target as HTMLInputElement).value)}
+                style="flex: 1;"
+              ></ha-textfield>
+              <ha-icon icon="mdi:delete" @click=${() => this._removePersistentEntityState(index, stateIndex)}></ha-icon>
+            </div>
+          `)}
+          <div class="add-state-btn" @click=${() => this._addPersistentEntityState(index)}>
+            <ha-icon icon="mdi:plus"></ha-icon>
+            <span>Add State Config</span>
+          </div>
         </div>
       </div>
     `;
@@ -942,6 +1065,191 @@ export class UnifiedRoomCardEditor extends LitElement {
     this._config = {
       ...this._config,
       power_entities: Object.keys(powerEntities).length > 0 ? powerEntities : undefined,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Handle persistent entities config changes
+   */
+  private _persistentValueChanged(key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    
+    if (value === '' || value === undefined || value === null) {
+      delete (persistentEntities as Record<string, unknown>)[key];
+    } else {
+      (persistentEntities as Record<string, unknown>)[key] = value;
+    }
+
+    this._config = {
+      ...this._config,
+      persistent_entities: Object.keys(persistentEntities).length > 0 ? persistentEntities : undefined,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Toggle persistent entity expand state
+   */
+  private _togglePersistentEntityExpand(index: number): void {
+    this._persistentEntityExpanded = this._persistentEntityExpanded === index ? -1 : index;
+  }
+
+  /**
+   * Add new persistent entity
+   */
+  private _addPersistentEntity(): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    entities.push({ entity: '' });
+    persistentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: persistentEntities,
+    };
+
+    this._persistentEntityExpanded = entities.length - 1;
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove persistent entity
+   */
+  private _removePersistentEntity(index: number): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    entities.splice(index, 1);
+    persistentEntities.entities = entities.length > 0 ? entities : undefined;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: Object.keys(persistentEntities).filter(k => persistentEntities[k as keyof typeof persistentEntities] !== undefined).length > 0 ? persistentEntities : undefined,
+    };
+
+    if (this._persistentEntityExpanded === index) {
+      this._persistentEntityExpanded = -1;
+    }
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update persistent entity property
+   */
+  private _updatePersistentEntity(index: number, key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    if (entities[index]) {
+      (entities[index] as Record<string, unknown>)[key] = value || undefined;
+      if (!value) {
+        delete (entities[index] as Record<string, unknown>)[key];
+      }
+    }
+    
+    persistentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: persistentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Add state config to persistent entity
+   */
+  private _addPersistentEntityState(entityIndex: number): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    if (entities[entityIndex]) {
+      const entity = { ...entities[entityIndex] };
+      entity.states = [...(entity.states || []), { state: '', icon: '', color: '' }];
+      entities[entityIndex] = entity;
+    }
+    
+    persistentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: persistentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove state config from persistent entity
+   */
+  private _removePersistentEntityState(entityIndex: number, stateIndex: number): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    if (entities[entityIndex]) {
+      const entity = { ...entities[entityIndex] };
+      const states = [...(entity.states || [])];
+      states.splice(stateIndex, 1);
+      entity.states = states.length > 0 ? states : undefined;
+      entities[entityIndex] = entity;
+    }
+    
+    persistentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: persistentEntities,
+    };
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update state config in persistent entity
+   */
+  private _updatePersistentEntityState(entityIndex: number, stateIndex: number, key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const entities = [...(persistentEntities.entities || [])];
+    
+    if (entities[entityIndex]) {
+      const entity = { ...entities[entityIndex] };
+      const states = [...(entity.states || [])];
+      
+      if (states[stateIndex]) {
+        (states[stateIndex] as Record<string, unknown>)[key] = value || undefined;
+        if (!value) {
+          delete (states[stateIndex] as Record<string, unknown>)[key];
+        }
+      }
+      
+      entity.states = states;
+      entities[entityIndex] = entity;
+    }
+    
+    persistentEntities.entities = entities;
+
+    this._config = {
+      ...this._config,
+      persistent_entities: persistentEntities,
     };
 
     this._dispatchConfigChanged();

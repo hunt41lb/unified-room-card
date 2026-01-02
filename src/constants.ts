@@ -9,7 +9,7 @@
 // CARD METADATA
 // =============================================================================
 
-export const CARD_VERSION = '1.0.5';
+export const CARD_VERSION = '1.0.6';
 export const CARD_NAME = 'unified-room-card';
 export const CARD_DESCRIPTION = 'A comprehensive room status card for Home Assistant with support for climate, persistent, and intermittent entities.';
 export const CARD_EDITOR_NAME = 'unified-room-card-editor';

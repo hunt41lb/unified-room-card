@@ -295,26 +295,25 @@ export const persistentStyles = css`
     grid-area: persistent;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-  }
-
-  .persistent-section.position-left {
-    justify-content: flex-start;
-  }
-
-  .persistent-section.position-center {
-    justify-content: center;
-  }
-
-  .persistent-section.position-right {
-    justify-content: flex-end;
+    gap: 4px;
+    padding: 0 0 1px 2px;
+    margin: 0 3px 0 0;
   }
 
   .persistent-entity {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .persistent-entity:hover {
+    transform: scale(1.1);
+  }
+
+  .persistent-entity:active {
+    transform: scale(0.95);
   }
 
   .persistent-entity ha-icon {
@@ -571,11 +570,49 @@ export const editorStyles = css`
     cursor: pointer;
     color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
     transition: all 0.2s ease;
+    gap: 4px;
   }
 
   .add-entity-btn:hover {
     border-color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+  }
+
+  .add-state-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    margin-top: 8px;
+    border: 1px dashed ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
+    border-radius: 4px;
+    cursor: pointer;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    transition: all 0.2s ease;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .add-state-btn:hover {
+    border-color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+  }
+
+  .state-config-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+  }
+
+  .state-config-row ha-icon {
+    cursor: pointer;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    flex-shrink: 0;
+  }
+
+  .state-config-row ha-icon:hover {
+    color: var(--error-color, #db4437);
   }
 
   ha-textfield,

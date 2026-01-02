@@ -93,6 +93,9 @@ export interface EntityConfig {
   states?: StateConfig[];
   animation?: AnimationType;
   unavailable_icon?: string;
+  tap_action?: TapActionConfig;
+  hold_action?: TapActionConfig;
+  double_tap_action?: TapActionConfig;
 }
 
 // =============================================================================
@@ -100,12 +103,8 @@ export interface EntityConfig {
 // =============================================================================
 
 export interface PersistentEntitiesConfig {
-  position?: PositionType;
-  icon_size?: string;
-  active_color?: string;
-  inactive_color?: string;
-  animation?: AnimationType;
-  unavailable_icon?: string;
+  position?: 'left' | 'center' | 'right';  // Horizontal position
+  icon_size?: string;        // Default icon size for all entities
   entities?: EntityConfig[];
 }
 
