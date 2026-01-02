@@ -71,6 +71,11 @@ export class UnifiedRoomCard extends LitElement {
 
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config?: UnifiedRoomCardConfig;
+  
+  // Tap handling - debounce to prevent double-tap from triggering tap
+  private _tapTimeout?: ReturnType<typeof setTimeout>;
+  private _tapCount: number = 0;
+  private static readonly TAP_DEBOUNCE_MS = 250;
 
   // ===========================================================================
   // STATIC STYLES
@@ -110,6 +115,18 @@ export class UnifiedRoomCard extends LitElement {
    */
   public getCardSize(): number {
     return 2;
+  }
+
+  /**
+   * Clean up on disconnect
+   */
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    // Clean up tap debounce timer
+    if (this._tapTimeout) {
+      clearTimeout(this._tapTimeout);
+      this._tapTimeout = undefined;
+    }
   }
 
   /**
@@ -274,7 +291,6 @@ export class UnifiedRoomCard extends LitElement {
         style=${cardDynamicStyles}
         @click=${this._handleTap}
         @contextmenu=${this._handleHold}
-        @dblclick=${this._handleDoubleTap}
       >
         ${this._renderName()}
         ${this._renderIcon()}
@@ -1637,12 +1653,33 @@ export class UnifiedRoomCard extends LitElement {
   // ===========================================================================
 
   /**
-   * Handle tap action
+   * Handle tap action with debounce to detect double-tap
    */
   private _handleTap(ev: Event): void {
     ev.stopPropagation();
-    if (this._config?.tap_action) {
-      this._handleAction(this._config.tap_action);
+    
+    this._tapCount++;
+    
+    // If this is the first tap, start the timer
+    if (this._tapCount === 1) {
+      this._tapTimeout = setTimeout(() => {
+        // Timer expired - it was a single tap
+        if (this._tapCount === 1 && this._config?.tap_action) {
+          this._handleAction(this._config.tap_action);
+        }
+        this._tapCount = 0;
+      }, UnifiedRoomCard.TAP_DEBOUNCE_MS);
+    } else if (this._tapCount === 2) {
+      // Second tap arrived - it's a double tap
+      if (this._tapTimeout) {
+        clearTimeout(this._tapTimeout);
+        this._tapTimeout = undefined;
+      }
+      this._tapCount = 0;
+      
+      if (this._config?.double_tap_action) {
+        this._handleAction(this._config.double_tap_action);
+      }
     }
   }
 
@@ -1652,19 +1689,27 @@ export class UnifiedRoomCard extends LitElement {
   private _handleHold(ev: Event): void {
     ev.preventDefault();
     ev.stopPropagation();
+    
+    // Cancel any pending tap action
+    if (this._tapTimeout) {
+      clearTimeout(this._tapTimeout);
+      this._tapTimeout = undefined;
+    }
+    this._tapCount = 0;
+    
     if (this._config?.hold_action) {
       this._handleAction(this._config.hold_action);
     }
   }
 
   /**
-   * Handle double tap action
+   * Handle double tap action (now handled in _handleTap with debounce)
+   * @deprecated - kept for backwards compatibility, logic moved to _handleTap
    */
   private _handleDoubleTap(ev: Event): void {
     ev.stopPropagation();
-    if (this._config?.double_tap_action) {
-      this._handleAction(this._config.double_tap_action);
-    }
+    // Double-tap is now handled in _handleTap with debounce
+    // This method is kept to prevent errors if @dblclick is still bound somewhere
   }
 
   /**
