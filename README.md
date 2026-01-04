@@ -27,7 +27,7 @@ A comprehensive room status card for Home Assistant that consolidates climate da
 2. Click on "Frontend"
 3. Click the three dots in the top right corner
 4. Select "Custom repositories"
-5. Add `https://github.com/hunt41lb/unified-room-card` and select "Lovelace" as the category
+5. Add `https://github.com/hunt41lb/unified-room-card` and select "Dashboard" as the Type
 6. Search for "Unified Room Card" and install it
 7. Refresh your browser
 
