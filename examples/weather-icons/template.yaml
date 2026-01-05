@@ -1,0 +1,99 @@
+- sensor:
+  - name: "Weather Card"
+    unique_id: "weather_card"
+    state: >
+      {% set weather = states('weather.forecast_home') %}
+      {% if is_state('sun.sun', 'above_horizon') %}
+      {{ '/local/weather_icons/' + weather + '_day.svg' }}
+      {% else %}
+      {{ '/local/weather_icons/' + weather + '_night.svg' }}
+      {% endif %}
+    attributes:
+      temperature: >
+        {{ state_attr('weather.forecast_home', 'temperature') }}
+      feels_like: >
+        {% set T = (state_attr('weather.forecast_home', 'temperature') | float) %}
+        {% set V = (state_attr('weather.forecast_home', 'wind_speed') | float) %}
+        {% set H = (state_attr('weather.forecast_home', 'humidity') | float) %}
+        
+        {% if T <= 50 and V > 3 %}
+          {# Wind Chill Calculation for cold temperatures #}
+          {% set A = 35.74 + 0.6215 * T - 35.75 * (V ** 0.16) + 0.4275 * T * (V ** 0.16) %}
+          {{ A | round(1) }}
+        
+        {% elif T >= 80 %}
+          {# Heat Index Calculation for warm temperatures #}
+          {% set HI = -42.379 + 2.04901523*T + 10.14333127*H - 0.22475541*T*H - 0.00683783*T*T - 0.05481717*H*H + 0.00122874*T*T*H + 0.00085282*T*H*H - 0.00000199*T*T*H*H %}
+          {{ HI | round(1) }}
+        
+        {% else %}
+          {# If neither condition applies, return the actual temperature #}
+          {{ T }}
+        {% endif %}
+      desc: >
+        {% set weather_desc = states('weather.forecast_home') %}
+        {% set conditions = {
+          'partlycloudy': 'Partly Cloudy',
+          'mostlycloudy': 'Mostly Cloudy',
+          'clear': 'Clear',
+          'cloudy': 'Cloudy',
+          'rainy': 'Rain',
+          'snowy': 'Snow',
+          'sunny': 'Sunny',
+          'windy': 'Windy',
+          'foggy': 'Foggy',
+          'fog': 'Fog',
+          'stormy': 'Stormy',
+          'clear-night': 'Clear'
+        } %}
+        {{ conditions.get(weather_desc, weather_desc) }}
+      precipitation: >
+        {% if state_attr('weather.forecast_home', 'forecast') %}
+          {% set precipitation = state_attr('weather.forecast_home', 'forecast')[0].precipitation %}
+          {{ precipitation if precipitation is not none else 0 }}
+        {% else %}
+          0
+        {% endif %}
+      precipitation_probability: >
+        {% if state_attr('weather.forecast_home', 'forecast') %}
+          {% set precipitation_prob = state_attr('weather.forecast_home', 'forecast')[0].precipitation_probability %}
+          {{ precipitation_prob if precipitation_prob is not none else 0 }}
+        {% else %}
+          0
+        {% endif %}
+      wind_dir: >
+        {% set direction = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N'] %}
+        {% set degree = state_attr('weather.forecast_home', 'wind_bearing') | float %}
+        {{ direction[((degree + 11.25) / 22.5) | int] }}
+      wind_speed: >
+        {% set sensor = state_attr('weather.forecast_home', 'wind_speed') | float %}
+        {{ (sensor / 3.6) | round(1) }}
+      wind_description: >
+        {% set sensor = state_attr('weather.forecast_home', 'wind_speed') | float %}
+        {% if sensor > 0 and sensor < 0.99 %}
+          Calm
+        {% elif sensor >= 1 and sensor < 6.99 %}
+          Light air
+        {% elif sensor >= 7 and sensor < 11.99 %}
+          Light breeze
+        {% elif sensor >= 12 and sensor < 19.99 %}
+          Gentle breeze
+        {% elif sensor >= 20 and sensor < 29.99 %}
+          Moderate breeze
+        {% elif sensor >= 30 and sensor < 39.99 %}
+          Fresh breeze
+        {% elif sensor >= 40 and sensor < 50.99 %}
+          Strong breeze
+        {% elif sensor >= 51 and sensor < 62.99 %}
+          Near gale
+        {% elif sensor >= 63 and sensor < 75.99 %}
+          Gale
+        {% elif sensor >= 76 and sensor < 87.99 %}
+          Strong gale
+        {% elif sensor >= 88 and sensor < 102.99 %}
+          Storm
+        {% elif sensor >= 103 and sensor < 117.99 %}
+          Violent storm
+        {% else %}
+          Hurricane
+        {% endif %}
