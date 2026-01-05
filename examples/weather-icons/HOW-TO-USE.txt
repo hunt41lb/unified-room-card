@@ -7,3 +7,5 @@ Add the template.yaml config in the directory /homeassistant/template.yaml
 After adding the tmeplate.yaml, in your /homeassistant/configuration.yaml file, add the below:
 
 template: !include template.yaml
+
+Restart Home Assistant/Quick Reload.
