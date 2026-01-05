@@ -1,0 +1,5 @@
+All Weather Icons can be found here: https://basmilius.github.io/weather-icons/index-fill.html
+
+Save in directory /homeassistant/www/weather_icons as .svg files
+
+Add the template.yaml config in the directory /homeassistant/template.yaml
