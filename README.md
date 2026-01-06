@@ -27,7 +27,7 @@ A comprehensive room status card for Home Assistant that consolidates climate da
 2. Click on "Frontend"
 3. Click the three dots in the top right corner
 4. Select "Custom repositories"
-5. Add `https://github.com/hunt41lb/unified-room-card` and select "Dashboard" as the Type
+5. Add `https://github.com/hunt41lb/unified-room-card` and select "Lovelace" as the category
 6. Search for "Unified Room Card" and install it
 7. Refresh your browser
 
@@ -104,13 +104,36 @@ update_entities:
 | `type` | string | **Required** | `custom:unified-room-card` |
 | `name` | string | - | Card name displayed in the header |
 | `entity` | string | - | Main entity for card state and actions |
+| `entities` | array | - | Additional entities (same domain) for grouped control |
 | `icon` | string | auto | Main icon (auto-detected from entity if not specified) |
 | `show_name` | boolean | `true` | Show/hide card name |
 | `show_icon` | boolean | `true` | Show/hide main icon |
 | `show_state` | boolean | `false` | Show entity state text below name |
-| `animate_icon` | boolean | `false` | Animate icon when entity is active |
+| `show_img_cell` | boolean | `true` | Show icon background circle |
+| `icon_background_opacity` | number | `0.3` | Opacity of icon background when active (0-1) |
+| `icon_animation` | string | `none` | Icon animation: `none`, `pulse`, `glow`, `flash`, `spin` |
 | `card_height` | string | `97px` | Card height |
 | `card_width` | string | `auto` | Card width |
+
+### Entity Grouping
+
+Group multiple entities of the same domain for unified control:
+
+```yaml
+type: custom:unified-room-card
+name: Living Room Lights
+entity: light.living_room_main
+entities:
+  - light.living_room_lamp
+  - light.living_room_accent
+```
+
+**Benefits:**
+- **Tap toggles all** - Single tap toggles all entities in the group
+- **Averaged colors** - For lights, RGB colors are averaged for the icon background
+- **Any active = active** - Card shows active if ANY entity in the group is on
+
+**Note:** All entities in the group must be the same domain as the primary entity.
 
 ### Tap Actions
 
@@ -319,6 +342,47 @@ border_entity: binary_sensor.alarm_armed
 border_width: 2px
 border_style: solid
 ```
+
+### Glow Effects
+
+Add dynamic glow effects triggered by entity states. Multiple effects can be configured, and the first matching effect wins (priority-based).
+
+```yaml
+glow_effects:
+  # High priority - error states (checked first)
+  - entity: lock.front_door
+    state: jammed
+    color: var(--error-color, #db4437)
+    animation: pulse
+    spread: 6
+    
+  # Lower priority - unlocked warning
+  - entity: lock.front_door
+    states:
+      - unlocked
+      - unlocking
+    color: var(--warning-color, #ffa600)
+    
+  # Light glow using entity's actual color
+  - entity: light.living_room
+    state: on
+    color: auto  # Uses light's rgb_color
+    animation: breathe
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `entity` | string | **Required** | Entity to monitor |
+| `state` | string | - | Single state that triggers glow |
+| `states` | array | - | Multiple states that trigger glow |
+| `color` | string | `auto` | Glow color - "auto", CSS color, or variable |
+| `spread` | number | `4` | Glow blur/spread radius in pixels |
+| `animation` | string | `none` | Animation: `none`, `pulse`, `breathe` |
+
+**Color Options:**
+- `auto` - Derives color from entity (e.g., light's rgb_color, climate hvac_action)
+- CSS color: `#ff0000`, `rgb(255, 0, 0)`
+- CSS variable: `var(--error-color)`, `var(--state-lock-jammed-color, #db4437)`
 
 ### Power Entities
 

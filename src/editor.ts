@@ -134,6 +134,7 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _renderBasicSettingsSubSection(): TemplateResult {
     const expanded = this._accordionState.mainBasic;
+    const primaryDomain = this._config?.entity ? this._config.entity.split('.')[0] : undefined;
 
     return html`
       <div class="sub-accordion">
@@ -175,6 +176,21 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-selector>
             </div>
           </div>
+          <!-- Additional Entities (same domain) -->
+          ${primaryDomain ? html`
+            <div class="form-row">
+              <span class="form-label">Additional Entities</span>
+              <div class="form-input">
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ entity: { domain: primaryDomain, multiple: true } }}
+                  .value=${this._config?.entities || []}
+                  @value-changed=${(e: CustomEvent) => this._valueChanged('entities', e.detail.value)}
+                ></ha-selector>
+              </div>
+            </div>
+            <p class="helper-text">Group multiple ${primaryDomain} entities - tap toggles all, colors are averaged</p>
+          ` : ''}
           <!-- Show State -->
           <div class="form-row">
             <span class="form-label">Show State</span>
@@ -301,6 +317,19 @@ export class UnifiedRoomCardEditor extends LitElement {
                   ></ha-textfield>
                 </div>
               </div>
+              <!-- Background Opacity -->
+              <div class="form-row">
+                <span class="form-label">Background Opacity</span>
+                <div class="form-input">
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ number: { min: 0, max: 1, step: 0.1, mode: 'slider' } }}
+                    .value=${this._config?.icon_background_opacity ?? 0.3}
+                    @value-changed=${(e: CustomEvent) => this._valueChanged('icon_background_opacity', e.detail.value)}
+                  ></ha-selector>
+                </div>
+              </div>
+              <p class="helper-text">Opacity of the icon background when entity is active</p>
             ` : ''}
             <!-- Animation dropdown -->
             <div class="form-row">
@@ -432,6 +461,21 @@ export class UnifiedRoomCardEditor extends LitElement {
               </div>
             </div>
           ` : ''}
+          
+          <!-- Glow Effects Section -->
+          <div class="section-divider"></div>
+          <div class="section-header">
+            <span>Glow Effects</span>
+          </div>
+          <p class="helper-text">Add glow effects triggered by entity states. First matching effect wins.</p>
+          ${this._renderGlowEffects()}
+          <button 
+            class="add-entity-button"
+            @click=${this._addGlowEffect}
+          >
+            <ha-icon .icon=${'mdi:plus'}></ha-icon>
+            Add Glow Effect
+          </button>
         </div>
       </div>
     `;
@@ -2696,6 +2740,183 @@ export class UnifiedRoomCardEditor extends LitElement {
       update_entities: updateEntities,
     };
 
+    this._dispatchConfigChanged();
+  }
+
+  // ===========================================================================
+  // GLOW EFFECTS METHODS
+  // ===========================================================================
+
+  /**
+   * Render glow effects list
+   */
+  private _renderGlowEffects(): TemplateResult {
+    const glowEffects = this._config?.glow_effects || [];
+
+    if (glowEffects.length === 0) {
+      return html``;
+    }
+
+    return html`
+      <div class="glow-effects-list">
+        ${glowEffects.map((effect, index) => this._renderGlowEffect(effect, index))}
+      </div>
+    `;
+  }
+
+  /**
+   * Render a single glow effect configuration
+   */
+  private _renderGlowEffect(effect: { entity: string; state?: string; states?: string[]; color?: string; spread?: number; animation?: string }, index: number): TemplateResult {
+    // Combine state and states for display
+    const displayStates = effect.states?.length 
+      ? effect.states.join(', ')
+      : effect.state || '';
+
+    return html`
+      <div class="glow-effect-config">
+        <div class="glow-effect-header">
+          <span class="glow-effect-title">Glow Effect ${index + 1}</span>
+          <ha-icon-button
+            .path=${'M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'}
+            @click=${() => this._removeGlowEffect(index)}
+            title="Remove glow effect"
+          ></ha-icon-button>
+        </div>
+        
+        <!-- Entity -->
+        <div class="form-row">
+          <span class="form-label">Entity</span>
+          <div class="form-input">
+            <ha-selector
+              .hass=${this.hass}
+              .selector=${{ entity: {} }}
+              .value=${effect.entity || ''}
+              @value-changed=${(e: CustomEvent) => this._updateGlowEffect(index, 'entity', e.detail.value)}
+            ></ha-selector>
+          </div>
+        </div>
+        
+        <!-- States (comma-separated) -->
+        <div class="form-row">
+          <span class="form-label">Trigger States</span>
+          <div class="form-input">
+            <ha-textfield
+              .value=${displayStates}
+              placeholder="error, jammed, unlocked"
+              @input=${(e: Event) => {
+                const value = (e.target as HTMLInputElement).value;
+                const states = value.split(',').map(s => s.trim()).filter(s => s);
+                this._updateGlowEffect(index, 'states', states);
+                // Clear single state when using states array
+                if (effect.state) {
+                  this._updateGlowEffect(index, 'state', undefined);
+                }
+              }}
+            ></ha-textfield>
+          </div>
+        </div>
+        <p class="helper-text">Comma-separated list of states that trigger this glow</p>
+        
+        <!-- Color -->
+        <div class="form-row">
+          <span class="form-label">Glow Color</span>
+          <div class="form-input">
+            <ha-textfield
+              .value=${effect.color || ''}
+              placeholder="auto"
+              @input=${(e: Event) => this._updateGlowEffect(index, 'color', (e.target as HTMLInputElement).value)}
+            ></ha-textfield>
+          </div>
+        </div>
+        <p class="helper-text">Use "auto" for entity color, or CSS color/variable (e.g., #ff0000, var(--error-color))</p>
+        
+        <!-- Spread -->
+        <div class="form-row">
+          <span class="form-label">Spread (px)</span>
+          <div class="form-input">
+            <ha-selector
+              .hass=${this.hass}
+              .selector=${{ number: { min: 1, max: 30, step: 1, mode: 'box' } }}
+              .value=${effect.spread ?? 4}
+              @value-changed=${(e: CustomEvent) => this._updateGlowEffect(index, 'spread', e.detail.value)}
+            ></ha-selector>
+          </div>
+        </div>
+        
+        <!-- Animation -->
+        <div class="form-row">
+          <span class="form-label">Animation</span>
+          <div class="form-input">
+            <ha-select
+              .value=${effect.animation || 'none'}
+              @selected=${(e: Event) => this._updateGlowEffect(index, 'animation', (e.target as HTMLSelectElement).value)}
+              @closed=${(e: Event) => e.stopPropagation()}
+            >
+              <mwc-list-item value="none">None (Static)</mwc-list-item>
+              <mwc-list-item value="pulse">Pulse</mwc-list-item>
+              <mwc-list-item value="breathe">Breathe</mwc-list-item>
+            </ha-select>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Add a new glow effect
+   */
+  private _addGlowEffect(): void {
+    if (!this._config) return;
+
+    const glowEffects = [...(this._config.glow_effects || [])];
+    glowEffects.push({
+      entity: '',
+      states: [],
+      color: 'auto',
+      spread: 4,
+      animation: 'none',
+    });
+
+    this._config = {
+      ...this._config,
+      glow_effects: glowEffects,
+    };
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update a glow effect property
+   */
+  private _updateGlowEffect(index: number, key: string, value: unknown): void {
+    if (!this._config?.glow_effects) return;
+
+    const glowEffects = [...this._config.glow_effects];
+    glowEffects[index] = {
+      ...glowEffects[index],
+      [key]: value,
+    };
+
+    this._config = {
+      ...this._config,
+      glow_effects: glowEffects,
+    };
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove a glow effect
+   */
+  private _removeGlowEffect(index: number): void {
+    if (!this._config?.glow_effects) return;
+
+    const glowEffects = [...this._config.glow_effects];
+    glowEffects.splice(index, 1);
+
+    this._config = {
+      ...this._config,
+      glow_effects: glowEffects.length > 0 ? glowEffects : undefined,
+    };
     this._dispatchConfigChanged();
   }
 

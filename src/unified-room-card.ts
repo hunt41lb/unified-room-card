@@ -32,10 +32,12 @@ import {
 
 import type {
   HomeAssistant,
+  HassEntity,
   UnifiedRoomCardConfig,
   TapActionConfig,
   ClimateEntitiesConfig,
   PowerEntitiesConfig,
+  GlowEffectConfig,
 } from './types';
 
 import {
@@ -265,9 +267,12 @@ export class UnifiedRoomCard extends LitElement {
 
     const entitiesToCheck: string[] = [];
 
-    // Main entity
+    // Main entity and additional entities
     if (this._config.entity) {
       entitiesToCheck.push(this._config.entity);
+    }
+    if (this._config.entities?.length) {
+      entitiesToCheck.push(...this._config.entities);
     }
 
     // Persistent entities
@@ -309,6 +314,13 @@ export class UnifiedRoomCard extends LitElement {
       entitiesToCheck.push(...this._config.update_entities.entities);
     }
 
+    // Glow effect entities
+    if (this._config.glow_effects?.length) {
+      entitiesToCheck.push(
+        ...this._config.glow_effects.map((g) => g.entity).filter(Boolean)
+      );
+    }
+
     // Check if any of these entities have changed
     for (const entityId of entitiesToCheck) {
       const oldState = oldHass.states[entityId];
@@ -331,21 +343,17 @@ export class UnifiedRoomCard extends LitElement {
       return nothing;
     }
 
-    const mainEntity = this._config.entity
-      ? this.hass.states[this._config.entity]
-      : undefined;
+    // Get primary entity for display purposes
+    const mainEntity = this._getPrimaryEntity();
 
-    const isActive = mainEntity
-      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state, mainEntity.attributes)
-      : false;
-
-    const cardClasses = {
-      'state-on': isActive,
-      'state-off': !isActive && !!mainEntity,
-    };
+    // Check if ANY entity in the group is active
+    const isActive = this._isGroupActive();
 
     // Calculate border color from border_entity
     const borderStyle = this._getBorderStyle();
+
+    // Get active glow effect (first matching)
+    const activeGlow = this._getActiveGlowEffect();
 
     const cardDynamicStyles = getCardDynamicStyles({
       cardHeight: this._config.card_height,
@@ -357,7 +365,28 @@ export class UnifiedRoomCard extends LitElement {
       activeBackgroundColor: isActive ? this._config.active_background_color : undefined,
       backgroundGradient: this._config.background_gradient,
       borderStyle: borderStyle,
+      // Glow effect
+      glowColor: activeGlow?.color,
+      glowSpread: activeGlow?.spread,
+      glowAnimation: activeGlow?.animation,
     });
+
+    // Build card classes including glow
+    const cardClasses: Record<string, boolean> = {
+      'state-on': isActive,
+      'state-off': !isActive && !!mainEntity,
+    };
+    
+    // Add glow classes if active
+    if (activeGlow) {
+      if (activeGlow.animation === 'pulse') {
+        cardClasses['card-glow-pulse'] = true;
+      } else if (activeGlow.animation === 'breathe') {
+        cardClasses['card-glow-breathe'] = true;
+      } else {
+        cardClasses['card-glow'] = true;
+      }
+    }
 
     // Detect which grid areas are defined in custom grid
     const gridAreas = this._getDefinedGridAreas();
@@ -582,18 +611,18 @@ export class UnifiedRoomCard extends LitElement {
    * Render main icon section
    */
   private _renderIcon(): TemplateResult | typeof nothing {
-    const mainEntity = this._config?.entity
-      ? this.hass?.states[this._config.entity]
-      : undefined;
-
-    const isActive = mainEntity
-      ? this._isEntityActive(mainEntity.entity_id, mainEntity.state, mainEntity.attributes)
-      : false;
+    // Get primary entity for display purposes
+    const mainEntity = this._getPrimaryEntity();
+    
+    // Check if ANY entity in the group is active
+    const isActive = this._isGroupActive();
+    
+    // Get domain from primary entity
+    const domain = this._getPrimaryDomain() || '';
 
     const showIcon = this._config?.show_icon !== false;
     const showImgCell = this._config?.show_img_cell ?? true;
     const icon = this._config?.icon || this._getDefaultIcon(mainEntity);
-    const domain = mainEntity ? this._getDomain(mainEntity.entity_id) : '';
 
     // Get animation class (only when active and animation is configured)
     const animationClass = isActive && this._config?.icon_animation && this._config.icon_animation !== 'none'
@@ -627,9 +656,9 @@ export class UnifiedRoomCard extends LitElement {
     }
     
     // Apply dynamic background color for active state with img_cell
+    // Use averaged color for light groups
     if (isActive && showImgCell) {
-      const bgColor = this._getEntityBackgroundColor(mainEntity);
-      iconContainerStyles['background-color'] = bgColor;
+      const bgColor = this._getGroupBackgroundColor();
       iconContainerStyles['background'] = bgColor;
     }
 
@@ -651,8 +680,8 @@ export class UnifiedRoomCard extends LitElement {
     } else if (mainEntity && isActive) {
       // Active state WITHOUT img_cell - use domain-specific colors
       if (domain === 'light') {
-        // Use light's actual color (RGB/HS) or fallback to active color
-        iconStyles['color'] = this._getLightIconColor(mainEntity);
+        // Use averaged light color for groups
+        iconStyles['color'] = this._getGroupIconColor();
       } else if (domain === 'climate') {
         // Use climate hvac_action colors
         iconStyles['color'] = this._getClimateIconColor(mainEntity);
@@ -737,8 +766,10 @@ export class UnifiedRoomCard extends LitElement {
    * Supports light entities with rgb_color attribute and climate entities with hvac_action
    */
   private _getEntityBackgroundColor(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
+    const opacity = this._config?.icon_background_opacity ?? 0.3;
+    
     if (!entity) {
-      return 'var(--state-active-color, rgba(255, 167, 38, 0.3))';
+      return `rgba(255, 193, 7, ${opacity})`; // Amber fallback
     }
 
     const domain = this._getDomain(entity.entity_id);
@@ -748,6 +779,7 @@ export class UnifiedRoomCard extends LitElement {
       const hvacAction = entity.attributes.hvac_action as string | undefined;
       switch (hvacAction) {
         case 'heating':
+        case 'preheating':
           return 'var(--state-climate-heat-color, #ff8c00)';
         case 'cooling':
           return 'var(--state-climate-cool-color, #2196f3)';
@@ -755,46 +787,44 @@ export class UnifiedRoomCard extends LitElement {
           return 'var(--state-climate-dry-color, #8bc34a)';
         case 'fan':
           return 'var(--state-climate-fan_only-color, #00bcd4)';
-        case 'preheating':
-          return 'var(--state-climate-heat-color, #ff8c00)';
         default:
           // idle or off - use secondary background (no colored background)
           return 'var(--secondary-background-color)';
       }
     }
 
-    // Light entities - check for color attributes (with opacity for img_cell background)
+    // Light entities - use rgb_color directly when on
     if (domain === 'light') {
-      const opacity = 0.3; // Opacity for light background when active with img_cell
-      
-      // Check for rgb_color attribute
-      const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
-      if (rgbColor && Array.isArray(rgbColor) && rgbColor.length === 3) {
-        return `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, ${opacity})`;
+      if (entity.state === 'on') {
+        // Use rgb_color if available
+        if (entity.attributes.rgb_color) {
+          const rgb = entity.attributes.rgb_color as [number, number, number];
+          return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
+        }
+        // Light on but no color capability - use amber
+        return `rgba(255, 193, 7, ${opacity})`;
       }
-
-      // Check for hs_color and convert to rgb
-      const hsColor = entity.attributes.hs_color as [number, number] | undefined;
-      const brightness = entity.attributes.brightness as number | undefined;
-      if (hsColor && Array.isArray(hsColor) && hsColor.length === 2) {
-        const rgb = this._hsToRgb(hsColor[0], hsColor[1], brightness);
-        return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
-      }
-
-      // Lights without color capability (warmth only) - use amber with opacity
-      return `rgba(255, 193, 7, ${opacity})`; // Amber color with opacity
+      // Light off - no colored background
+      return 'var(--secondary-background-color)';
     }
 
-    // Lock entities
+    // Lock entities - use state-specific colors
     if (domain === 'lock') {
       const stateColor = DOMAIN_STATE_COLORS[domain]?.[entity.state];
       if (stateColor) {
         return stateColor;
       }
+      return 'var(--secondary-background-color)';
     }
 
-    // Default for other domains - amber active color with opacity
-    return 'rgba(255, 167, 38, 0.3)';
+    // Other entities - check if in active state using domain defaults
+    const activeStates = DOMAIN_ACTIVE_STATES[domain] || ['on'];
+    if (activeStates.includes(entity.state)) {
+      return `rgba(255, 193, 7, ${opacity})`; // Amber for active state
+    }
+
+    // Inactive - use secondary background
+    return 'var(--secondary-background-color)';
   }
 
   /**
@@ -802,17 +832,9 @@ export class UnifiedRoomCard extends LitElement {
    * Used when img_cell is disabled
    */
   private _getLightIconColor(entity: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
-    // Check for rgb_color attribute
-    const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
-    if (rgbColor && Array.isArray(rgbColor) && rgbColor.length === 3) {
-      return `rgb(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]})`;
-    }
-
-    // Check for hs_color and convert to rgb
-    const hsColor = entity.attributes.hs_color as [number, number] | undefined;
-    const brightness = entity.attributes.brightness as number | undefined;
-    if (hsColor && Array.isArray(hsColor) && hsColor.length === 2) {
-      const rgb = this._hsToRgb(hsColor[0], hsColor[1], brightness);
+    // Only use rgb_color if light is on and has color
+    if (entity.state === 'on' && entity.attributes.rgb_color) {
+      const rgb = entity.attributes.rgb_color as [number, number, number];
       return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
     }
 
@@ -866,6 +888,269 @@ export class UnifiedRoomCard extends LitElement {
       Math.round((g + m) * 255),
       Math.round((b + m) * 255)
     ];
+  }
+
+  // ===========================================================================
+  // MULTIPLE ENTITY GROUP HELPERS
+  // ===========================================================================
+
+  /**
+   * Get all primary entities (entity + entities array)
+   */
+  private _getAllPrimaryEntities(): string[] {
+    const entities: string[] = [];
+    if (this._config?.entity) {
+      entities.push(this._config.entity);
+    }
+    if (this._config?.entities?.length) {
+      entities.push(...this._config.entities);
+    }
+    return entities;
+  }
+
+  /**
+   * Get the domain of the primary entity
+   */
+  private _getPrimaryDomain(): string | undefined {
+    if (!this._config?.entity) return undefined;
+    return this._getDomain(this._config.entity);
+  }
+
+  /**
+   * Check if ANY entity in the primary group is active
+   */
+  private _isGroupActive(): boolean {
+    if (!this.hass) return false;
+    
+    const entities = this._getAllPrimaryEntities();
+    if (entities.length === 0) return false;
+
+    for (const entityId of entities) {
+      const entity = this.hass.states[entityId];
+      if (entity && this._isEntityActive(entity.entity_id, entity.state, entity.attributes)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Get the primary entity state object
+   * Returns the first entity for backwards compatibility
+   */
+  private _getPrimaryEntity(): { entity_id: string; state: string; attributes: Record<string, unknown> } | undefined {
+    if (!this.hass || !this._config?.entity) return undefined;
+    return this.hass.states[this._config.entity];
+  }
+
+  /**
+   * Get averaged background color for light groups
+   * Averages RGB values from all active lights in the group
+   */
+  private _getGroupBackgroundColor(): string {
+    if (!this.hass) return 'var(--state-active-color, var(--amber-color, #ffc107))';
+    
+    const entities = this._getAllPrimaryEntities();
+    const domain = this._getPrimaryDomain();
+    
+    // Only average colors for lights
+    if (domain !== 'light') {
+      const primaryEntity = this._getPrimaryEntity();
+      return this._getEntityBackgroundColor(primaryEntity);
+    }
+    
+    const opacity = this._config?.icon_background_opacity ?? 0.3;
+    
+    // Collect RGB values from all active lights
+    const rgbValues: { r: number; g: number; b: number }[] = [];
+    
+    for (const entityId of entities) {
+      const entity = this.hass.states[entityId];
+      if (!entity || entity.state !== 'on') continue;
+      
+      const rgb = entity.attributes.rgb_color as [number, number, number] | undefined;
+      if (rgb) {
+        rgbValues.push({ r: rgb[0], g: rgb[1], b: rgb[2] });
+      }
+    }
+    
+    // If we have RGB values, average them with configurable opacity
+    if (rgbValues.length > 0) {
+      const avgR = Math.round(rgbValues.reduce((sum, c) => sum + c.r, 0) / rgbValues.length);
+      const avgG = Math.round(rgbValues.reduce((sum, c) => sum + c.g, 0) / rgbValues.length);
+      const avgB = Math.round(rgbValues.reduce((sum, c) => sum + c.b, 0) / rgbValues.length);
+      return `rgba(${avgR}, ${avgG}, ${avgB}, ${opacity})`;
+    }
+    
+    // Fallback to primary entity color
+    const primaryEntity = this._getPrimaryEntity();
+    return this._getEntityBackgroundColor(primaryEntity);
+  }
+
+  /**
+   * Get averaged icon color for light groups (when no img_cell)
+   */
+  private _getGroupIconColor(): string {
+    if (!this.hass) return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
+    
+    const entities = this._getAllPrimaryEntities();
+    const domain = this._getPrimaryDomain();
+    
+    // Only average colors for lights
+    if (domain !== 'light') {
+      const primaryEntity = this._getPrimaryEntity();
+      if (!primaryEntity) return 'var(--state-active-color, var(--amber-color, #ffc107))';
+      return this._getLightIconColor(primaryEntity);
+    }
+    
+    // Collect RGB values from all active lights
+    const rgbValues: { r: number; g: number; b: number }[] = [];
+    
+    for (const entityId of entities) {
+      const entity = this.hass.states[entityId];
+      if (!entity || entity.state !== 'on') continue;
+      
+      const rgb = entity.attributes.rgb_color as [number, number, number] | undefined;
+      if (rgb) {
+        rgbValues.push({ r: rgb[0], g: rgb[1], b: rgb[2] });
+      }
+    }
+    
+    // If we have RGB values, average them
+    if (rgbValues.length > 0) {
+      const avgR = Math.round(rgbValues.reduce((sum, c) => sum + c.r, 0) / rgbValues.length);
+      const avgG = Math.round(rgbValues.reduce((sum, c) => sum + c.g, 0) / rgbValues.length);
+      const avgB = Math.round(rgbValues.reduce((sum, c) => sum + c.b, 0) / rgbValues.length);
+      return `rgb(${avgR}, ${avgG}, ${avgB})`;
+    }
+    
+    // Fallback
+    return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
+  }
+
+  // ===========================================================================
+  // GLOW EFFECT HELPERS
+  // ===========================================================================
+
+  /**
+   * Get the first active glow effect based on entity states
+   * Returns the first matching glow effect configuration with resolved color, or undefined if none match
+   */
+  private _getActiveGlowEffect(): { color: string; spread: number; animation: string } | undefined {
+    if (!this._config?.glow_effects?.length || !this.hass) {
+      return undefined;
+    }
+
+    // Find first matching glow effect
+    for (const glowEffect of this._config.glow_effects) {
+      if (!glowEffect.entity) {
+        continue;
+      }
+
+      const entity = this.hass.states[glowEffect.entity];
+      if (!entity) {
+        continue;
+      }
+
+      // Get trigger states (support both state and states)
+      const triggerStates: string[] = [];
+      if (glowEffect.state) {
+        triggerStates.push(glowEffect.state);
+      }
+      if (glowEffect.states?.length) {
+        triggerStates.push(...glowEffect.states);
+      }
+
+      // If no states specified, skip this effect
+      if (triggerStates.length === 0) {
+        continue;
+      }
+
+      // Check if entity is in one of the trigger states
+      if (triggerStates.includes(entity.state)) {
+        // Resolve color (auto or specified)
+        const resolvedColor = this._resolveGlowColor(glowEffect.color, entity);
+        
+        return {
+          color: resolvedColor,
+          spread: glowEffect.spread ?? 4,
+          animation: glowEffect.animation || 'none',
+        };
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Resolve glow color - handles 'auto' and explicit colors
+   */
+  private _resolveGlowColor(color: string | undefined, entity: HassEntity): string {
+    // Default to auto if not specified
+    const colorValue = color || 'auto';
+    
+    if (colorValue === 'auto') {
+      return this._getEntityGlowColor(entity);
+    }
+    
+    return colorValue;
+  }
+
+  /**
+   * Get glow color from entity based on domain and state
+   */
+  private _getEntityGlowColor(entity: HassEntity): string {
+    const domain = entity.entity_id.split('.')[0];
+    
+    // Light entities - use rgb_color if available
+    if (domain === 'light' && entity.state === 'on') {
+      const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
+      if (rgbColor) {
+        return `rgb(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]})`;
+      }
+      // Fallback for lights without color
+      return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
+    }
+
+    // Climate entities
+    if (domain === 'climate') {
+      const hvacAction = entity.attributes.hvac_action as string | undefined;
+      switch (hvacAction) {
+        case 'heating':
+        case 'preheating':
+          return 'var(--state-climate-heat-color, #ff8c00)';
+        case 'cooling':
+          return 'var(--state-climate-cool-color, #2196f3)';
+        case 'drying':
+          return 'var(--state-climate-dry-color, #8bc34a)';
+        case 'fan':
+          return 'var(--state-climate-fan_only-color, #00bcd4)';
+        default:
+          return 'var(--primary-color)';
+      }
+    }
+
+    // Lock entities
+    if (domain === 'lock') {
+      switch (entity.state) {
+        case 'locked':
+          return 'var(--state-lock-locked-color, #43a047)';
+        case 'unlocked':
+          return 'var(--state-lock-unlocked-color, #ffa600)';
+        case 'jammed':
+          return 'var(--state-lock-jammed-color, #db4437)';
+        default:
+          return 'var(--primary-color)';
+      }
+    }
+
+    // Binary sensors / problem states
+    if (entity.state === 'problem' || entity.state === 'error' || entity.state === 'jammed') {
+      return 'var(--error-color, #db4437)';
+    }
+
+    // Default - use primary color
+    return 'var(--primary-color)';
   }
 
 
@@ -1667,23 +1952,25 @@ export class UnifiedRoomCard extends LitElement {
   private _handleAction(actionConfig: TapActionConfig): void {
     if (!this.hass || !this._config) return;
 
-    const entityId = this._config.entity;
+    const primaryEntityId = this._config.entity;
+    const allEntities = this._getAllPrimaryEntities();
 
     switch (actionConfig.action) {
       case 'toggle':
-        if (entityId) {
+        if (allEntities.length > 0) {
+          // Toggle all entities in the group
           this.hass.callService('homeassistant', 'toggle', {
-            entity_id: entityId,
+            entity_id: allEntities,
           });
         }
         break;
 
       case 'more-info':
-        if (entityId) {
+        if (primaryEntityId) {
           const event = new CustomEvent('hass-more-info', {
             bubbles: true,
             composed: true,
-            detail: { entityId },
+            detail: { entityId: primaryEntityId },
           });
           this.dispatchEvent(event);
         }

@@ -181,6 +181,21 @@ export interface UpdateEntitiesConfig {
 }
 
 // =============================================================================
+// GLOW EFFECT CONFIGURATION
+// =============================================================================
+
+export type GlowAnimationType = 'none' | 'pulse' | 'breathe';
+
+export interface GlowEffectConfig {
+  entity: string;                    // Entity to monitor for glow trigger
+  state?: string;                    // Single state that triggers this glow effect
+  states?: string[];                 // Multiple states that trigger this glow effect
+  color?: string;                    // Glow color - CSS variable, color value, or 'auto' (default: auto)
+  spread?: number;                   // Box-shadow blur/spread in px (default: 4)
+  animation?: GlowAnimationType;     // Glow animation type (default: none)
+}
+
+// =============================================================================
 // GRID LAYOUT CONFIGURATION
 // =============================================================================
 
@@ -199,8 +214,9 @@ export interface UnifiedRoomCardConfig {
   type: string;
   name?: string;
   
-  // Main Entity
-  entity?: string;
+  // Main Entity (single or multiple)
+  entity?: string;              // Primary entity (backwards compatible)
+  entities?: string[];          // Additional entities (same domain, grouped control)
   
   // Display Options
   show_name?: boolean;
@@ -216,6 +232,7 @@ export interface UnifiedRoomCardConfig {
   img_cell_size?: string;
   icon_horizontal_position?: IconHorizontalPositionType;
   icon_vertical_position?: IconVerticalPositionType;
+  icon_background_opacity?: number;  // Opacity of icon background when active (0-1, default: 0.3)
   
   // Entity Domain/State Handling
   active_states?: string[];  // Custom states considered "active" (overrides domain defaults)
@@ -250,6 +267,9 @@ export interface UnifiedRoomCardConfig {
   background_color?: string;
   active_background_color?: string;
   background_gradient?: string;
+  
+  // Glow Effects
+  glow_effects?: GlowEffectConfig[];
 }
 
 // =============================================================================

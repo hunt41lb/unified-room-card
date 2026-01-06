@@ -9,7 +9,7 @@
 // CARD METADATA
 // =============================================================================
 
-export const CARD_VERSION = '2.0.1';
+export const CARD_VERSION = '2.0.2';
 export const CARD_NAME = 'Unified Room Card';
 export const CARD_DESCRIPTION = 'A comprehensive room status card for Home Assistant';
 export const CARD_EDITOR_NAME = 'unified-room-card-editor';

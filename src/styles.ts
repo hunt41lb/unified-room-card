@@ -117,6 +117,25 @@ export const animationKeyframes = css`
       transform: rotate(360deg);
     }
   }
+
+  /* Card Glow Animations */
+  @keyframes card-glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 var(--glow-spread, 4px) var(--glow-spread, 4px) var(--glow-color, transparent);
+    }
+    50% {
+      box-shadow: 0 0 calc(var(--glow-spread, 4px) * 2) calc(var(--glow-spread, 4px) * 2) var(--glow-color, transparent);
+    }
+  }
+
+  @keyframes card-glow-breathe {
+    0%, 100% {
+      box-shadow: 0 0 var(--glow-spread, 4px) var(--glow-spread, 4px) var(--glow-color, transparent);
+    }
+    50% {
+      box-shadow: 0 0 var(--glow-spread, 4px) var(--glow-spread, 4px) transparent;
+    }
+  }
 `;
 
 // =============================================================================
@@ -138,6 +157,26 @@ export const animationClasses = css`
 
   .animation-spin {
     animation: spin var(--spin-duration, 2s) linear infinite;
+  }
+`;
+
+// =============================================================================
+// CARD GLOW EFFECT STYLES
+// =============================================================================
+
+export const cardGlowStyles = css`
+  /* Static card glow - applied via inline style with --glow-color and --glow-spread */
+  .card-glow {
+    box-shadow: 0 0 var(--glow-spread, 4px) var(--glow-spread, 4px) var(--glow-color, transparent);
+  }
+
+  /* Animated card glow */
+  .card-glow-pulse {
+    animation: card-glow-pulse 2s ease-in-out infinite;
+  }
+
+  .card-glow-breathe {
+    animation: card-glow-breathe 2s ease-in-out infinite;
   }
 `;
 
@@ -504,6 +543,7 @@ export const unavailableStyles = css`
 export const cardStyles = css`
   ${animationKeyframes}
   ${animationClasses}
+  ${cardGlowStyles}
   ${cardBaseStyles}
   ${nameStyles}
   ${iconStyles}
@@ -955,6 +995,44 @@ export const editorStyles = css`
   ha-switch {
     --mdc-theme-secondary: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
   }
+
+  /* Section divider and header */
+  .section-divider {
+    height: 1px;
+    background: ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
+    margin: 16px 0;
+  }
+
+  .section-header {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
+  }
+
+  /* Glow Effects */
+  .glow-effects-list {
+    margin-bottom: 12px;
+  }
+
+  .glow-effect-config {
+    border: 1px solid ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.01);
+  }
+
+  .glow-effect-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .glow-effect-title {
+    font-weight: 500;
+    font-size: 14px;
+  }
 `;
 
 // =============================================================================
@@ -974,6 +1052,10 @@ export function getCardDynamicStyles(config: {
   activeBackgroundColor?: string;
   backgroundGradient?: string;
   borderStyle?: string;
+  // Glow effect
+  glowColor?: string;
+  glowSpread?: number;
+  glowAnimation?: string;
 }): string {
   const styles: string[] = [];
 
@@ -999,6 +1081,13 @@ export function getCardDynamicStyles(config: {
   }
   if (config.borderStyle) {
     styles.push(`border: ${config.borderStyle};`);
+  }
+  
+  // Glow effect - set CSS variables for use by glow classes
+  if (config.glowColor) {
+    const spread = config.glowSpread ?? 4;
+    styles.push(`--glow-color: ${config.glowColor};`);
+    styles.push(`--glow-spread: ${spread}px;`);
   }
 
   return styles.join(' ');
