@@ -1776,6 +1776,17 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _valueChanged(key: string, value: unknown): void {
     if (!this._config) return;
 
+    // Guard against unnecessary updates when value hasn't changed
+    const currentValue = (this._config as Record<string, unknown>)[key];
+    if (currentValue === value) {
+      return;
+    }
+    
+    // Also guard against empty string vs undefined
+    if ((currentValue === undefined || currentValue === null) && (value === '' || value === undefined || value === null)) {
+      return;
+    }
+
     const newConfig = {
       ...this._config,
       [key]: value,
@@ -1818,9 +1829,21 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _tapActionChanged(actionKey: 'tap_action' | 'hold_action' | 'double_tap_action', action: string): void {
     if (!this._config) return;
 
+    // Get existing action config
+    const existingAction = this._config[actionKey];
+    
+    // Guard against ha-select firing on initial render with same value
+    if (existingAction?.action === action) {
+      return;
+    }
+
+    // Preserve existing properties when changing action type
     const newConfig = {
       ...this._config,
-      [actionKey]: { action },
+      [actionKey]: {
+        ...existingAction,
+        action,
+      },
     };
 
     this._config = newConfig;
@@ -2148,11 +2171,18 @@ export class UnifiedRoomCardEditor extends LitElement {
     
     if (entities[index]) {
       const entity = { ...entities[index] };
-      if (actionValue === 'none' || actionValue === 'more-info') {
-        entity[actionKey] = { action: actionValue };
-      } else {
-        entity[actionKey] = { action: actionValue };
+      const existingAction = entity[actionKey];
+      
+      // Guard against unnecessary updates
+      if (existingAction?.action === actionValue) {
+        return;
       }
+      
+      // Preserve existing properties when changing action type
+      entity[actionKey] = {
+        ...existingAction,
+        action: actionValue,
+      };
       entities[index] = entity;
     }
     
@@ -2351,7 +2381,18 @@ export class UnifiedRoomCardEditor extends LitElement {
     
     if (entities[index]) {
       const entity = { ...entities[index] };
-      entity[actionKey] = { action: actionValue };
+      const existingAction = entity[actionKey];
+      
+      // Guard against unnecessary updates
+      if (existingAction?.action === actionValue) {
+        return;
+      }
+      
+      // Preserve existing properties when changing action type
+      entity[actionKey] = {
+        ...existingAction,
+        action: actionValue,
+      };
       entities[index] = entity;
     }
     
@@ -2570,7 +2611,18 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const batteryEntities = { ...this._config.battery_entities } || {};
-    (batteryEntities as Record<string, unknown>)[actionKey] = { action: actionValue };
+    const existingAction = (batteryEntities as Record<string, unknown>)[actionKey] as { action?: string } | undefined;
+    
+    // Guard against unnecessary updates
+    if (existingAction?.action === actionValue) {
+      return;
+    }
+    
+    // Preserve existing properties when changing action type
+    (batteryEntities as Record<string, unknown>)[actionKey] = {
+      ...existingAction,
+      action: actionValue,
+    };
 
     this._config = {
       ...this._config,
@@ -2673,7 +2725,18 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const updateEntities = { ...this._config.update_entities } || {};
-    (updateEntities as Record<string, unknown>)[actionKey] = { action: actionValue };
+    const existingAction = (updateEntities as Record<string, unknown>)[actionKey] as { action?: string } | undefined;
+    
+    // Guard against unnecessary updates
+    if (existingAction?.action === actionValue) {
+      return;
+    }
+    
+    // Preserve existing properties when changing action type
+    (updateEntities as Record<string, unknown>)[actionKey] = {
+      ...existingAction,
+      action: actionValue,
+    };
 
     this._config = {
       ...this._config,
