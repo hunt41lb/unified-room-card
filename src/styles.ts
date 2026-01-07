@@ -575,7 +575,7 @@ export const editorStyles = css`
     border: 1px solid ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
     border-radius: 8px;
     margin-bottom: 8px;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .accordion-header {
@@ -588,6 +588,7 @@ export const editorStyles = css`
     font-weight: 500;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
     transition: background 0.2s ease;
+    border-radius: 8px 8px 0 0;
   }
 
   .accordion-header:hover {
@@ -609,6 +610,7 @@ export const editorStyles = css`
 
   .accordion-content.expanded {
     display: block;
+    overflow: visible;
   }
 
   /* Sub-accordion styles (nested within main accordions) */
@@ -617,8 +619,8 @@ export const editorStyles = css`
     border-radius: 6px;
     margin-bottom: 12px;
     margin-left: 8px;
-    overflow: hidden;
     background: rgba(0, 0, 0, 0.01);
+    overflow: visible;
   }
 
   .sub-accordion:last-child {
@@ -636,6 +638,7 @@ export const editorStyles = css`
     font-size: 14px;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
     transition: background 0.2s ease;
+    border-radius: 6px 6px 0 0;
   }
 
   .sub-accordion-header:hover {
@@ -659,6 +662,18 @@ export const editorStyles = css`
 
   .sub-accordion-content.expanded {
     display: block;
+    overflow: visible;
+  }
+
+  /* Ensure ha-select dropdowns can extend beyond containers */
+  ha-select {
+    --mdc-menu-max-height: 300px;
+    --mdc-menu-min-width: 200px;
+  }
+
+  /* Fix mwc-menu positioning to use fixed positioning */
+  mwc-menu {
+    --mdc-menu-z-index: 100;
   }
 
   .section-description {

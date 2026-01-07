@@ -397,7 +397,7 @@ function t(t,e,i,n){var s,a=arguments.length,o=a<3?e:null===n?n=Object.getOwnPro
     border: 1px solid ${r(he)};
     border-radius: 8px;
     margin-bottom: 8px;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .accordion-header {
@@ -410,6 +410,7 @@ function t(t,e,i,n){var s,a=arguments.length,o=a<3?e:null===n?n=Object.getOwnPro
     font-weight: 500;
     color: ${r(le)};
     transition: background 0.2s ease;
+    border-radius: 8px 8px 0 0;
   }
 
   .accordion-header:hover {
@@ -431,6 +432,7 @@ function t(t,e,i,n){var s,a=arguments.length,o=a<3?e:null===n?n=Object.getOwnPro
 
   .accordion-content.expanded {
     display: block;
+    overflow: visible;
   }
 
   /* Sub-accordion styles (nested within main accordions) */
@@ -439,8 +441,8 @@ function t(t,e,i,n){var s,a=arguments.length,o=a<3?e:null===n?n=Object.getOwnPro
     border-radius: 6px;
     margin-bottom: 12px;
     margin-left: 8px;
-    overflow: hidden;
     background: rgba(0, 0, 0, 0.01);
+    overflow: visible;
   }
 
   .sub-accordion:last-child {
@@ -458,6 +460,7 @@ function t(t,e,i,n){var s,a=arguments.length,o=a<3?e:null===n?n=Object.getOwnPro
     font-size: 14px;
     color: ${r(le)};
     transition: background 0.2s ease;
+    border-radius: 6px 6px 0 0;
   }
 
   .sub-accordion-header:hover {
@@ -481,6 +484,18 @@ function t(t,e,i,n){var s,a=arguments.length,o=a<3?e:null===n?n=Object.getOwnPro
 
   .sub-accordion-content.expanded {
     display: block;
+    overflow: visible;
+  }
+
+  /* Ensure ha-select dropdowns can extend beyond containers */
+  ha-select {
+    --mdc-menu-max-height: 300px;
+    --mdc-menu-min-width: 200px;
+  }
+
+  /* Fix mwc-menu positioning to use fixed positioning */
+  mwc-menu {
+    --mdc-menu-z-index: 100;
   }
 
   .section-description {
@@ -2407,7 +2422,7 @@ function t(t,e,i,n){var s,a=arguments.length,o=a<3?e:null===n?n=Object.getOwnPro
   .animate-flash {
     animation: flash 1s ease-in-out infinite;
   }
-`,console.info(`%c ${bt.toUpperCase()} %c v2.0.2 `,"color: white; background: #3498db; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;","color: #3498db; background: #ecf0f1; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;");let ke=Ee=class extends lt{constructor(){super(...arguments),this._tapCount=0,this._updateAnimationState={isSpinning:!1}}setConfig(t){if(!t)throw new Error("Invalid configuration");this._config={show_name:!0,show_icon:!0,show_state:!1,show_img_cell:!0,icon_animation:"none",tap_action:{action:"toggle"},hold_action:{action:"none"},double_tap_action:{action:"more-info"},...t}}getCardSize(){return 2}disconnectedCallback(){super.disconnectedCallback(),this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._stopUpdateSpinTimer()}_startUpdateSpinTimer(){if(this._stopUpdateSpinTimer(),t=this._config?.update_entities,!0!==t?.spin_animation)return;var t;if(!this.hass||0===Ce(this.hass,this._config?.update_entities))return;const e=function(t){const e=t?.spin_interval??60;return 1e3*Math.max(10,e)}(this._config?.update_entities);this._triggerUpdateSpin(),this._updateSpinTimer=setInterval(()=>{this._triggerUpdateSpin()},e)}_stopUpdateSpinTimer(){this._updateSpinTimer&&(clearInterval(this._updateSpinTimer),this._updateSpinTimer=void 0),this._spinAnimationTimeout&&(clearTimeout(this._spinAnimationTimeout),this._spinAnimationTimeout=void 0)}_triggerUpdateSpin(){this._updateAnimationState={isSpinning:!0},this._spinAnimationTimeout=setTimeout(()=>{this._updateAnimationState={isSpinning:!1}},1e3)}static getConfigElement(){return document.createElement(Ct)}static getStubConfig(){return{type:`custom:${xt}`,name:"Room Name",entity:"",show_name:!0,show_icon:!0}}updated(t){super.updated(t),this._config?.grid_area?this.style.gridArea=this._config.grid_area:this.style.removeProperty("grid-area"),(t.has("hass")||t.has("_config"))&&(t.get("hass")&&!t.has("_config")||this._startUpdateSpinTimer())}shouldUpdate(t){if(t.has("_config"))return!0;if(t.has("_updateAnimationState"))return!0;if(t.has("hass")&&this._config){const e=t.get("hass");return!e||this._hasRelevantStateChanged(e)}return!1}_hasRelevantStateChanged(t){if(!this._config||!this.hass)return!1;const e=[];if(this._config.entity&&e.push(this._config.entity),this._config.entities?.length&&e.push(...this._config.entities),this._config.persistent_entities?.entities&&e.push(...this._config.persistent_entities.entities.map(t=>t.entity)),this._config.intermittent_entities?.entities&&e.push(...this._config.intermittent_entities.entities.map(t=>t.entity)),this._config.climate_entities){const t=this._config.climate_entities;t.primary_entities&&e.push(...t.primary_entities),t.temperature_entities&&e.push(...t.temperature_entities),t.humidity_entities&&e.push(...t.humidity_entities),t.air_quality_entities&&e.push(...t.air_quality_entities),t.illuminance_entities&&e.push(...t.illuminance_entities)}this._config.power_entities?.entities&&e.push(...this._config.power_entities.entities),this._config.battery_entities?.entities&&e.push(...this._config.battery_entities.entities),this._config.update_entities?.entities&&e.push(...this._config.update_entities.entities),this._config.glow_effects?.length&&e.push(...this._config.glow_effects.map(t=>t.entity).filter(Boolean));for(const i of e)if(t.states[i]!==this.hass.states[i])return!0;return!1}render(){if(!this._config||!this.hass)return F;const t=this._getPrimaryEntity(),e=this._isGroupActive(),i=this._getBorderStyle(),n=this._getActiveGlowEffect(),s=function(t){const e=[];if(t.cardHeight&&e.push(`height: ${t.cardHeight};`),t.cardWidth&&e.push(`width: ${t.cardWidth};`),t.gridTemplateAreas&&e.push(`grid-template-areas: ${t.gridTemplateAreas};`),t.gridTemplateColumns&&e.push(`grid-template-columns: ${t.gridTemplateColumns};`),t.gridTemplateRows&&e.push(`grid-template-rows: ${t.gridTemplateRows};`),t.backgroundGradient?e.push(`background: ${t.backgroundGradient};`):t.backgroundColor&&e.push(`background-color: ${t.backgroundColor};`),t.borderStyle&&e.push(`border: ${t.borderStyle};`),t.glowColor){const i=t.glowSpread??4;e.push(`--glow-color: ${t.glowColor};`),e.push(`--glow-spread: ${i}px;`)}return e.join(" ")}({cardHeight:this._config.card_height,cardWidth:this._config.card_width,gridTemplateAreas:this._config.grid?.template_areas,gridTemplateColumns:this._config.grid?.template_columns,gridTemplateRows:this._config.grid?.template_rows,backgroundColor:this._config.background_color,activeBackgroundColor:e?this._config.active_background_color:void 0,backgroundGradient:this._config.background_gradient,borderStyle:i,glowColor:n?.color,glowSpread:n?.spread,glowAnimation:n?.animation}),a={"state-on":e,"state-off":!e&&!!t};n&&("pulse"===n.animation?a["card-glow-pulse"]=!0:"breathe"===n.animation?a["card-glow-breathe"]=!0:a["card-glow"]=!0);const o=this._getDefinedGridAreas();return W`
+`,console.info(`%c ${bt.toUpperCase()} %c v2.0.3 `,"color: white; background: #3498db; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;","color: #3498db; background: #ecf0f1; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;");let ke=Ee=class extends lt{constructor(){super(...arguments),this._tapCount=0,this._updateAnimationState={isSpinning:!1}}setConfig(t){if(!t)throw new Error("Invalid configuration");this._config={show_name:!0,show_icon:!0,show_state:!1,show_img_cell:!0,icon_animation:"none",tap_action:{action:"toggle"},hold_action:{action:"none"},double_tap_action:{action:"more-info"},...t}}getCardSize(){return 2}disconnectedCallback(){super.disconnectedCallback(),this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._stopUpdateSpinTimer()}_startUpdateSpinTimer(){if(this._stopUpdateSpinTimer(),t=this._config?.update_entities,!0!==t?.spin_animation)return;var t;if(!this.hass||0===Ce(this.hass,this._config?.update_entities))return;const e=function(t){const e=t?.spin_interval??60;return 1e3*Math.max(10,e)}(this._config?.update_entities);this._triggerUpdateSpin(),this._updateSpinTimer=setInterval(()=>{this._triggerUpdateSpin()},e)}_stopUpdateSpinTimer(){this._updateSpinTimer&&(clearInterval(this._updateSpinTimer),this._updateSpinTimer=void 0),this._spinAnimationTimeout&&(clearTimeout(this._spinAnimationTimeout),this._spinAnimationTimeout=void 0)}_triggerUpdateSpin(){this._updateAnimationState={isSpinning:!0},this._spinAnimationTimeout=setTimeout(()=>{this._updateAnimationState={isSpinning:!1}},1e3)}static getConfigElement(){return document.createElement(Ct)}static getStubConfig(){return{type:`custom:${xt}`,name:"Room Name",entity:"",show_name:!0,show_icon:!0}}updated(t){super.updated(t),this._config?.grid_area?this.style.gridArea=this._config.grid_area:this.style.removeProperty("grid-area"),(t.has("hass")||t.has("_config"))&&(t.get("hass")&&!t.has("_config")||this._startUpdateSpinTimer())}shouldUpdate(t){if(t.has("_config"))return!0;if(t.has("_updateAnimationState"))return!0;if(t.has("hass")&&this._config){const e=t.get("hass");return!e||this._hasRelevantStateChanged(e)}return!1}_hasRelevantStateChanged(t){if(!this._config||!this.hass)return!1;const e=[];if(this._config.entity&&e.push(this._config.entity),this._config.entities?.length&&e.push(...this._config.entities),this._config.persistent_entities?.entities&&e.push(...this._config.persistent_entities.entities.map(t=>t.entity)),this._config.intermittent_entities?.entities&&e.push(...this._config.intermittent_entities.entities.map(t=>t.entity)),this._config.climate_entities){const t=this._config.climate_entities;t.primary_entities&&e.push(...t.primary_entities),t.temperature_entities&&e.push(...t.temperature_entities),t.humidity_entities&&e.push(...t.humidity_entities),t.air_quality_entities&&e.push(...t.air_quality_entities),t.illuminance_entities&&e.push(...t.illuminance_entities)}this._config.power_entities?.entities&&e.push(...this._config.power_entities.entities),this._config.battery_entities?.entities&&e.push(...this._config.battery_entities.entities),this._config.update_entities?.entities&&e.push(...this._config.update_entities.entities),this._config.glow_effects?.length&&e.push(...this._config.glow_effects.map(t=>t.entity).filter(Boolean));for(const i of e)if(t.states[i]!==this.hass.states[i])return!0;return!1}render(){if(!this._config||!this.hass)return F;const t=this._getPrimaryEntity(),e=this._isGroupActive(),i=this._getBorderStyle(),n=this._getActiveGlowEffect(),s=function(t){const e=[];if(t.cardHeight&&e.push(`height: ${t.cardHeight};`),t.cardWidth&&e.push(`width: ${t.cardWidth};`),t.gridTemplateAreas&&e.push(`grid-template-areas: ${t.gridTemplateAreas};`),t.gridTemplateColumns&&e.push(`grid-template-columns: ${t.gridTemplateColumns};`),t.gridTemplateRows&&e.push(`grid-template-rows: ${t.gridTemplateRows};`),t.backgroundGradient?e.push(`background: ${t.backgroundGradient};`):t.backgroundColor&&e.push(`background-color: ${t.backgroundColor};`),t.borderStyle&&e.push(`border: ${t.borderStyle};`),t.glowColor){const i=t.glowSpread??4;e.push(`--glow-color: ${t.glowColor};`),e.push(`--glow-spread: ${i}px;`)}return e.join(" ")}({cardHeight:this._config.card_height,cardWidth:this._config.card_width,gridTemplateAreas:this._config.grid?.template_areas,gridTemplateColumns:this._config.grid?.template_columns,gridTemplateRows:this._config.grid?.template_rows,backgroundColor:this._config.background_color,activeBackgroundColor:e?this._config.active_background_color:void 0,backgroundGradient:this._config.background_gradient,borderStyle:i,glowColor:n?.color,glowSpread:n?.spread,glowAnimation:n?.animation}),a={"state-on":e,"state-off":!e&&!!t};n&&("pulse"===n.animation?a["card-glow-pulse"]=!0:"breathe"===n.animation?a["card-glow-breathe"]=!0:a["card-glow"]=!0);const o=this._getDefinedGridAreas();return W`
       <ha-card
         class=${_t(a)}
         style=${s}
