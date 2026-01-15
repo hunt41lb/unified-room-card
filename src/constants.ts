@@ -75,6 +75,26 @@ export const DEFAULT_UPDATE_ICON = 'mdi:update';
 // =============================================================================
 
 export const DEFAULT_UNAVAILABLE_ICON = 'mdi:alert-circle-outline';
+export const DEFAULT_UNAVAILABLE_BEHAVIOR = 'off';
+export const DEFAULT_UNAVAILABLE_OPACITY = 0.5;
+export const DEFAULT_UNAVAILABLE_ICON_COLOR = 'var(--disabled-text-color)';
+export const DEFAULT_UNAVAILABLE_BACKGROUND_COLOR = 'var(--secondary-background-color)';
+
+export const UNAVAILABLE_BEHAVIOR_TYPES = {
+  OFF: 'off',
+  ON: 'on',
+  UNAVAILABLE: 'unavailable',
+  CUSTOM: 'custom',
+} as const;
+
+export type UnavailableBehaviorType = typeof UNAVAILABLE_BEHAVIOR_TYPES[keyof typeof UNAVAILABLE_BEHAVIOR_TYPES];
+
+export const UNAVAILABLE_BEHAVIOR_OPTIONS = [
+  { value: 'off', label: 'Treat as Off', description: 'Card appears inactive (default)' },
+  { value: 'on', label: 'Treat as On', description: 'Card appears active' },
+  { value: 'unavailable', label: 'Show as Unavailable', description: 'Shows custom unavailable styling' },
+  { value: 'custom', label: 'Custom Styling', description: 'Full control over appearance' },
+];
 
 // =============================================================================
 // OVERFLOW INDICATOR
