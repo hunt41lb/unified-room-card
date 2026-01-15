@@ -202,7 +202,7 @@ export const cardBaseStyles = css`
     overflow: hidden;
     background: ${unsafeCSS(HA_CSS_VARIABLES.cardBackground)};
     border-radius: ${unsafeCSS(HA_CSS_VARIABLES.cardBorderRadius)};
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
   }
 
   ha-card.state-on {
@@ -211,6 +211,11 @@ export const cardBaseStyles = css`
 
   ha-card.state-off {
     background-color: color-mix(in srgb, var(--card-background-color) 50%, transparent);
+  }
+
+  /* NEW: Unavailable state styling */
+  ha-card.state-unavailable {
+    background-color: color-mix(in srgb, var(--card-background-color) 40%, transparent);
   }
 `;
 
@@ -251,6 +256,8 @@ export const iconStyles = css`
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative; /* NEW: For unavailable badge positioning */
+    transition: opacity 0.3s ease; /* NEW: For unavailable opacity transition */
   }
 
   .icon-container {
@@ -533,6 +540,25 @@ export const unavailableStyles = css`
   .unavailable {
     color: ${unsafeCSS(HA_CSS_VARIABLES.unavailableColor)} !important;
     opacity: 0.5;
+  }
+
+  /* NEW: Unavailable badge indicator */
+  .unavailable-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    background: var(--error-color, #db4437);
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 `;
 
@@ -1019,9 +1045,17 @@ export const editorStyles = css`
   }
 
   .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 500;
     margin-bottom: 8px;
     color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
+  }
+
+  .section-header ha-icon {
+    --mdc-icon-size: 18px;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
   }
 
   /* Glow Effects */
@@ -1048,6 +1082,35 @@ export const editorStyles = css`
     font-weight: 500;
     font-size: 14px;
   }
+
+  /* NEW: Add entity button styling (used in various sections) */
+  .add-entity-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    margin-top: 12px;
+    background: transparent;
+    border: 1px dashed ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
+    border-radius: 8px;
+    cursor: pointer;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    font-size: 14px;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .add-entity-button:hover {
+    border-color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    background: rgba(var(--rgb-primary-color), 0.04);
+  }
+
+  .add-entity-button ha-icon {
+    --mdc-icon-size: 18px;
+  }
 `;
 
 // =============================================================================
@@ -1071,6 +1134,8 @@ export function getCardDynamicStyles(config: {
   glowColor?: string;
   glowSpread?: number;
   glowAnimation?: string;
+  // NEW: Unavailable opacity
+  unavailableOpacity?: number;
 }): string {
   const styles: string[] = [];
 
@@ -1103,6 +1168,11 @@ export function getCardDynamicStyles(config: {
     const spread = config.glowSpread ?? 4;
     styles.push(`--glow-color: ${config.glowColor};`);
     styles.push(`--glow-spread: ${spread}px;`);
+  }
+
+  // NEW: Unavailable opacity
+  if (config.unavailableOpacity !== undefined) {
+    styles.push(`opacity: ${config.unavailableOpacity};`);
   }
 
   return styles.join(' ');
