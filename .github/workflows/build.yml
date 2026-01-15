@@ -5,6 +5,7 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -30,10 +31,13 @@ jobs:
       - name: Build
         run: npm run build
       
+      - name: Copy to root for HACS
+        run: cp dist/unified-room-card.js unified-room-card.js
+      
       - name: Commit built files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add dist/ unified-room-card.js 2>/dev/null || true
+          git add dist/unified-room-card.js unified-room-card.js
           git diff --staged --quiet || git commit -m "Build: Update compiled JS [skip ci]"
           git push
