@@ -82,6 +82,21 @@ export interface StateConfig {
 }
 
 // =============================================================================
+// UNAVAILABLE STATE HANDLING CONFIGURATION
+// =============================================================================
+
+export type UnavailableBehavior = 'off' | 'on' | 'unavailable' | 'custom';
+
+export interface UnavailableHandlingConfig {
+  behavior: UnavailableBehavior;
+  icon?: string;
+  icon_color?: string;
+  background_color?: string;
+  opacity?: number;
+  show_badge?: boolean;
+}
+
+// =============================================================================
 // INDIVIDUAL ENTITY CONFIGURATION
 // =============================================================================
 
@@ -213,11 +228,11 @@ export interface UnifiedRoomCardConfig {
   // Card Metadata
   type: string;
   name?: string;
-  
+
   // Main Entity (single or multiple)
   entity?: string;              // Primary entity (backwards compatible)
   entities?: string[];          // Additional entities (same domain, grouped control)
-  
+
   // Display Options
   show_name?: boolean;
   show_icon?: boolean;
@@ -225,7 +240,7 @@ export interface UnifiedRoomCardConfig {
   show_img_cell?: boolean;
   icon_animation?: string;  // Animation type: none, pulse, glow, flash, spin
   spin_duration?: number;   // Duration of full 360° spin in seconds (default: 2)
-  
+
   // Main Icon
   icon?: string;
   icon_size?: string;
@@ -233,28 +248,31 @@ export interface UnifiedRoomCardConfig {
   icon_horizontal_position?: IconHorizontalPositionType;
   icon_vertical_position?: IconVerticalPositionType;
   icon_background_opacity?: number;  // Opacity of icon background when active (0-1, default: 0.3)
-  
+
   // Entity Domain/State Handling
   active_states?: string[];  // Custom states considered "active" (overrides domain defaults)
-  
+
+  // Unavailable State Handling
+  unavailable_handling?: UnavailableHandlingConfig;
+
   // Border Indicator Entity
   border_entity?: string;  // Entity that controls border color
   border_width?: string;   // Border width (default: 2px)
   border_style?: string;   // Border style (default: solid)
-  
+
   // Tap Actions
   tap_action?: TapActionConfig;
   hold_action?: TapActionConfig;
   double_tap_action?: TapActionConfig;
-  
+
   // Card Dimensions
   card_height?: string;
   card_width?: string;
-  
+
   // Grid Layout
   grid?: GridConfig;
   grid_area?: string;
-  
+
   // Entity Groups
   persistent_entities?: PersistentEntitiesConfig;
   intermittent_entities?: IntermittentEntitiesConfig;
@@ -262,12 +280,12 @@ export interface UnifiedRoomCardConfig {
   power_entities?: PowerEntitiesConfig;
   battery_entities?: BatteryEntitiesConfig;
   update_entities?: UpdateEntitiesConfig;
-  
+
   // Styling
   background_color?: string;
   active_background_color?: string;
   background_gradient?: string;
-  
+
   // Glow Effects
   glow_effects?: GlowEffectConfig[];
 }
