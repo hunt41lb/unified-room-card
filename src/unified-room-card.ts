@@ -371,14 +371,20 @@ export class UnifiedRoomCard extends LitElement {
       glowAnimation: activeGlow?.animation,
     });
 
-    // Build card classes including glow
+    // Check unavailable state
+    const isUnavailable = this._isPrimaryEntityUnavailable();
+    const unavailableConfig = this._getUnavailableConfig();
+    const applyUnavailableStyles = isUnavailable && unavailableConfig.behavior !== 'off';
+
+    // Build card classes including glow and unavailable
     const cardClasses: Record<string, boolean> = {
-      'state-on': isActive,
-      'state-off': !isActive && !!mainEntity,
+      'state-on': isActive && !applyUnavailableStyles,
+      'state-off': !isActive && !!mainEntity && !applyUnavailableStyles,
+      'state-unavailable': applyUnavailableStyles,
     };
-    
-    // Add glow classes if active
-    if (activeGlow) {
+
+    // Add glow classes if active (but not if unavailable)
+    if (activeGlow && !applyUnavailableStyles) {
       if (activeGlow.animation === 'pulse') {
         cardClasses['card-glow-pulse'] = true;
       } else if (activeGlow.animation === 'breathe') {
@@ -386,6 +392,11 @@ export class UnifiedRoomCard extends LitElement {
       } else {
         cardClasses['card-glow'] = true;
       }
+    }
+
+    // Apply unavailable opacity to card styles
+    if (applyUnavailableStyles) {
+      cardDynamicStyles.opacity = unavailableConfig.opacity.toString();
     }
 
     // Detect which grid areas are defined in custom grid
@@ -398,6 +409,11 @@ export class UnifiedRoomCard extends LitElement {
         @click=${this._handleTap}
         @contextmenu=${this._handleHold}
       >
+        ${applyUnavailableStyles && unavailableConfig.show_badge ? html`
+          <div class="unavailable-badge" title="Entity unavailable">
+            <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
+          </div>
+        ` : nothing}
         ${this._renderName()}
         ${this._renderIcon()}
         ${this.hass ? renderClimateSection(this.hass, this._config?.climate_entities, this._config?.power_entities) : nothing}
@@ -613,16 +629,26 @@ export class UnifiedRoomCard extends LitElement {
   private _renderIcon(): TemplateResult | typeof nothing {
     // Get primary entity for display purposes
     const mainEntity = this._getPrimaryEntity();
-    
+
     // Check if ANY entity in the group is active
     const isActive = this._isGroupActive();
-    
+
     // Get domain from primary entity
     const domain = this._getPrimaryDomain() || '';
 
     const showIcon = this._config?.show_icon !== false;
     const showImgCell = this._config?.show_img_cell ?? true;
-    const icon = this._config?.icon || this._getDefaultIcon(mainEntity);
+
+    // Check for unavailable state and get appropriate icon
+    const isUnavailable = this._isPrimaryEntityUnavailable();
+    const unavailableConfig = this._getUnavailableConfig();
+    const applyUnavailableStyles = isUnavailable && unavailableConfig.behavior !== 'off';
+
+    // Icon priority: unavailable custom icon > config icon > entity default
+    let icon = this._config?.icon || this._getDefaultIcon(mainEntity);
+    if (applyUnavailableStyles && unavailableConfig.icon) {
+      icon = unavailableConfig.icon;
+    }
 
     // Get animation class (only when active and animation is configured)
     const animationClass = isActive && this._config?.icon_animation && this._config.icon_animation !== 'none'
@@ -657,7 +683,10 @@ export class UnifiedRoomCard extends LitElement {
     
     // Apply dynamic background color for active state with img_cell
     // Use averaged color for light groups
-    if (isActive && showImgCell) {
+    if (applyUnavailableStyles && showImgCell) {
+      // Unavailable state background
+      iconContainerStyles['background'] = unavailableConfig.background_color;
+    } else if (isActive && showImgCell) {
       const bgColor = this._getGroupBackgroundColor();
       iconContainerStyles['background'] = bgColor;
     }
@@ -674,7 +703,10 @@ export class UnifiedRoomCard extends LitElement {
     }
     
     // Determine icon color based on state and configuration
-    if (isActive && showImgCell) {
+    if (applyUnavailableStyles) {
+      // Unavailable state color
+      iconStyles['color'] = unavailableConfig.icon_color;
+    } else if (isActive && showImgCell) {
       // For active state with img-cell, use white/contrast color
       iconStyles['color'] = 'var(--text-primary-color, #fff)';
     } else if (mainEntity && isActive) {
@@ -1153,12 +1185,42 @@ export class UnifiedRoomCard extends LitElement {
     return 'var(--primary-color)';
   }
 
-
   /**
    * Check if entity is unavailable
    */
   private _isUnavailable(entity: { state: string }): boolean {
     return ['unavailable', 'unknown'].includes(entity.state);
+  }
+
+  /**
+   * Check if the primary entity is unavailable
+   */
+  private _isPrimaryEntityUnavailable(): boolean {
+    const entity = this._getPrimaryEntity();
+    if (!entity) return true; // Entity doesn't exist
+    return this._isUnavailable(entity);
+  }
+
+  /**
+   * Get unavailable handling config with defaults
+   */
+  private _getUnavailableConfig(): {
+    behavior: string;
+    icon?: string;
+    icon_color: string;
+    background_color: string;
+    opacity: number;
+    show_badge: boolean;
+  } {
+    const config = this._config?.unavailable_handling || { behavior: 'off' };
+    return {
+      behavior: config.behavior || 'off',
+      icon: config.icon,
+      icon_color: config.icon_color || 'var(--disabled-text-color)',
+      background_color: config.background_color || 'var(--secondary-background-color)',
+      opacity: config.opacity ?? 0.5,
+      show_badge: config.show_badge || false,
+    };
   }
 
   /**
