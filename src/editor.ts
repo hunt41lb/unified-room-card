@@ -17,6 +17,7 @@ import {
   DOMAIN_STATE_DEFAULTS,
   DOMAINS_WITH_DEFAULTS,
   ANIMATION_OPTIONS,
+  UNAVAILABLE_BEHAVIOR_OPTIONS,
 } from './constants';
 
 import type {
@@ -59,6 +60,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   @state() private _intermittentEntityExpanded: number = -1;
   @state() private _customColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input (persistent)
   @state() private _intermittentCustomColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input (intermittent)
+  @state() private _showUnavailableCustomColorInput: boolean = false; // Tracks if custom color input is shown for unavailable handling
 
   // ===========================================================================
   // STATIC STYLES
@@ -201,9 +203,178 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-switch>
             </div>
           </div>
+
+          <!-- Unavailable State Handling Section -->
+          ${this._renderUnavailableHandlingSection()}
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Render Unavailable State Handling section
+   */
+  private _renderUnavailableHandlingSection(): TemplateResult {
+    // Only show if an entity is selected
+    if (!this._config?.entity) {
+      return html``;
+    }
+
+    const unavailableConfig = this._config?.unavailable_handling || { behavior: 'off' };
+    const behavior = unavailableConfig.behavior || 'off';
+    const showCustomOptions = behavior === 'custom' || behavior === 'unavailable';
+
+    // Check if current icon_color is a custom value (not in predefined list)
+    const currentIconColor = unavailableConfig.icon_color || '';
+    const isCustomColor = this._showUnavailableCustomColorInput || 
+      (currentIconColor && !HA_COLOR_OPTIONS.some(opt => opt.value === currentIconColor));
+    const dropdownValue = isCustomColor ? 'custom' : (currentIconColor || 'var(--disabled-text-color)');
+
+    return html`
+      <div class="section-divider"></div>
+      <div class="section-header">
+        <ha-icon icon="mdi:help-circle-outline"></ha-icon>
+        <span>Unavailable State Handling</span>
+      </div>
+      <p class="helper-text">Configure how the card appears when the entity is unavailable or unknown</p>
+      
+      <!-- Behavior Selection -->
+      <div class="form-row">
+        <span class="form-label">When Unavailable</span>
+        <div class="form-input">
+          <ha-select
+            .value=${behavior}
+            @selected=${(e: Event) => this._updateUnavailableHandling('behavior', (e.target as HTMLSelectElement).value)}
+            @closed=${(e: Event) => e.stopPropagation()}
+          >
+            ${UNAVAILABLE_BEHAVIOR_OPTIONS.map(
+              (option) => html`
+                <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+              `
+            )}
+          </ha-select>
+        </div>
+      </div>
+
+      ${showCustomOptions ? html`
+        <!-- Custom Icon when Unavailable -->
+        <div class="form-row">
+          <span class="form-label">Custom Icon</span>
+          <div class="form-input">
+            <ha-selector
+              .hass=${this.hass}
+              .selector=${{ icon: {} }}
+              .value=${unavailableConfig.icon || ''}
+              @value-changed=${(e: CustomEvent) => this._updateUnavailableHandling('icon', e.detail.value)}
+            ></ha-selector>
+          </div>
+        </div>
+        <p class="helper-text">Icon to display when entity is unavailable (leave empty to use default icon)</p>
+
+        <!-- Icon Color -->
+        <div class="form-row">
+          <span class="form-label">Icon Color</span>
+          <div class="form-input">
+            <ha-select
+              .value=${dropdownValue}
+              @selected=${(e: Event) => {
+                const value = (e.target as HTMLSelectElement).value;
+                if (value === 'custom') {
+                  this._showUnavailableCustomColorInput = true;
+                } else {
+                  this._showUnavailableCustomColorInput = false;
+                  this._updateUnavailableHandling('icon_color', value);
+                }
+              }}
+              @closed=${(e: Event) => e.stopPropagation()}
+            >
+              ${this._renderColorOptions()}
+            </ha-select>
+          </div>
+        </div>
+        ${isCustomColor ? html`
+          <div class="form-row">
+            <span class="form-label">Custom Color</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${unavailableConfig.icon_color || ''}
+                placeholder="var(--disabled-text-color)"
+                @input=${(e: Event) => this._updateUnavailableHandling('icon_color', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Background Color -->
+        <div class="form-row">
+          <span class="form-label">Background Color</span>
+          <div class="form-input">
+            <ha-textfield
+              .value=${unavailableConfig.background_color || ''}
+              placeholder="var(--secondary-background-color)"
+              @input=${(e: Event) => this._updateUnavailableHandling('background_color', (e.target as HTMLInputElement).value)}
+            ></ha-textfield>
+          </div>
+        </div>
+        <p class="helper-text">CSS color or variable for icon background when unavailable</p>
+
+        <!-- Opacity Slider -->
+        <div class="form-row">
+          <span class="form-label">Opacity</span>
+          <div class="form-input">
+            <ha-selector
+              .hass=${this.hass}
+              .selector=${{ number: { min: 0, max: 1, step: 0.1, mode: 'slider' } }}
+              .value=${unavailableConfig.opacity ?? 0.5}
+              @value-changed=${(e: CustomEvent) => this._updateUnavailableHandling('opacity', e.detail.value)}
+            ></ha-selector>
+          </div>
+        </div>
+        <p class="helper-text">Card opacity when entity is unavailable (0 = transparent, 1 = fully visible)</p>
+
+        <!-- Show Badge Toggle -->
+        <div class="form-row">
+          <span class="form-label">Show Unavailable Badge</span>
+          <div class="form-input">
+            <ha-switch
+              .checked=${unavailableConfig.show_badge || false}
+              @change=${(e: Event) => this._updateUnavailableHandling('show_badge', (e.target as HTMLInputElement).checked)}
+            ></ha-switch>
+          </div>
+        </div>
+        <p class="helper-text">Show a small indicator badge when entity is unavailable</p>
+      ` : ''}
+    `;
+  }
+
+  /**
+   * Update unavailable handling configuration
+   */
+  private _updateUnavailableHandling(key: string, value: unknown): void {
+    if (!this._config) return;
+
+    const currentConfig = this._config.unavailable_handling || { behavior: 'off' };
+    
+    // Create new config with update
+    const newConfig: Record<string, unknown> = {
+      ...currentConfig,
+      [key]: value,
+    };
+
+    // If value is empty/undefined and it's not the behavior, remove the key
+    if (key !== 'behavior' && (value === '' || value === undefined || value === null)) {
+      delete newConfig[key];
+    }
+
+    // If only behavior is 'off' with no other properties, remove the entire config
+    const hasCustomProps = Object.keys(newConfig).some(k => k !== 'behavior' && newConfig[k] !== undefined);
+    
+    this._config = {
+      ...this._config,
+      unavailable_handling: (newConfig.behavior === 'off' && !hasCustomProps) ? undefined : newConfig as typeof currentConfig,
+    };
+
+    this._dispatchConfigChanged();
   }
 
   /**
