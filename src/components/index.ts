@@ -5,14 +5,24 @@
  */
 
 export { renderClimateSection } from './climate-section';
-export { renderBatteryEntities, getLowBatteryCount } from './battery-entities';
+
 export { 
-  renderUpdateEntities, 
+  renderBatteryEntities, 
+  renderBatteryBadge,
+  getLowBatteryCount,
+  isBatteryBadgeMode,
+} from './battery-entities';
+
+export { 
+  renderUpdateEntities,
+  renderUpdateBadge,
   getPendingUpdateCount, 
   getSpinInterval, 
   isSpinAnimationEnabled,
+  isUpdateBadgeMode,
   type UpdateAnimationState 
 } from './update-entities';
+
 export { 
   animationKeyframes, 
   animationClasses, 
