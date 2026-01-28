@@ -51,13 +51,17 @@ import './editor';
 
 // Import components
 import { 
-  renderClimateSection, 
-  renderBatteryEntities, 
+  renderClimateSection,
+  renderBatteryEntities,
+  renderBatteryBadge,
   getLowBatteryCount,
+  isBatteryBadgeMode,
   renderUpdateEntities,
+  renderUpdateBadge,
   getPendingUpdateCount,
   getSpinInterval,
   isSpinAnimationEnabled,
+  isUpdateBadgeMode,
   type UpdateAnimationState
 } from './components';
 
@@ -414,6 +418,8 @@ export class UnifiedRoomCard extends LitElement {
             <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
           </div>
         ` : nothing}
+        ${this._renderBatteryBadge()}
+        ${this._renderUpdateBadge()}
         ${this._renderName()}
         ${this._renderIcon()}
         ${this.hass ? renderClimateSection(this.hass, this._config?.climate_entities, this._config?.power_entities) : nothing}
@@ -450,7 +456,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _renderEntitySections(gridAreas: ReturnType<typeof this._getDefinedGridAreas>): TemplateResult | typeof nothing {
     const { hasCustomGrid, hasPersistentArea, hasIntermittentArea, hasBatteryArea, hasUpdateArea } = gridAreas;
-    
+
     // Check if using any custom grid areas for entities
     const usesCustomEntityAreas = hasPersistentArea || hasIntermittentArea || hasBatteryArea || hasUpdateArea;
 
@@ -477,7 +483,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _renderBatterySection(): TemplateResult | typeof nothing {
     if (!this.hass || !this._config?.battery_entities) return nothing;
-    
+
     const lowBatteryCount = getLowBatteryCount(this.hass, this._config.battery_entities);
     if (lowBatteryCount === 0) return nothing;
 
@@ -505,6 +511,35 @@ export class UnifiedRoomCard extends LitElement {
   }
 
   /**
+   * Render battery badge if badge mode is enabled
+   */
+  private _renderBatteryBadge(): TemplateResult | typeof nothing {
+    if (!this.hass || !this._config?.battery_entities) return nothing;
+    if (!isBatteryBadgeMode(this._config.battery_entities)) return nothing;
+
+    return renderBatteryBadge(
+      this.hass, 
+      this._config.battery_entities, 
+      this._handleEntityAction.bind(this)
+    );
+  }
+
+  /**
+   * Render update badge if badge mode is enabled
+   */
+  private _renderUpdateBadge(): TemplateResult | typeof nothing {
+    if (!this.hass || !this._config?.update_entities) return nothing;
+    if (!isUpdateBadgeMode(this._config.update_entities)) return nothing;
+
+    return renderUpdateBadge(
+      this.hass, 
+      this._config.update_entities, 
+      this._handleEntityAction.bind(this),
+      this._updateAnimationState
+    );
+  }
+
+  /**
    * Render combined status section (persistent + intermittent + battery + update)
    * Used with default grid layout
    */
@@ -517,7 +552,7 @@ export class UnifiedRoomCard extends LitElement {
     // Check if any status content exists
     const lowBatteryCount = this.hass ? getLowBatteryCount(this.hass, this._config?.battery_entities) : 0;
     const pendingUpdateCount = this.hass ? getPendingUpdateCount(this.hass, this._config?.update_entities) : 0;
-    
+
     if (!hasPersistent && !hasIntermittent && lowBatteryCount === 0 && pendingUpdateCount === 0) {
       return nothing;
     }
