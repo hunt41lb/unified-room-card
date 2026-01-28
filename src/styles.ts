@@ -199,7 +199,7 @@ export const cardBaseStyles = css`
     padding: 6px;
     box-sizing: border-box;
     cursor: pointer;
-    overflow: hidden;
+    overflow: visible;
     background: ${unsafeCSS(HA_CSS_VARIABLES.cardBackground)};
     border-radius: ${unsafeCSS(HA_CSS_VARIABLES.cardBorderRadius)};
     transition: background-color 0.3s ease, opacity 0.3s ease;
