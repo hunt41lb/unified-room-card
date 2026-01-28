@@ -171,7 +171,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
     padding: 6px;
     box-sizing: border-box;
     cursor: pointer;
-    overflow: hidden;
+    overflow: visible;
     background: ${r("var(--ha-card-background, var(--card-background-color, white))")};
     border-radius: ${r("var(--ha-card-border-radius, 12px)")};
     transition: background-color 0.3s ease, opacity 0.3s ease;
