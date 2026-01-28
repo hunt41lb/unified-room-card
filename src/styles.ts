@@ -514,6 +514,45 @@ export const updateAnimationStyles = css`
 `;
 
 // =============================================================================
+// ALERT BADGE STYLES (NEW - for badge display mode)
+// =============================================================================
+
+export const alertBadgeStyles = css`
+  /* Base alert badge styles - positioned absolute to card */
+  .alert-badge {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .alert-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .alert-badge:active {
+    transform: scale(0.95);
+  }
+
+  .alert-badge ha-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Spin animation for update badge icon */
+  .alert-badge .update-icon.spin-animation {
+    animation: spin-once 1s ease-in-out;
+  }
+`;
+
+// =============================================================================
 // OVERFLOW INDICATOR STYLES
 // =============================================================================
 
@@ -582,6 +621,7 @@ export const cardStyles = css`
   ${overflowStyles}
   ${unavailableStyles}
   ${updateAnimationStyles}
+  ${alertBadgeStyles}
 `;
 
 // =============================================================================
