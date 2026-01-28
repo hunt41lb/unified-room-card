@@ -1071,7 +1071,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
         <span>Unavailable State Handling</span>
       </div>
       <p class="helper-text">Configure how the card appears when the entity is unavailable or unknown</p>
-      
+
       <!-- Behavior Selection -->
       <div class="form-row">
         <span class="form-label">When Unavailable</span>
@@ -1188,7 +1188,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
               ></ha-switch>
             </div>
           </div>
-          
+
           ${e?W`
             <!-- Icon selector -->
             <div class="form-row">
@@ -1359,7 +1359,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
             </div>
           </div>
           <p class="helper-text">Border color changes based on this entity's state</p>
-          
+
           ${e?W`
             <!-- Border Width / Style -->
             <div class="form-row-dual expand-inputs">
@@ -1398,7 +1398,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
               </div>
             </div>
           `:""}
-          
+
           <!-- Glow Effects Section -->
           <div class="section-divider"></div>
           <div class="section-header">
@@ -1468,7 +1468,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
               </div>
             </div>
           `:""}
-          
+
           <!-- Hold Action -->
           <div class="form-row">
             <span class="form-label">Hold Action</span>
@@ -1512,7 +1512,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
               </div>
             </div>
           `:""}
-          
+
           <!-- Double Tap Action -->
           <div class="form-row">
             <span class="form-label">Double Tap Action</span>
@@ -2587,7 +2587,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
             title="Remove glow effect"
           ></ha-icon-button>
         </div>
-        
+
         <!-- Entity -->
         <div class="form-row">
           <span class="form-label">Entity</span>
@@ -2600,7 +2600,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
             ></ha-selector>
           </div>
         </div>
-        
+
         <!-- States (comma-separated) -->
         <div class="form-row">
           <span class="form-label">Trigger States</span>
@@ -2613,7 +2613,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
           </div>
         </div>
         <p class="helper-text">Comma-separated list of states that trigger this glow</p>
-        
+
         <!-- Color -->
         <div class="form-row">
           <span class="form-label">Glow Color</span>
@@ -2626,7 +2626,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
           </div>
         </div>
         <p class="helper-text">Use "auto" for entity color, or CSS color/variable (e.g., #ff0000, var(--error-color))</p>
-        
+
         <!-- Spread -->
         <div class="form-row">
           <span class="form-label">Spread (px)</span>
@@ -2639,7 +2639,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
             ></ha-selector>
           </div>
         </div>
-        
+
         <!-- Animation -->
         <div class="form-row">
           <span class="form-label">Animation</span>
