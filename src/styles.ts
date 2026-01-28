@@ -30,47 +30,47 @@ export const HA_CSS_VARIABLES = {
   cardBackground: 'var(--ha-card-background, var(--card-background-color, white))',
   cardBorderRadius: 'var(--ha-card-border-radius, 12px)',
   cardBoxShadow: 'var(--ha-card-box-shadow, none)',
-  
+
   // Colors
   primaryColor: 'var(--primary-color)',
   primaryTextColor: 'var(--primary-text-color)',
   secondaryTextColor: 'var(--secondary-text-color)',
   disabledTextColor: 'var(--disabled-text-color)',
-  
+
   // State Colors
   stateOnColor: 'var(--state-light-on-color, var(--state-on-color, var(--primary-color)))',
   stateOffColor: 'var(--state-light-off-color, var(--state-off-color, var(--disabled-text-color)))',
   stateActiveColor: 'var(--state-active-color, var(--primary-color))',
   stateInactiveColor: 'var(--state-inactive-color, var(--disabled-text-color))',
-  
+
   // Sensor Battery Colors
   batteryLowColor: 'var(--state-sensor-battery-low-color, #db4437)',
   batteryMediumColor: 'var(--state-sensor-battery-medium-color, #ffa600)',
   batteryHighColor: 'var(--state-sensor-battery-high-color, #43a047)',
-  
+
   // Update Entity Color
   updateActiveColor: 'var(--state-update-on-color, var(--primary-color))',
-  
+
   // Climate Colors
   climateIdleColor: 'var(--state-climate-idle-color, var(--disabled-text-color))',
   climateHeatColor: 'var(--state-climate-heat-color, #ff8100)',
   climateCoolColor: 'var(--state-climate-cool-color, #2196f3)',
-  
+
   // Lock Colors
   lockLockedColor: 'var(--state-lock-locked-color, var(--primary-color))',
   lockUnlockedColor: 'var(--state-lock-unlocked-color, #db4437)',
-  
+
   // Binary Sensor Colors
   binarySensorOnColor: 'var(--state-binary-sensor-on-color, var(--primary-color))',
   binarySensorOffColor: 'var(--state-binary-sensor-off-color, var(--disabled-text-color))',
-  
+
   // Icon
   iconColor: 'var(--paper-item-icon-color, #44739e)',
   iconActiveColor: 'var(--paper-item-icon-active-color, var(--primary-color))',
-  
+
   // Divider
   dividerColor: 'var(--divider-color, #e0e0e0)',
-  
+
   // Unavailable
   unavailableColor: 'var(--state-unavailable-color, var(--disabled-text-color))',
 } as const;
