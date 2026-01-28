@@ -1,6 +1,6 @@
 /**
  * Unified Room Card - Type Definitions
- * 
+ *
  * All TypeScript interfaces and types for card configuration.
  * These types define the structure of the card's YAML configuration.
  */
