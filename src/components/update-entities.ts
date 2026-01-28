@@ -3,12 +3,20 @@
  * 
  * Renders a single update icon when any entities have pending updates.
  * Supports periodic spin animation to draw attention.
+ * Supports both inline (status section) and badge display modes.
  */
 
 import { html, TemplateResult, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { classMap } from 'lit/directives/class-map.js';
 import type { HomeAssistant, UpdateEntitiesConfig, TapActionConfig } from '../types';
+import {
+  DEFAULT_BADGE_SIZE,
+  DEFAULT_BADGE_ICON_SIZE,
+  DEFAULT_BADGE_POSITION,
+  BADGE_POSITION_OPTIONS,
+  type BadgePositionType,
+} from '../constants';
 
 // =============================================================================
 // CONSTANTS
@@ -84,12 +92,29 @@ function buildUpdateTooltip(
   return `${pendingEntities.length} updates available:\n${names.join('\n')}`;
 }
 
+/**
+ * Get badge position styles based on position setting
+ */
+function getBadgePositionStyles(position: BadgePositionType): Record<string, string> {
+  switch (position) {
+    case BADGE_POSITION_OPTIONS.TOP_LEFT:
+      return { top: '-10px', left: '-10px', right: 'auto', bottom: 'auto' };
+    case BADGE_POSITION_OPTIONS.BOTTOM_RIGHT:
+      return { top: 'auto', left: 'auto', right: '-10px', bottom: '-10px' };
+    case BADGE_POSITION_OPTIONS.BOTTOM_LEFT:
+      return { top: 'auto', left: '-10px', right: 'auto', bottom: '-10px' };
+    case BADGE_POSITION_OPTIONS.TOP_RIGHT:
+    default:
+      return { top: '-10px', left: 'auto', right: '-10px', bottom: 'auto' };
+  }
+}
+
 // =============================================================================
-// MAIN RENDER FUNCTION
+// MAIN RENDER FUNCTIONS
 // =============================================================================
 
 /**
- * Render update entities section
+ * Render update entities section (inline mode)
  * Shows a SINGLE icon when any updates are pending
  */
 export function renderUpdateEntities(
@@ -99,6 +124,9 @@ export function renderUpdateEntities(
   animationState: UpdateAnimationState
 ): TemplateResult | typeof nothing {
   if (!config) return nothing;
+  
+  // Skip rendering in inline mode if badge mode is enabled
+  if (config.show_as_badge) return nothing;
 
   const pendingEntities = getPendingUpdateEntities(hass, config);
   if (pendingEntities.length === 0) return nothing;
@@ -146,7 +174,73 @@ export function renderUpdateEntities(
 }
 
 /**
- * Get count of pending updates
+ * Render update badge (badge mode)
+ * Shows a single circular badge with update icon when any entities have updates
+ */
+export function renderUpdateBadge(
+  hass: HomeAssistant,
+  config: UpdateEntitiesConfig | undefined,
+  onAction: UpdateActionHandler,
+  animationState: UpdateAnimationState
+): TemplateResult | typeof nothing {
+  if (!config || !config.show_as_badge) return nothing;
+
+  const pendingEntities = getPendingUpdateEntities(hass, config);
+  if (pendingEntities.length === 0) return nothing;
+
+  const icon = config.icon || DEFAULT_ICON;
+  const badgeSize = config.badge_size || DEFAULT_BADGE_SIZE;
+  const badgeIconSize = config.badge_icon_size || DEFAULT_BADGE_ICON_SIZE;
+  const badgePosition = (config.badge_position || DEFAULT_BADGE_POSITION) as BadgePositionType;
+  const badgeColor = config.badge_color || 'var(--state-update-active-color, var(--info-color, #039be5))';
+  const spinEnabled = config.spin_animation === true;
+
+  const positionStyles = getBadgePositionStyles(badgePosition);
+
+  const badgeStyles: Record<string, string> = {
+    ...positionStyles,
+    'width': badgeSize,
+    'height': badgeSize,
+    'background-color': badgeColor,
+  };
+
+  const iconStyles: Record<string, string> = {
+    '--mdc-icon-size': badgeIconSize,
+    'color': 'white',
+  };
+
+  // Animation classes for the icon
+  const iconClasses = {
+    'update-icon': true,
+    'spin-animation': spinEnabled && animationState.isSpinning,
+  };
+
+  const tapAction = config.tap_action || { action: 'more-info' as const };
+  const holdAction = config.hold_action || { action: 'more-info' as const };
+
+  // Use first entity for tap action
+  const primaryEntityId = pendingEntities[0];
+  const tooltip = buildUpdateTooltip(hass, pendingEntities);
+
+  return html`
+    <div 
+      class="alert-badge alert-badge-update"
+      style=${styleMap(badgeStyles)}
+      @click=${(e: Event) => { e.stopPropagation(); onAction(tapAction, primaryEntityId); }}
+      @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); onAction(holdAction, primaryEntityId); }}
+      title="${tooltip}"
+    >
+      <ha-icon
+        class=${classMap(iconClasses)}
+        .icon=${icon}
+        style=${styleMap(iconStyles)}
+      ></ha-icon>
+    </div>
+  `;
+}
+
+/**
+ * Get count of pending update entities
  * Useful for checking if section should be rendered
  */
 export function getPendingUpdateCount(
@@ -161,8 +255,9 @@ export function getPendingUpdateCount(
  * Get spin interval from config (in milliseconds)
  */
 export function getSpinInterval(config: UpdateEntitiesConfig | undefined): number {
-  const seconds = config?.spin_interval ?? DEFAULT_SPIN_INTERVAL;
-  return Math.max(10, seconds) * 1000; // Minimum 10 seconds
+  const intervalSeconds = config?.spin_interval ?? DEFAULT_SPIN_INTERVAL;
+  // Ensure minimum of 10 seconds
+  return Math.max(10, intervalSeconds) * 1000;
 }
 
 /**
@@ -170,4 +265,11 @@ export function getSpinInterval(config: UpdateEntitiesConfig | undefined): numbe
  */
 export function isSpinAnimationEnabled(config: UpdateEntitiesConfig | undefined): boolean {
   return config?.spin_animation === true;
+}
+
+/**
+ * Check if update should be rendered as badge
+ */
+export function isUpdateBadgeMode(config: UpdateEntitiesConfig | undefined): boolean {
+  return config?.show_as_badge === true;
 }
