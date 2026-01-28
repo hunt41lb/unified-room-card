@@ -18,6 +18,9 @@ import {
   DOMAINS_WITH_DEFAULTS,
   ANIMATION_OPTIONS,
   UNAVAILABLE_BEHAVIOR_OPTIONS,
+  BORDER_WIDTH_OPTIONS,
+  BORDER_STYLE_OPTIONS,
+  BADGE_POSITION_DROPDOWN_OPTIONS,
 } from './constants';
 
 import type {
@@ -1513,12 +1516,13 @@ export class UnifiedRoomCardEditor extends LitElement {
   }
 
   /**
-   * Render battery entities section - Placeholder
+   * Render battery entities section
    */
   private _renderBatterySection(): TemplateResult {
     const expanded = this._accordionState.battery;
     const batteryConfig = this._config?.battery_entities || {};
     const entities = batteryConfig.entities || [];
+    const showAsBadge = batteryConfig.show_as_badge || false;
 
     return html`
       <div class="accordion">
@@ -1555,6 +1559,64 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-textfield>
             </div>
           </div>
+          <!-- Show as Badge Toggle (NEW) -->
+          <div class="form-row">
+            <span class="form-label">Show as Badge</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${showAsBadge}
+                @change=${(e: Event) => this._batteryValueChanged('show_as_badge', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
+          <p class="helper-text">Display as a circular badge on the card corner instead of in the status section</p>
+          <!-- Badge Options (only shown when badge mode enabled) (NEW) -->
+          ${showAsBadge ? html`
+            <div class="form-row">
+              <span class="form-label">Badge Position</span>
+              <div class="form-input">
+                <ha-select
+                  .value=${batteryConfig.badge_position || 'top-right'}
+                  @selected=${(e: CustomEvent) => this._batteryValueChanged('badge_position', (e.target as HTMLSelectElement).value)}
+                  @closed=${(e: Event) => e.stopPropagation()}
+                >
+                  ${BADGE_POSITION_DROPDOWN_OPTIONS.map(option => html`
+                    <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                  `)}
+                </ha-select>
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Badge Size</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${batteryConfig.badge_size || ''}
+                  placeholder="20px"
+                  @input=${(e: Event) => this._batteryValueChanged('badge_size', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Badge Icon Size</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${batteryConfig.badge_icon_size || ''}
+                  placeholder="12px"
+                  @input=${(e: Event) => this._batteryValueChanged('badge_icon_size', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Badge Color</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${batteryConfig.badge_color || ''}
+                  placeholder="var(--error-color)"
+                  @input=${(e: Event) => this._batteryValueChanged('badge_color', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+          ` : nothing}
           <!-- Tap Action -->
           <div class="form-row">
             <span class="form-label">Tap Action</span>
@@ -1622,6 +1684,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     const expanded = this._accordionState.update;
     const updateConfig = this._config?.update_entities || {};
     const entities = updateConfig.entities || [];
+    const showAsBadge = updateConfig.show_as_badge || false;
 
     return html`
       <div class="accordion">
@@ -1692,6 +1755,64 @@ export class UnifiedRoomCardEditor extends LitElement {
                   .value=${updateConfig.spin_interval ?? 60}
                   @value-changed=${(e: CustomEvent) => this._updateValueChanged('spin_interval', e.detail.value)}
                 ></ha-selector>
+              </div>
+            </div>
+          ` : nothing}
+          <!-- Show as Badge Toggle (NEW) -->
+          <div class="form-row">
+            <span class="form-label">Show as Badge</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${showAsBadge}
+                @change=${(e: Event) => this._updateValueChanged('show_as_badge', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
+          <p class="helper-text">Display as a circular badge on the card corner instead of in the status section</p>
+          <!-- Badge Options (only shown when badge mode enabled) (NEW) -->
+          ${showAsBadge ? html`
+            <div class="form-row">
+              <span class="form-label">Badge Position</span>
+              <div class="form-input">
+                <ha-select
+                  .value=${updateConfig.badge_position || 'top-right'}
+                  @selected=${(e: CustomEvent) => this._updateValueChanged('badge_position', (e.target as HTMLSelectElement).value)}
+                  @closed=${(e: Event) => e.stopPropagation()}
+                >
+                  ${BADGE_POSITION_DROPDOWN_OPTIONS.map(option => html`
+                    <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                  `)}
+                </ha-select>
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Badge Size</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${updateConfig.badge_size || ''}
+                  placeholder="20px"
+                  @input=${(e: Event) => this._updateValueChanged('badge_size', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Badge Icon Size</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${updateConfig.badge_icon_size || ''}
+                  placeholder="12px"
+                  @input=${(e: Event) => this._updateValueChanged('badge_icon_size', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Badge Color</span>
+              <div class="form-input">
+                <ha-textfield
+                  .value=${updateConfig.badge_color || ''}
+                  placeholder="var(--info-color)"
+                  @input=${(e: Event) => this._updateValueChanged('badge_color', (e.target as HTMLInputElement).value)}
+                ></ha-textfield>
               </div>
             </div>
           ` : nothing}
