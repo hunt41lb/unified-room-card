@@ -97,6 +97,12 @@ export interface UnavailableHandlingConfig {
 }
 
 // =============================================================================
+// BADGE POSITION TYPE
+// =============================================================================
+
+export type BadgePosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+
+// =============================================================================
 // INDIVIDUAL ENTITY CONFIGURATION
 // =============================================================================
 
@@ -177,6 +183,12 @@ export interface BatteryEntitiesConfig {
   icon_size?: string;               // Icon size (default: 21px)
   tap_action?: TapActionConfig;
   hold_action?: TapActionConfig;
+  // Badge mode options
+  show_as_badge?: boolean;          // Show as badge instead of in status section (default: false)
+  badge_position?: BadgePosition;   // Badge position (default: 'top-right')
+  badge_size?: string;              // Badge circle size (default: '20px')
+  badge_icon_size?: string;         // Icon size inside badge (default: '12px')
+  badge_color?: string;             // Badge background color (default: battery low color)
 }
 
 // =============================================================================
@@ -193,6 +205,12 @@ export interface UpdateEntitiesConfig {
   // Animation settings
   spin_animation?: boolean;         // Enable periodic spin animation (default: false)
   spin_interval?: number;           // Seconds between spins (default: 60)
+  // Badge mode options
+  show_as_badge?: boolean;          // Show as badge instead of in status section (default: false)
+  badge_position?: BadgePosition;   // Badge position (default: 'top-right')
+  badge_size?: string;              // Badge circle size (default: '20px')
+  badge_icon_size?: string;         // Icon size inside badge (default: '12px')
+  badge_color?: string;             // Badge background color (default: update active color)
 }
 
 // =============================================================================
