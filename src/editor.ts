@@ -240,7 +240,7 @@ export class UnifiedRoomCardEditor extends LitElement {
         <span>Unavailable State Handling</span>
       </div>
       <p class="helper-text">Configure how the card appears when the entity is unavailable or unknown</p>
-      
+
       <!-- Behavior Selection -->
       <div class="form-row">
         <span class="form-label">When Unavailable</span>
@@ -357,7 +357,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const currentConfig = this._config.unavailable_handling || { behavior: 'off' };
-    
+
     // Create new config with update
     const newConfig: Record<string, unknown> = {
       ...currentConfig,
@@ -371,7 +371,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     // If only behavior is 'off' with no other properties, remove the entire config
     const hasCustomProps = Object.keys(newConfig).some(k => k !== 'behavior' && newConfig[k] !== undefined);
-    
+
     this._config = {
       ...this._config,
       unavailable_handling: (newConfig.behavior === 'off' && !hasCustomProps) ? undefined : newConfig as typeof currentConfig,
@@ -409,7 +409,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-switch>
             </div>
           </div>
-          
+
           ${showIcon ? html`
             <!-- Icon selector -->
             <div class="form-row">
@@ -596,7 +596,7 @@ export class UnifiedRoomCardEditor extends LitElement {
             </div>
           </div>
           <p class="helper-text">Border color changes based on this entity's state</p>
-          
+
           ${hasBorderEntity ? html`
             <!-- Border Width / Style -->
             <div class="form-row-dual expand-inputs">
@@ -635,7 +635,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               </div>
             </div>
           ` : ''}
-          
+
           <!-- Glow Effects Section -->
           <div class="section-divider"></div>
           <div class="section-header">
@@ -714,7 +714,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               </div>
             </div>
           ` : ''}
-          
+
           <!-- Hold Action -->
           <div class="form-row">
             <span class="form-label">Hold Action</span>
@@ -758,7 +758,7 @@ export class UnifiedRoomCardEditor extends LitElement {
               </div>
             </div>
           ` : ''}
-          
+
           <!-- Double Tap Action -->
           <div class="form-row">
             <span class="form-label">Double Tap Action</span>
