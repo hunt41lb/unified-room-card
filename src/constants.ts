@@ -536,3 +536,35 @@ export const DOMAIN_STATE_DEFAULTS: Record<string, DomainStateDefault[]> = {
 
 // Domains that have state defaults available
 export const DOMAINS_WITH_DEFAULTS = Object.keys(DOMAIN_STATE_DEFAULTS);
+
+// =============================================================================
+// BADGE DISPLAY MODE OPTIONS (NEW - for badge mode feature)
+// =============================================================================
+
+// Default badge dimensions
+export const DEFAULT_BADGE_SIZE = '20px';
+export const DEFAULT_BADGE_ICON_SIZE = '12px';
+
+// Badge position type and options
+export const BADGE_POSITION_OPTIONS = {
+  TOP_RIGHT: 'top-right',
+  TOP_LEFT: 'top-left',
+  BOTTOM_RIGHT: 'bottom-right',
+  BOTTOM_LEFT: 'bottom-left',
+} as const;
+
+export type BadgePositionType = typeof BADGE_POSITION_OPTIONS[keyof typeof BADGE_POSITION_OPTIONS];
+
+export const DEFAULT_BADGE_POSITION = BADGE_POSITION_OPTIONS.TOP_RIGHT;
+
+// Badge position dropdown options for editor
+export const BADGE_POSITION_DROPDOWN_OPTIONS = [
+  { value: BADGE_POSITION_OPTIONS.TOP_RIGHT, label: 'Top Right' },
+  { value: BADGE_POSITION_OPTIONS.TOP_LEFT, label: 'Top Left' },
+  { value: BADGE_POSITION_OPTIONS.BOTTOM_RIGHT, label: 'Bottom Right' },
+  { value: BADGE_POSITION_OPTIONS.BOTTOM_LEFT, label: 'Bottom Left' },
+];
+
+// Default badge colors
+export const DEFAULT_BATTERY_BADGE_COLOR = 'var(--state-sensor-battery-low-color, var(--error-color, #db4437))';
+export const DEFAULT_UPDATE_BADGE_COLOR = 'var(--state-update-active-color, var(--info-color, #039be5))';
