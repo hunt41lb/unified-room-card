@@ -3,11 +3,20 @@
  * 
  * Renders battery icons for entities below the low threshold.
  * Shows dynamic battery icons based on level.
+ * Supports both inline (status section) and badge display modes.
  */
 
 import { html, TemplateResult, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
+import { classMap } from 'lit/directives/class-map.js';
 import type { HomeAssistant, BatteryEntitiesConfig, TapActionConfig } from '../types';
+import {
+  DEFAULT_BADGE_SIZE,
+  DEFAULT_BADGE_ICON_SIZE,
+  DEFAULT_BADGE_POSITION,
+  BADGE_POSITION_OPTIONS,
+  type BadgePositionType,
+} from '../constants';
 
 // =============================================================================
 // TYPES
@@ -73,12 +82,57 @@ function getLowBatteryEntities(
   return lowBatteryEntities;
 }
 
+/**
+ * Build tooltip showing all low battery entities
+ */
+function buildBatteryTooltip(
+  hass: HomeAssistant,
+  lowBatteryEntities: string[]
+): string {
+  if (lowBatteryEntities.length === 0) return '';
+  
+  if (lowBatteryEntities.length === 1) {
+    const entity = hass.states[lowBatteryEntities[0]];
+    if (!entity) return '1 low battery';
+    const name = entity.attributes.friendly_name || lowBatteryEntities[0];
+    const level = getBatteryLevel(entity);
+    return `${name}: ${level}%`;
+  }
+  
+  // Multiple low batteries - show count and list
+  const items = lowBatteryEntities.map(entityId => {
+    const entity = hass.states[entityId];
+    const name = entity?.attributes.friendly_name || entityId;
+    const level = getBatteryLevel(entity);
+    return `${name}: ${level}%`;
+  });
+  
+  return `${lowBatteryEntities.length} low batteries:\n${items.join('\n')}`;
+}
+
+/**
+ * Get badge position styles based on position setting
+ */
+function getBadgePositionStyles(position: BadgePositionType): Record<string, string> {
+  switch (position) {
+    case BADGE_POSITION_OPTIONS.TOP_LEFT:
+      return { top: '-10px', left: '-10px', right: 'auto', bottom: 'auto' };
+    case BADGE_POSITION_OPTIONS.BOTTOM_RIGHT:
+      return { top: 'auto', left: 'auto', right: '-10px', bottom: '-10px' };
+    case BADGE_POSITION_OPTIONS.BOTTOM_LEFT:
+      return { top: 'auto', left: '-10px', right: 'auto', bottom: '-10px' };
+    case BADGE_POSITION_OPTIONS.TOP_RIGHT:
+    default:
+      return { top: '-10px', left: 'auto', right: '-10px', bottom: 'auto' };
+  }
+}
+
 // =============================================================================
 // RENDER FUNCTIONS
 // =============================================================================
 
 /**
- * Render a single battery entity
+ * Render a single battery entity (inline mode)
  */
 function renderBatteryEntity(
   hass: HomeAssistant,
@@ -118,11 +172,11 @@ function renderBatteryEntity(
 }
 
 // =============================================================================
-// MAIN RENDER FUNCTION
+// MAIN RENDER FUNCTIONS
 // =============================================================================
 
 /**
- * Render battery entities section
+ * Render battery entities section (inline mode)
  * Only shows entities below the low threshold
  */
 export function renderBatteryEntities(
@@ -131,6 +185,9 @@ export function renderBatteryEntities(
   onAction: BatteryActionHandler
 ): TemplateResult | typeof nothing {
   if (!config) return nothing;
+  
+  // Skip rendering in inline mode if badge mode is enabled
+  if (config.show_as_badge) return nothing;
 
   const lowBatteryEntities = getLowBatteryEntities(hass, config);
   if (lowBatteryEntities.length === 0) return nothing;
@@ -146,6 +203,75 @@ export function renderBatteryEntities(
 }
 
 /**
+ * Render battery badge (badge mode)
+ * Shows a single circular badge with battery icon when any entities are low
+ */
+export function renderBatteryBadge(
+  hass: HomeAssistant,
+  config: BatteryEntitiesConfig | undefined,
+  onAction: BatteryActionHandler
+): TemplateResult | typeof nothing {
+  if (!config || !config.show_as_badge) return nothing;
+
+  const lowBatteryEntities = getLowBatteryEntities(hass, config);
+  if (lowBatteryEntities.length === 0) return nothing;
+
+  // Get the lowest battery level for the icon
+  let lowestLevel: number | null = null;
+  for (const entityId of lowBatteryEntities) {
+    const entity = hass.states[entityId];
+    if (entity) {
+      const level = getBatteryLevel(entity);
+      if (level !== null && (lowestLevel === null || level < lowestLevel)) {
+        lowestLevel = level;
+      }
+    }
+  }
+
+  const icon = getBatteryIcon(lowestLevel);
+  const badgeSize = config.badge_size || DEFAULT_BADGE_SIZE;
+  const badgeIconSize = config.badge_icon_size || DEFAULT_BADGE_ICON_SIZE;
+  const badgePosition = (config.badge_position || DEFAULT_BADGE_POSITION) as BadgePositionType;
+  const badgeColor = config.badge_color || 'var(--state-sensor-battery-low-color, var(--error-color, #db4437))';
+
+  const positionStyles = getBadgePositionStyles(badgePosition);
+
+  const badgeStyles: Record<string, string> = {
+    ...positionStyles,
+    'width': badgeSize,
+    'height': badgeSize,
+    'background-color': badgeColor,
+  };
+
+  const iconStyles: Record<string, string> = {
+    '--mdc-icon-size': badgeIconSize,
+    'color': 'white',
+  };
+
+  const tapAction = config.tap_action || { action: 'more-info' as const };
+  const holdAction = config.hold_action || { action: 'more-info' as const };
+
+  // Use first entity for tap action
+  const primaryEntityId = lowBatteryEntities[0];
+  const tooltip = buildBatteryTooltip(hass, lowBatteryEntities);
+
+  return html`
+    <div 
+      class="alert-badge alert-badge-battery"
+      style=${styleMap(badgeStyles)}
+      @click=${(e: Event) => { e.stopPropagation(); onAction(tapAction, primaryEntityId); }}
+      @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); onAction(holdAction, primaryEntityId); }}
+      title="${tooltip}"
+    >
+      <ha-icon
+        .icon=${icon}
+        style=${styleMap(iconStyles)}
+      ></ha-icon>
+    </div>
+  `;
+}
+
+/**
  * Get count of low battery entities
  * Useful for checking if section should be rendered
  */
@@ -155,4 +281,11 @@ export function getLowBatteryCount(
 ): number {
   if (!config) return 0;
   return getLowBatteryEntities(hass, config).length;
+}
+
+/**
+ * Check if battery should be rendered as badge
+ */
+export function isBatteryBadgeMode(config: BatteryEntitiesConfig | undefined): boolean {
+  return config?.show_as_badge === true;
 }
