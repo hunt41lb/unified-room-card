@@ -1,6 +1,6 @@
 /**
  * Unified Room Card
- * 
+ *
  * A comprehensive room status card for Home Assistant with support for
  * climate, persistent, and intermittent entities.
  */
@@ -35,9 +35,6 @@ import type {
   HassEntity,
   UnifiedRoomCardConfig,
   TapActionConfig,
-  ClimateEntitiesConfig,
-  PowerEntitiesConfig,
-  GlowEffectConfig,
 } from './types';
 
 import {
@@ -50,7 +47,7 @@ import {
 import './editor';
 
 // Import components
-import { 
+import {
   renderClimateSection,
   renderBatteryEntities,
   renderBatteryBadge,
@@ -87,7 +84,7 @@ export class UnifiedRoomCard extends LitElement {
 
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config?: UnifiedRoomCardConfig;
-  
+
   // Tap handling - debounce to prevent double-tap from triggering tap
   private _tapTimeout?: ReturnType<typeof setTimeout>;
   private _tapCount: number = 0;
@@ -157,15 +154,15 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _startUpdateSpinTimer(): void {
     this._stopUpdateSpinTimer();
-    
+
     if (!isSpinAnimationEnabled(this._config?.update_entities)) return;
     if (!this.hass || getPendingUpdateCount(this.hass, this._config?.update_entities) === 0) return;
 
     const interval = getSpinInterval(this._config?.update_entities);
-    
+
     // Trigger initial spin
     this._triggerUpdateSpin();
-    
+
     // Set up periodic spin
     this._updateSpinTimer = setInterval(() => {
       this._triggerUpdateSpin();
@@ -191,7 +188,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _triggerUpdateSpin(): void {
     this._updateAnimationState = { isSpinning: true };
-    
+
     // Stop spinning after animation completes (1 second)
     this._spinAnimationTimeout = setTimeout(() => {
       this._updateAnimationState = { isSpinning: false };
@@ -224,7 +221,7 @@ export class UnifiedRoomCard extends LitElement {
 
   protected override updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
-    
+
     // Apply grid-area to host element for layout-card compatibility
     if (this._config?.grid_area) {
       this.style.gridArea = this._config.grid_area;
@@ -421,7 +418,9 @@ export class UnifiedRoomCard extends LitElement {
         ${this._renderBatteryBadge()}
         ${this._renderUpdateBadge()}
         ${this._renderName()}
+        ${this._renderLabel()}
         ${this._renderIcon()}
+        ${this._renderStateArea()}
         ${this.hass ? renderClimateSection(this.hass, this._config?.climate_entities, this._config?.power_entities) : nothing}
         ${this._renderEntitySections(gridAreas)}
       </ha-card>
@@ -433,6 +432,9 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getDefinedGridAreas(): {
     hasCustomGrid: boolean;
+    hasNameArea: boolean;
+    hasLabelArea: boolean;
+    hasStateArea: boolean;
     hasPersistentArea: boolean;
     hasIntermittentArea: boolean;
     hasBatteryArea: boolean;
@@ -441,6 +443,9 @@ export class UnifiedRoomCard extends LitElement {
     const customAreas = this._config?.grid?.template_areas || '';
     return {
       hasCustomGrid: customAreas.length > 0,
+      hasNameArea: customAreas.includes('name'),
+      hasLabelArea: customAreas.includes('label'),
+      hasStateArea: /\bstate\b/.test(customAreas),
       hasPersistentArea: customAreas.includes('persistent'),
       hasIntermittentArea: customAreas.includes('intermittent'),
       hasBatteryArea: customAreas.includes('battery'),
@@ -499,7 +504,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _renderUpdateSection(): TemplateResult | typeof nothing {
     if (!this.hass || !this._config?.update_entities) return nothing;
-    
+
     const pendingUpdateCount = getPendingUpdateCount(this.hass, this._config.update_entities);
     if (pendingUpdateCount === 0) return nothing;
 
@@ -518,8 +523,8 @@ export class UnifiedRoomCard extends LitElement {
     if (!isBatteryBadgeMode(this._config.battery_entities)) return nothing;
 
     return renderBatteryBadge(
-      this.hass, 
-      this._config.battery_entities, 
+      this.hass,
+      this._config.battery_entities,
       this._handleEntityAction.bind(this)
     );
   }
@@ -532,8 +537,8 @@ export class UnifiedRoomCard extends LitElement {
     if (!isUpdateBadgeMode(this._config.update_entities)) return nothing;
 
     return renderUpdateBadge(
-      this.hass, 
-      this._config.update_entities, 
+      this.hass,
+      this._config.update_entities,
       this._handleEntityAction.bind(this),
       this._updateAnimationState
     );
@@ -659,6 +664,21 @@ export class UnifiedRoomCard extends LitElement {
   }
 
   /**
+   * Render card label section (e.g., "Ground Floor")
+   */
+  private _renderLabel(): TemplateResult | typeof nothing {
+    if (!this._config?.show_label || !this._config.label) {
+      return nothing;
+    }
+
+    return html`
+      <div class="label-section">
+        ${this._config.label}
+      </div>
+    `;
+  }
+
+  /**
    * Render main icon section
    */
   private _renderIcon(): TemplateResult | typeof nothing {
@@ -695,7 +715,7 @@ export class UnifiedRoomCard extends LitElement {
       'with-img-cell': showImgCell,
       'active': isActive,
     };
-    
+
     // Only add animation class if it's not empty
     if (animationClass) {
       iconContainerClasses[animationClass] = true;
@@ -709,13 +729,13 @@ export class UnifiedRoomCard extends LitElement {
       const spinDuration = this._config?.spin_duration || 2;
       iconContainerStyles['--spin-duration'] = `${spinDuration}s`;
     }
-    
+
     // Apply custom img_cell size if specified
     if (showImgCell && this._config?.img_cell_size) {
       iconContainerStyles['width'] = this._config.img_cell_size;
       iconContainerStyles['height'] = this._config.img_cell_size;
     }
-    
+
     // Apply dynamic background color for active state with img_cell
     // Use averaged color for light groups
     if (applyUnavailableStyles && showImgCell) {
@@ -736,7 +756,7 @@ export class UnifiedRoomCard extends LitElement {
         iconContainerStyles['height'] = this._config.icon_size;
       }
     }
-    
+
     // Determine icon color based on state and configuration
     if (applyUnavailableStyles) {
       // Unavailable state color
@@ -774,7 +794,7 @@ export class UnifiedRoomCard extends LitElement {
 
     // Build icon section styles for positioning
     const iconSectionStyles: Record<string, string> = {};
-    
+
     // Horizontal positioning
     const hPos = this._config?.icon_horizontal_position || ICON_HORIZONTAL_POSITION_OPTIONS.RIGHT;
     switch (hPos) {
@@ -789,7 +809,7 @@ export class UnifiedRoomCard extends LitElement {
         iconSectionStyles['justify-self'] = 'end';
         break;
     }
-    
+
     // Vertical positioning
     const vPos = this._config?.icon_vertical_position || ICON_VERTICAL_POSITION_OPTIONS.TOP;
     switch (vPos) {
@@ -806,13 +826,13 @@ export class UnifiedRoomCard extends LitElement {
 
     return html`
       <div class="icon-section" style=${styleMap(iconSectionStyles)}>
-        ${this._config?.show_state && mainEntity
+        ${this._config?.show_state && mainEntity && !/\bstate\b/.test(this._config?.grid?.template_areas || '')
           ? html`<span class="state-text">${mainEntity.state}</span>`
           : nothing}
         <div class="icon-wrapper">
           ${showIcon
             ? html`
-                <div 
+                <div
                   class=${classMap(iconContainerClasses)}
                   style=${styleMap(iconContainerStyles)}
                 >
@@ -829,12 +849,32 @@ export class UnifiedRoomCard extends LitElement {
   }
 
   /**
+   * Render standalone state area (when 'state' is a grid area)
+   */
+  private _renderStateArea(): TemplateResult | typeof nothing {
+    if (!this._config?.show_state) return nothing;
+
+    const mainEntity = this._getPrimaryEntity();
+    if (!mainEntity) return nothing;
+
+    // Only render as standalone grid area if 'state' is defined in grid template
+    const templateAreas = this._config?.grid?.template_areas || '';
+    if (!/\bstate\b/.test(templateAreas)) return nothing;
+
+    return html`
+      <div class="state-section">
+        ${mainEntity.state}
+      </div>
+    `;
+  }
+
+  /**
    * Get background color for icon based on entity attributes and domain
    * Supports light entities with rgb_color attribute and climate entities with hvac_action
    */
   private _getEntityBackgroundColor(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
     const opacity = this._config?.icon_background_opacity ?? 0.3;
-    
+
     if (!entity) {
       return `rgba(255, 193, 7, ${opacity})`; // Amber fallback
     }
@@ -936,20 +976,20 @@ export class UnifiedRoomCard extends LitElement {
   private _hsToRgb(h: number, s: number, brightness?: number): [number, number, number] {
     const sat = s / 100;
     const light = (brightness ?? 255) / 255 * 0.5;
-    
+
     const c = (1 - Math.abs(2 * light - 1)) * sat;
     const x = c * (1 - Math.abs((h / 60) % 2 - 1));
     const m = light - c / 2;
-    
+
     let r = 0, g = 0, b = 0;
-    
+
     if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
     else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
     else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
     else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
     else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
     else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
-    
+
     return [
       Math.round((r + m) * 255),
       Math.round((g + m) * 255),
@@ -988,7 +1028,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _isGroupActive(): boolean {
     if (!this.hass) return false;
-    
+
     const entities = this._getAllPrimaryEntities();
     if (entities.length === 0) return false;
 
@@ -1016,31 +1056,31 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getGroupBackgroundColor(): string {
     if (!this.hass) return 'var(--state-active-color, var(--amber-color, #ffc107))';
-    
+
     const entities = this._getAllPrimaryEntities();
     const domain = this._getPrimaryDomain();
-    
+
     // Only average colors for lights
     if (domain !== 'light') {
       const primaryEntity = this._getPrimaryEntity();
       return this._getEntityBackgroundColor(primaryEntity);
     }
-    
+
     const opacity = this._config?.icon_background_opacity ?? 0.3;
-    
+
     // Collect RGB values from all active lights
     const rgbValues: { r: number; g: number; b: number }[] = [];
-    
+
     for (const entityId of entities) {
       const entity = this.hass.states[entityId];
       if (!entity || entity.state !== 'on') continue;
-      
+
       const rgb = entity.attributes.rgb_color as [number, number, number] | undefined;
       if (rgb) {
         rgbValues.push({ r: rgb[0], g: rgb[1], b: rgb[2] });
       }
     }
-    
+
     // If we have RGB values, average them with configurable opacity
     if (rgbValues.length > 0) {
       const avgR = Math.round(rgbValues.reduce((sum, c) => sum + c.r, 0) / rgbValues.length);
@@ -1048,7 +1088,7 @@ export class UnifiedRoomCard extends LitElement {
       const avgB = Math.round(rgbValues.reduce((sum, c) => sum + c.b, 0) / rgbValues.length);
       return `rgba(${avgR}, ${avgG}, ${avgB}, ${opacity})`;
     }
-    
+
     // Fallback to primary entity color
     const primaryEntity = this._getPrimaryEntity();
     return this._getEntityBackgroundColor(primaryEntity);
@@ -1059,30 +1099,30 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getGroupIconColor(): string {
     if (!this.hass) return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
-    
+
     const entities = this._getAllPrimaryEntities();
     const domain = this._getPrimaryDomain();
-    
+
     // Only average colors for lights
     if (domain !== 'light') {
       const primaryEntity = this._getPrimaryEntity();
       if (!primaryEntity) return 'var(--state-active-color, var(--amber-color, #ffc107))';
       return this._getLightIconColor(primaryEntity);
     }
-    
+
     // Collect RGB values from all active lights
     const rgbValues: { r: number; g: number; b: number }[] = [];
-    
+
     for (const entityId of entities) {
       const entity = this.hass.states[entityId];
       if (!entity || entity.state !== 'on') continue;
-      
+
       const rgb = entity.attributes.rgb_color as [number, number, number] | undefined;
       if (rgb) {
         rgbValues.push({ r: rgb[0], g: rgb[1], b: rgb[2] });
       }
     }
-    
+
     // If we have RGB values, average them
     if (rgbValues.length > 0) {
       const avgR = Math.round(rgbValues.reduce((sum, c) => sum + c.r, 0) / rgbValues.length);
@@ -1090,7 +1130,7 @@ export class UnifiedRoomCard extends LitElement {
       const avgB = Math.round(rgbValues.reduce((sum, c) => sum + c.b, 0) / rgbValues.length);
       return `rgb(${avgR}, ${avgG}, ${avgB})`;
     }
-    
+
     // Fallback
     return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
   }
@@ -1137,7 +1177,7 @@ export class UnifiedRoomCard extends LitElement {
       if (triggerStates.includes(entity.state)) {
         // Resolve color (auto or specified)
         const resolvedColor = this._resolveGlowColor(glowEffect.color, entity);
-        
+
         return {
           color: resolvedColor,
           spread: glowEffect.spread ?? 4,
@@ -1155,11 +1195,11 @@ export class UnifiedRoomCard extends LitElement {
   private _resolveGlowColor(color: string | undefined, entity: HassEntity): string {
     // Default to auto if not specified
     const colorValue = color || 'auto';
-    
+
     if (colorValue === 'auto') {
       return this._getEntityGlowColor(entity);
     }
-    
+
     return colorValue;
   }
 
@@ -1168,7 +1208,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getEntityGlowColor(entity: HassEntity): string {
     const domain = entity.entity_id.split('.')[0];
-    
+
     // Light entities - use rgb_color if available
     if (domain === 'light' && entity.state === 'on') {
       const rgbColor = entity.attributes.rgb_color as [number, number, number] | undefined;
@@ -1328,7 +1368,7 @@ export class UnifiedRoomCard extends LitElement {
 
     return html`
       <div class=${classMap(classes)} style=${styleMap(sectionStyles)}>
-        ${entities.map((entityConfig) => 
+        ${entities.map((entityConfig) =>
           this._renderPersistentEntity(entityConfig, defaultIconSize)
         )}
       </div>
@@ -1339,10 +1379,10 @@ export class UnifiedRoomCard extends LitElement {
    * Render a single persistent entity
    */
   private _renderPersistentEntity(
-    entityConfig: { 
-      entity: string; 
-      icon?: string; 
-      icon_size?: string; 
+    entityConfig: {
+      entity: string;
+      icon?: string;
+      icon_size?: string;
       states?: Array<{ state: string; icon?: string; color?: string; animation?: string }>;
       tap_action?: TapActionConfig;
       hold_action?: TapActionConfig;
@@ -1404,7 +1444,7 @@ export class UnifiedRoomCard extends LitElement {
     };
 
     return html`
-      <div 
+      <div
         class="persistent-entity"
         @click=${handleTap}
         @contextmenu=${handleHold}
@@ -1487,7 +1527,7 @@ export class UnifiedRoomCard extends LitElement {
 
     // Binary sensor colors
     if (domain === 'binary_sensor') {
-      return state === 'on' 
+      return state === 'on'
         ? 'var(--state-binary_sensor-active-color, var(--amber-color, #ffc107))'
         : 'var(--primary-text-color)';
     }
@@ -1590,12 +1630,12 @@ export class UnifiedRoomCard extends LitElement {
     const sectionAnimation = config?.animation;
 
     // Filter to only active entities
-    const activeEntities = (config?.entities || []).filter(entityConfig => 
+    const activeEntities = (config?.entities || []).filter(entityConfig =>
       this._isIntermittentEntityActive(entityConfig, sectionActiveStates)
     );
 
     // Check if battery/update have content
-    const hasBatteryContent = includeBattery && this.hass && this._config?.battery_entities && 
+    const hasBatteryContent = includeBattery && this.hass && this._config?.battery_entities &&
       getLowBatteryCount(this.hass, this._config.battery_entities) > 0;
     const hasUpdateContent = includeUpdate && this.hass && this._config?.update_entities &&
       getPendingUpdateCount(this.hass, this._config.update_entities) > 0;
@@ -1616,7 +1656,7 @@ export class UnifiedRoomCard extends LitElement {
 
     return html`
       <div class=${classMap(classes)} style=${styleMap(sectionStyles)}>
-        ${activeEntities.map((entityConfig) => 
+        ${activeEntities.map((entityConfig) =>
           this._renderIntermittentEntity(entityConfig, defaultIconSize, sectionAnimation)
         )}
         ${hasBatteryContent ? renderBatteryEntities(this.hass!, this._config!.battery_entities, this._handleEntityAction.bind(this)) : nothing}
@@ -1633,10 +1673,10 @@ export class UnifiedRoomCard extends LitElement {
     sectionActiveStates?: string[]
   ): boolean {
     if (!this.hass) return false;
-    
+
     const entity = this.hass.states[entityConfig.entity];
     if (!entity) return false;
-    
+
     // Check if unavailable - don't show
     if (['unavailable', 'unknown'].includes(entity.state)) {
       return false;
@@ -1644,10 +1684,10 @@ export class UnifiedRoomCard extends LitElement {
 
     const state = entity.state;
     const domain = entityConfig.entity.split('.')[0];
-    
+
     // Priority: entity-specific > section-wide > domain defaults
     const activeStates = entityConfig.active_states || sectionActiveStates || DOMAIN_ACTIVE_STATES[domain] || ['on'];
-    
+
     return activeStates.includes(state);
   }
 
@@ -1655,10 +1695,10 @@ export class UnifiedRoomCard extends LitElement {
    * Render a single intermittent entity
    */
   private _renderIntermittentEntity(
-    entityConfig: { 
-      entity: string; 
-      icon?: string; 
-      icon_size?: string; 
+    entityConfig: {
+      entity: string;
+      icon?: string;
+      icon_size?: string;
       states?: Array<{ state: string; icon?: string; color?: string; animation?: string }>;
       animation?: AnimationType;
       tap_action?: TapActionConfig;
@@ -1711,7 +1751,7 @@ export class UnifiedRoomCard extends LitElement {
     };
 
     return html`
-      <div 
+      <div
         class=${classMap(entityClasses)}
         @click=${(e: Event) => { e.stopPropagation(); this._handleIntermittentAction(tapAction, entityConfig.entity); }}
         @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleIntermittentAction(holdAction, entityConfig.entity); }}
@@ -1754,7 +1794,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _getBinarySensorIcon(deviceClass: string | undefined, state: string): string {
     const isOn = state === 'on';
-    
+
     const deviceClassIcons: Record<string, { on: string; off: string }> = {
       motion: { on: 'mdi:motion-sensor', off: 'mdi:motion-sensor-off' },
       occupancy: { on: 'mdi:home-account', off: 'mdi:home-outline' },
@@ -1898,7 +1938,7 @@ export class UnifiedRoomCard extends LitElement {
     }
 
     const domain = this._getDomain(entityId);
-    
+
     // Special handling for climate - use hvac_action attribute
     if (domain === 'climate' && attributes) {
       const hvacAction = attributes.hvac_action as string | undefined;
@@ -1910,7 +1950,7 @@ export class UnifiedRoomCard extends LitElement {
 
     // Otherwise, use domain-specific defaults
     const domainActiveStates = DOMAIN_ACTIVE_STATES[domain];
-    
+
     if (domainActiveStates) {
       return domainActiveStates.includes(state);
     }
@@ -1942,7 +1982,7 @@ export class UnifiedRoomCard extends LitElement {
     }
 
     const domain = this._getDomain(entity.entity_id);
-    
+
     // Special handling for climate - use hvac_action for icon
     if (domain === 'climate') {
       const hvacAction = entity.attributes.hvac_action as string | undefined;
@@ -1962,8 +2002,8 @@ export class UnifiedRoomCard extends LitElement {
         }
       }
     }
-    
-    // Check for state-specific icon 
+
+    // Check for state-specific icon
     const stateIcons = DOMAIN_STATE_ICONS[domain];
     if (stateIcons && stateIcons[entity.state]) {
       return stateIcons[entity.state];
@@ -1981,7 +2021,7 @@ export class UnifiedRoomCard extends LitElement {
 
     const domain = this._getDomain(entity.entity_id);
     const stateColors = DOMAIN_STATE_COLORS[domain];
-    
+
     if (stateColors && stateColors[entity.state]) {
       return stateColors[entity.state];
     }
@@ -1998,9 +2038,9 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handleTap(ev: Event): void {
     ev.stopPropagation();
-    
+
     this._tapCount++;
-    
+
     // If this is the first tap, start the timer
     if (this._tapCount === 1) {
       this._tapTimeout = setTimeout(() => {
@@ -2017,7 +2057,7 @@ export class UnifiedRoomCard extends LitElement {
         this._tapTimeout = undefined;
       }
       this._tapCount = 0;
-      
+
       if (this._config?.double_tap_action) {
         this._handleAction(this._config.double_tap_action);
       }
@@ -2030,14 +2070,14 @@ export class UnifiedRoomCard extends LitElement {
   private _handleHold(ev: Event): void {
     ev.preventDefault();
     ev.stopPropagation();
-    
+
     // Cancel any pending tap action
     if (this._tapTimeout) {
       clearTimeout(this._tapTimeout);
       this._tapTimeout = undefined;
     }
     this._tapCount = 0;
-    
+
     if (this._config?.hold_action) {
       this._handleAction(this._config.hold_action);
     }

@@ -11,7 +11,7 @@ import type {
   UnitHandlingType,
   IconHorizontalPositionType,
   IconVerticalPositionType,
-  BadgePositionType,  // NEW: Import badge position type
+  BadgePositionType,
 } from './constants';
 
 // =============================================================================
@@ -250,6 +250,7 @@ export interface UnifiedRoomCardConfig {
   show_name?: boolean;
   show_icon?: boolean;
   show_state?: boolean;
+  show_label?: boolean;
   show_img_cell?: boolean;
   icon_animation?: string;  // Animation type: none, pulse, glow, flash, spin
   spin_duration?: number;   // Duration of full 360° spin in seconds (default: 2)
@@ -264,6 +265,7 @@ export interface UnifiedRoomCardConfig {
 
   // Entity Domain/State Handling
   active_states?: string[];  // Custom states considered "active" (overrides domain defaults)
+  label?: string;            // Custom label text
 
   // Unavailable State Handling
   unavailable_handling?: UnavailableHandlingConfig;

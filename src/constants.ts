@@ -1,6 +1,6 @@
 /**
  * Unified Room Card - Constants
- * 
+ *
  * Central source of truth for all card metadata, default values,
  * and configuration constants. Update values here for global changes.
  */
@@ -9,7 +9,7 @@
 // CARD METADATA
 // =============================================================================
 
-export const CARD_VERSION = '2.0.2';
+export const CARD_VERSION = '2.0.2-u4';
 export const CARD_NAME = 'Unified Room Card';
 export const CARD_DESCRIPTION = 'A comprehensive room status card for Home Assistant';
 export const CARD_EDITOR_NAME = 'unified-room-card-editor';
@@ -23,7 +23,7 @@ export const CARD_EDITOR_TAG = 'unified-room-card-editor';
 // =============================================================================
 
 // Icon spans all columns in row 1, name overlays on top
-export const DEFAULT_GRID_TEMPLATE_AREAS = '"icon icon icon icon" "climate climate status status"';
+export const DEFAULT_GRID_TEMPLATE_AREAS = '"name name icon icon" "climate climate status status"';
 export const DEFAULT_GRID_TEMPLATE_COLUMNS = '1fr 1fr 1fr 1fr';
 export const DEFAULT_GRID_TEMPLATE_ROWS = '1fr min-content';
 
@@ -285,13 +285,13 @@ export const HA_COLOR_OPTIONS = [
   { value: 'var(--primary-text-color)', label: 'Primary Text', category: 'Theme' },
   { value: 'var(--secondary-text-color)', label: 'Secondary Text', category: 'Theme' },
   { value: 'var(--disabled-text-color)', label: 'Disabled', category: 'Theme' },
-  
+
   // Status Colors
   { value: 'var(--success-color)', label: 'Success (Green)', category: 'Status' },
   { value: 'var(--warning-color)', label: 'Warning (Amber)', category: 'Status' },
   { value: 'var(--error-color)', label: 'Error (Red)', category: 'Status' },
   { value: 'var(--info-color)', label: 'Info (Blue)', category: 'Status' },
-  
+
   // Base Colors
   { value: 'var(--amber-color)', label: 'Amber', category: 'Colors' },
   { value: 'var(--blue-color)', label: 'Blue', category: 'Colors' },
@@ -302,50 +302,50 @@ export const HA_COLOR_OPTIONS = [
   { value: 'var(--purple-color)', label: 'Purple', category: 'Colors' },
   { value: 'var(--pink-color)', label: 'Pink', category: 'Colors' },
   { value: 'var(--yellow-color)', label: 'Yellow', category: 'Colors' },
-  
+
   // Binary Sensor States
   { value: 'var(--state-binary_sensor-active-color)', label: 'Binary Sensor Active', category: 'Binary Sensor' },
   { value: 'var(--state-binary_sensor-inactive-color)', label: 'Binary Sensor Inactive', category: 'Binary Sensor' },
-  
+
   // Lock States
   { value: 'var(--state-lock-locked-color)', label: 'Lock Locked', category: 'Lock' },
   { value: 'var(--state-lock-unlocked-color)', label: 'Lock Unlocked', category: 'Lock' },
   { value: 'var(--state-lock-jammed-color)', label: 'Lock Jammed', category: 'Lock' },
   { value: 'var(--state-lock-pending-color)', label: 'Lock Pending', category: 'Lock' },
-  
+
   // Light States
   { value: 'var(--state-light-active-color)', label: 'Light Active', category: 'Light' },
   { value: 'var(--state-light-inactive-color)', label: 'Light Inactive', category: 'Light' },
-  
+
   // Switch States
   { value: 'var(--state-switch-active-color)', label: 'Switch Active', category: 'Switch' },
   { value: 'var(--state-switch-inactive-color)', label: 'Switch Inactive', category: 'Switch' },
-  
+
   // Cover States
   { value: 'var(--state-cover-open-color)', label: 'Cover Open', category: 'Cover' },
   { value: 'var(--state-cover-closed-color)', label: 'Cover Closed', category: 'Cover' },
-  
+
   // Climate States
   { value: 'var(--state-climate-heat-color)', label: 'Climate Heat', category: 'Climate' },
   { value: 'var(--state-climate-cool-color)', label: 'Climate Cool', category: 'Climate' },
   { value: 'var(--state-climate-idle-color)', label: 'Climate Idle', category: 'Climate' },
   { value: 'var(--state-climate-fan_only-color)', label: 'Climate Fan', category: 'Climate' },
   { value: 'var(--state-climate-dry-color)', label: 'Climate Dry', category: 'Climate' },
-  
+
   // Person/Presence
   { value: 'var(--state-person-home-color)', label: 'Person Home', category: 'Presence' },
   { value: 'var(--state-person-away-color)', label: 'Person Away', category: 'Presence' },
-  
+
   // Alarm States
   { value: 'var(--state-alarm-armed-color)', label: 'Alarm Armed', category: 'Alarm' },
   { value: 'var(--state-alarm-disarmed-color)', label: 'Alarm Disarmed', category: 'Alarm' },
   { value: 'var(--state-alarm-triggered-color)', label: 'Alarm Triggered', category: 'Alarm' },
   { value: 'var(--state-alarm-pending-color)', label: 'Alarm Pending', category: 'Alarm' },
-  
+
   // Generic Active/Inactive
   { value: 'var(--state-active-color)', label: 'Active (Generic)', category: 'Generic' },
   { value: 'var(--state-inactive-color)', label: 'Inactive (Generic)', category: 'Generic' },
-  
+
   // Custom option
   { value: 'custom', label: '↳ Custom CSS...', category: 'Custom' },
 ];

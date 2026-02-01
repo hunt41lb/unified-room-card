@@ -1,6 +1,6 @@
 /**
  * Unified Room Card - Styles
- * 
+ *
  * Central source of truth for all CSS styles.
  * All styles reference Home Assistant CSS variables where applicable
  * to ensure theme compatibility.
@@ -226,8 +226,7 @@ export const cardBaseStyles = css`
 export const nameStyles = css`
   .name-section {
     /* Position in row 1, spanning first 2 columns */
-    grid-row: 1;
-    grid-column: 1 / 3;
+    grid-area: name;
     justify-self: start;
     align-self: start;
     text-align: left;
@@ -354,6 +353,44 @@ export const statusStyles = css`
     gap: 4px;
     padding: 0 0 1px 2px;
     margin: 0 3px 0 0;
+  }
+`;
+
+// =============================================================================
+// LABEL SECTION STYLES
+// =============================================================================
+
+export const labelStyles = css`
+  .label-section {
+    grid-area: label;
+    justify-self: start;
+    align-self: center;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 400;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    padding: 0 14px 8px 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
+// =============================================================================
+// STATE SECTION STYLES (standalone grid area for entity state text)
+// =============================================================================
+
+export const stateAreaStyles = css`
+  .state-section {
+    grid-area: state;
+    justify-self: end;
+    align-self: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    text-transform: capitalize;
+    white-space: nowrap;
+    padding: 0 14px 8px 0;
   }
 `;
 
@@ -1202,7 +1239,7 @@ export function getCardDynamicStyles(config: {
   if (config.borderStyle) {
     styles.push(`border: ${config.borderStyle};`);
   }
-  
+
   // Glow effect - set CSS variables for use by glow classes
   if (config.glowColor) {
     const spread = config.glowSpread ?? 4;
