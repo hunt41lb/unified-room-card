@@ -1,6 +1,6 @@
 /**
  * Unified Room Card - Visual Editor
- * 
+ *
  * GUI editor for configuring the card through Home Assistant's
  * card configuration dialog.
  */
@@ -169,6 +169,24 @@ export class UnifiedRoomCardEditor extends LitElement {
               ></ha-switch>
             </div>
           </div>
+          <!-- Label with inline Show Label toggle -->
+          <div class="form-row-inline">
+            <span class="form-label">Label</span>
+            <div class="form-input">
+              <ha-textfield
+                .value=${this._config?.label || ''}
+                placeholder="e.g., Ground Floor"
+                @input=${(e: Event) => this._valueChanged('label', (e.target as HTMLInputElement).value)}
+              ></ha-textfield>
+            </div>
+            <div class="form-toggle">
+              <span>Show</span>
+              <ha-switch
+                .checked=${this._config?.show_label || false}
+                @change=${(e: Event) => this._valueChanged('show_label', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
           <!-- Entity -->
           <div class="form-row">
             <span class="form-label">Entity</span>
@@ -229,7 +247,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     // Check if current icon_color is a custom value (not in predefined list)
     const currentIconColor = unavailableConfig.icon_color || '';
-    const isCustomColor = this._showUnavailableCustomColorInput || 
+    const isCustomColor = this._showUnavailableCustomColorInput ||
       (currentIconColor && !HA_COLOR_OPTIONS.some(opt => opt.value === currentIconColor));
     const dropdownValue = isCustomColor ? 'custom' : (currentIconColor || 'var(--disabled-text-color)');
 
@@ -643,7 +661,7 @@ export class UnifiedRoomCardEditor extends LitElement {
           </div>
           <p class="helper-text">Add glow effects triggered by entity states. First matching effect wins.</p>
           ${this._renderGlowEffects()}
-          <button 
+          <button
             class="add-entity-button"
             @click=${this._addGlowEffect}
           >
@@ -1007,10 +1025,10 @@ export class UnifiedRoomCardEditor extends LitElement {
           ${(entityConfig.states || []).map((stateConfig, stateIndex) => {
             const colorKey = `${index}-${stateIndex}`;
             const currentColor = stateConfig.color || '';
-            const isCustomColor = this._customColorInputs.has(colorKey) || 
+            const isCustomColor = this._customColorInputs.has(colorKey) ||
               (currentColor && !HA_COLOR_OPTIONS.some(opt => opt.value === currentColor));
             const dropdownValue = isCustomColor ? 'custom' : currentColor;
-            
+
             return html`
               <div class="state-config-row">
                 <ha-textfield
@@ -1267,10 +1285,10 @@ export class UnifiedRoomCardEditor extends LitElement {
           ${(entityConfig.states || []).map((stateConfig, stateIndex) => {
             const colorKey = `i-${index}-${stateIndex}`;
             const currentColor = stateConfig.color || '';
-            const isCustomColor = this._intermittentCustomColorInputs.has(colorKey) || 
+            const isCustomColor = this._intermittentCustomColorInputs.has(colorKey) ||
               (currentColor && !HA_COLOR_OPTIONS.some(opt => opt.value === currentColor));
             const dropdownValue = isCustomColor ? 'custom' : currentColor;
-            
+
             return html`
               <div class="state-config-row">
                 <ha-textfield
@@ -1963,24 +1981,24 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _getPrimaryEntitySelector(): Record<string, unknown> {
     const deviceClass = this._getPrimaryEntityDeviceClass();
-    
+
     if (deviceClass) {
       // Filter to same device_class as first entity
-      return { 
-        entity: { 
-          domain: 'sensor', 
-          device_class: deviceClass, 
-          multiple: true 
-        } 
+      return {
+        entity: {
+          domain: 'sensor',
+          device_class: deviceClass,
+          multiple: true
+        }
       };
     }
-    
+
     // No entities selected - allow any sensor
-    return { 
-      entity: { 
-        domain: ['sensor', 'climate', 'weather'], 
-        multiple: true 
-      } 
+    return {
+      entity: {
+        domain: ['sensor', 'climate', 'weather'],
+        multiple: true
+      }
     };
   }
 
@@ -2008,7 +2026,7 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _getPowerEntitySelector(): Record<string, unknown> {
     const unit = this._getPowerEntityUnit();
-    
+
     if (unit) {
       // Filter to same unit as first entity
       // We use a filter function approach via device_class matching
@@ -2026,25 +2044,25 @@ export class UnifiedRoomCardEditor extends LitElement {
         'V': ['voltage'],
         'mV': ['voltage'],
       };
-      
+
       const deviceClasses = deviceClassMap[unit] || ['power', 'energy', 'voltage', 'current'];
-      
-      return { 
-        entity: { 
-          domain: 'sensor', 
+
+      return {
+        entity: {
+          domain: 'sensor',
           device_class: deviceClasses,
-          multiple: true 
-        } 
+          multiple: true
+        }
       };
     }
-    
+
     // No entities selected - allow any power-related sensors
-    return { 
-      entity: { 
-        domain: 'sensor', 
+    return {
+      entity: {
+        domain: 'sensor',
         device_class: ['power', 'energy', 'voltage', 'current'],
-        multiple: true 
-      } 
+        multiple: true
+      }
     };
   }
 
@@ -2073,7 +2091,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (currentValue === value) {
       return;
     }
-    
+
     // Also guard against empty string vs undefined
     if ((currentValue === undefined || currentValue === null) && (value === '' || value === undefined || value === null)) {
       return;
@@ -2100,7 +2118,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const grid = { ...this._config.grid } || {};
-    
+
     if (value) {
       (grid as Record<string, string>)[key] = value;
     } else {
@@ -2123,7 +2141,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     // Get existing action config
     const existingAction = this._config[actionKey];
-    
+
     // Guard against ha-select firing on initial render with same value
     if (existingAction?.action === action) {
       return;
@@ -2153,7 +2171,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const currentAction = this._config[actionKey] || { action: 'none' };
-    
+
     const newConfig = {
       ...this._config,
       [actionKey]: {
@@ -2178,7 +2196,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const climateEntities = { ...this._config.climate_entities } || {};
-    
+
     // Handle arrays vs single values
     if (Array.isArray(value) && value.length === 0) {
       delete (climateEntities as Record<string, unknown>)[key];
@@ -2203,7 +2221,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const powerEntities = { ...this._config.power_entities } || {};
-    
+
     // Handle arrays vs single values
     if (Array.isArray(value) && value.length === 0) {
       delete (powerEntities as Record<string, unknown>)[key];
@@ -2228,7 +2246,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
-    
+
     if (value === '' || value === undefined || value === null) {
       delete (persistentEntities as Record<string, unknown>)[key];
     } else {
@@ -2258,7 +2276,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     entities.push({ entity: '' });
     persistentEntities.entities = entities;
 
@@ -2279,7 +2297,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     entities.splice(index, 1);
     persistentEntities.entities = entities.length > 0 ? entities : undefined;
 
@@ -2302,14 +2320,14 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     if (entities[index]) {
       (entities[index] as Record<string, unknown>)[key] = value || undefined;
       if (!value) {
         delete (entities[index] as Record<string, unknown>)[key];
       }
     }
-    
+
     persistentEntities.entities = entities;
 
     this._config = {
@@ -2328,13 +2346,13 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     if (entities[entityIndex]) {
       const entity = { ...entities[entityIndex] };
       entity.states = [...(entity.states || []), { state: '', icon: '', color: '' }];
       entities[entityIndex] = entity;
     }
-    
+
     persistentEntities.entities = entities;
 
     this._config = {
@@ -2353,7 +2371,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     if (entities[entityIndex]) {
       const entity = { ...entities[entityIndex] };
       const states = [...(entity.states || [])];
@@ -2361,7 +2379,7 @@ export class UnifiedRoomCardEditor extends LitElement {
       entity.states = states.length > 0 ? states : undefined;
       entities[entityIndex] = entity;
     }
-    
+
     persistentEntities.entities = entities;
 
     this._config = {
@@ -2380,22 +2398,22 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     if (entities[entityIndex]) {
       const entity = { ...entities[entityIndex] };
       const states = [...(entity.states || [])];
-      
+
       if (states[stateIndex]) {
         (states[stateIndex] as Record<string, unknown>)[key] = value || undefined;
         if (!value) {
           delete (states[stateIndex] as Record<string, unknown>)[key];
         }
       }
-      
+
       entity.states = states;
       entities[entityIndex] = entity;
     }
-    
+
     persistentEntities.entities = entities;
 
     this._config = {
@@ -2426,7 +2444,7 @@ export class UnifiedRoomCardEditor extends LitElement {
           `);
         }
       }
-      
+
       options.push(html`
         <mwc-list-item value=${opt.value}>${opt.label}</mwc-list-item>
       `);
@@ -2440,7 +2458,7 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _handleColorSelect(entityIndex: number, stateIndex: number, value: string): void {
     const colorKey = `${entityIndex}-${stateIndex}`;
-    
+
     if (value === 'custom') {
       // Show custom input
       this._customColorInputs = new Set([...this._customColorInputs, colorKey]);
@@ -2460,16 +2478,16 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     if (entities[index]) {
       const entity = { ...entities[index] };
       const existingAction = entity[actionKey];
-      
+
       // Guard against unnecessary updates
       if (existingAction?.action === actionValue) {
         return;
       }
-      
+
       // Preserve existing properties when changing action type
       entity[actionKey] = {
         ...existingAction,
@@ -2477,7 +2495,7 @@ export class UnifiedRoomCardEditor extends LitElement {
       };
       entities[index] = entity;
     }
-    
+
     persistentEntities.entities = entities;
 
     this._config = {
@@ -2499,7 +2517,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     const persistentEntities = { ...this._config.persistent_entities } || {};
     const entities = [...(persistentEntities.entities || [])];
-    
+
     if (entities[index]) {
       const entity = { ...entities[index] };
       // Replace existing states with domain defaults
@@ -2510,7 +2528,7 @@ export class UnifiedRoomCardEditor extends LitElement {
       }));
       entities[index] = entity;
     }
-    
+
     persistentEntities.entities = entities;
 
     this._config = {
@@ -3124,7 +3142,7 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _renderGlowEffect(effect: { entity: string; state?: string; states?: string[]; color?: string; spread?: number; animation?: string }, index: number): TemplateResult {
     // Combine state and states for display
-    const displayStates = effect.states?.length 
+    const displayStates = effect.states?.length
       ? effect.states.join(', ')
       : effect.state || '';
 
