@@ -648,7 +648,9 @@ export const cardStyles = css`
   ${cardGlowStyles}
   ${cardBaseStyles}
   ${nameStyles}
+  ${labelStyles}
   ${iconStyles}
+  ${stateAreaStyles}
   ${climateStyles}
   ${statusStyles}
   ${persistentStyles}
