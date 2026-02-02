@@ -65,6 +65,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   @state() private _customColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input (persistent)
   @state() private _intermittentCustomColorInputs: Set<string> = new Set(); // Tracks which state configs show custom input (intermittent)
   @state() private _showUnavailableCustomColorInput: boolean = false; // Tracks if custom color input is shown for unavailable handling
+  @state() private _iconStateMapCustomColors: Set<string> = new Set(); // Tracks which icon_state_map entries show custom color input
 
   // ===========================================================================
   // STATIC STYLES
@@ -557,6 +558,8 @@ export class UnifiedRoomCardEditor extends LitElement {
               </div>
               <p class="helper-text">Time for one complete 360° rotation (useful for timer visualization)</p>
             ` : ''}
+            <!-- Icon State Map -->
+            ${this._renderIconStateMapSection()}
           ` : ''}
         </div>
       </div>
@@ -2543,6 +2546,208 @@ export class UnifiedRoomCardEditor extends LitElement {
     this._customColorInputs = newCustomInputs;
 
     this._dispatchConfigChanged();
+  }
+
+  // ===========================================================================
+  // ICON STATE MAP METHODS
+  // ===========================================================================
+
+  /**
+   * Render the icon state map section inside the Icon sub-accordion
+   */
+  private _renderIconStateMapSection(): TemplateResult {
+    const stateMap = this._config?.icon_state_map;
+    const hasStates = stateMap?.states && Object.keys(stateMap.states).length > 0;
+
+    return html`
+      <div class="form-row state-header-row" style="margin-top: 12px;">
+        <span class="form-label">Icon State Map</span>
+      </div>
+      <p class="helper-text" style="margin-top: 0;">Change icon and color based on an entity's state</p>
+      <!-- Entity selector (optional - defaults to primary entity) -->
+      <div class="form-row">
+        <span class="form-label">Watch Entity</span>
+        <div class="form-input">
+          <ha-entity-picker
+            .hass=${this.hass}
+            .value=${stateMap?.entity || ''}
+            @value-changed=${(e: CustomEvent) => this._updateIconStateMapEntity(e.detail.value)}
+            allow-custom-entity
+          ></ha-entity-picker>
+        </div>
+      </div>
+      <p class="helper-text">Entity whose state drives the icon change (defaults to primary entity if empty)</p>
+      ${hasStates ? Object.entries(stateMap!.states).map(([stateValue, entry], idx) => {
+        const colorKey = `ism-${idx}`;
+        const currentColor = entry.color || '';
+        const isCustomColor = this._iconStateMapCustomColors.has(colorKey) ||
+          (currentColor && !HA_COLOR_OPTIONS.some(opt => opt.value === currentColor));
+        const dropdownValue = isCustomColor ? 'custom' : currentColor;
+
+        return html`
+          <div class="state-config-row">
+            <ha-textfield
+              .value=${stateValue}
+              placeholder="State (e.g., on)"
+              @input=${(e: Event) => this._updateIconStateMapState(stateValue, 'state', (e.target as HTMLInputElement).value)}
+              style="flex: 1;"
+            ></ha-textfield>
+            <ha-selector
+              .hass=${this.hass}
+              .selector=${{ icon: {} }}
+              .value=${entry.icon || ''}
+              @value-changed=${(e: CustomEvent) => this._updateIconStateMapState(stateValue, 'icon', e.detail.value)}
+              style="flex: 1;"
+            ></ha-selector>
+            <div class="color-select-wrapper" style="flex: 1.5; display: flex; flex-direction: column; gap: 4px;">
+              <div class="color-select-with-preview">
+                <ha-select
+                  .value=${dropdownValue}
+                  @selected=${(e: CustomEvent) => this._handleIconStateMapColorSelect(stateValue, idx, (e.target as HTMLSelectElement).value)}
+                  @closed=${(e: Event) => e.stopPropagation()}
+                  style="flex: 1;"
+                >
+                  ${this._renderColorOptions()}
+                </ha-select>
+                <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
+              </div>
+              ${isCustomColor ? html`
+                <ha-textfield
+                  .value=${currentColor}
+                  placeholder="CSS color value"
+                  @input=${(e: Event) => this._updateIconStateMapState(stateValue, 'color', (e.target as HTMLInputElement).value)}
+                  style="width: 100%;"
+                ></ha-textfield>
+              ` : nothing}
+            </div>
+            <ha-icon icon="mdi:delete" @click=${() => this._removeIconStateMapState(stateValue)}></ha-icon>
+          </div>
+        `;
+      }) : nothing}
+      <div class="add-state-btn" @click=${() => this._addIconStateMapState()}>
+        <ha-icon icon="mdi:plus"></ha-icon>
+        <span>Add State Mapping</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Update icon_state_map.entity
+   */
+  private _updateIconStateMapEntity(value: string): void {
+    if (!this._config) return;
+
+    const stateMap = { ...(this._config.icon_state_map || { states: {} }) };
+
+    if (value) {
+      stateMap.entity = value;
+    } else {
+      delete stateMap.entity;
+    }
+
+    // Clean up: remove icon_state_map entirely if empty
+    if (!stateMap.entity && (!stateMap.states || Object.keys(stateMap.states).length === 0)) {
+      const { icon_state_map: _, ...rest } = this._config;
+      this._config = { ...rest } as UnifiedRoomCardConfig;
+    } else {
+      this._config = { ...this._config, icon_state_map: stateMap };
+    }
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Add a new empty state entry to icon_state_map
+   */
+  private _addIconStateMapState(): void {
+    if (!this._config) return;
+
+    const stateMap = { ...(this._config.icon_state_map || { states: {} }) };
+    const states = { ...stateMap.states };
+
+    // Find a unique placeholder key
+    let key = '';
+    let counter = 1;
+    do {
+      key = `state_${counter}`;
+      counter++;
+    } while (key in states);
+
+    states[key] = {};
+    stateMap.states = states;
+
+    this._config = { ...this._config, icon_state_map: stateMap };
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Remove a state entry from icon_state_map
+   */
+  private _removeIconStateMapState(stateValue: string): void {
+    if (!this._config?.icon_state_map?.states) return;
+
+    const stateMap = { ...this._config.icon_state_map };
+    const states = { ...stateMap.states };
+    delete states[stateValue];
+    stateMap.states = states;
+
+    // Clean up: remove icon_state_map entirely if no states and no entity
+    if (Object.keys(states).length === 0 && !stateMap.entity) {
+      const { icon_state_map: _, ...rest } = this._config;
+      this._config = { ...rest } as UnifiedRoomCardConfig;
+    } else {
+      this._config = { ...this._config, icon_state_map: stateMap };
+    }
+
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Update a specific field of an icon_state_map state entry
+   * When field is 'state', the key itself is renamed
+   */
+  private _updateIconStateMapState(oldStateValue: string, field: string, value: string): void {
+    if (!this._config?.icon_state_map?.states) return;
+
+    const stateMap = { ...this._config.icon_state_map };
+    const states = { ...stateMap.states };
+
+    if (field === 'state') {
+      // Rename key: copy entry to new key, delete old
+      const entry = states[oldStateValue] || {};
+      delete states[oldStateValue];
+      if (value) {
+        states[value] = { ...entry };
+      }
+    } else {
+      // Update icon or color on the existing entry
+      const entry = { ...(states[oldStateValue] || {}) };
+      if (value) {
+        (entry as Record<string, string>)[field] = value;
+      } else {
+        delete (entry as Record<string, string>)[field];
+      }
+      states[oldStateValue] = entry;
+    }
+
+    stateMap.states = states;
+    this._config = { ...this._config, icon_state_map: stateMap };
+    this._dispatchConfigChanged();
+  }
+
+  /**
+   * Handle color dropdown selection for icon_state_map
+   */
+  private _handleIconStateMapColorSelect(stateValue: string, idx: number, value: string): void {
+    const colorKey = `ism-${idx}`;
+
+    if (value === 'custom') {
+      this._iconStateMapCustomColors = new Set([...this._iconStateMapCustomColors, colorKey]);
+    } else {
+      this._iconStateMapCustomColors.delete(colorKey);
+      this._iconStateMapCustomColors = new Set(this._iconStateMapCustomColors);
+      this._updateIconStateMapState(stateValue, 'color', value);
+    }
   }
 
   // ===========================================================================

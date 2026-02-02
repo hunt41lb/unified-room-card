@@ -591,8 +591,23 @@ export class UnifiedRoomCard extends LitElement {
     const unavailableConfig = getUnavailableConfig(this._config!);
     const applyUnavailableStyles = entityUnavailable && unavailableConfig.behavior !== 'off';
 
-    // Icon priority: unavailable custom icon > config icon > entity default
-    let icon = this._config?.icon || this._getDefaultIcon(mainEntity);
+    // Resolve icon_state_map match (if configured)
+    let stateMapIcon: string | undefined;
+    let stateMapColor: string | undefined;
+    if (this._config?.icon_state_map?.states && this.hass) {
+      const mapEntityId = this._config.icon_state_map.entity || this._config.entity;
+      const mapEntity = mapEntityId ? this.hass.states[mapEntityId] : undefined;
+      if (mapEntity) {
+        const mapEntry = this._config.icon_state_map.states[mapEntity.state];
+        if (mapEntry) {
+          stateMapIcon = mapEntry.icon;
+          stateMapColor = mapEntry.color;
+        }
+      }
+    }
+
+    // Icon priority: unavailable custom icon > state map icon > config icon > entity default
+    let icon = stateMapIcon || this._config?.icon || this._getDefaultIcon(mainEntity);
     if (applyUnavailableStyles && unavailableConfig.icon) {
       icon = unavailableConfig.icon;
     }
@@ -633,6 +648,9 @@ export class UnifiedRoomCard extends LitElement {
     if (applyUnavailableStyles && showImgCell) {
       // Unavailable state background
       iconContainerStyles['background'] = unavailableConfig.background_color;
+    } else if (stateMapColor && showImgCell) {
+      // Icon state map color overrides background when img_cell is shown
+      iconContainerStyles['background'] = stateMapColor;
     } else if (isActive && showImgCell) {
       const bgColor = getGroupBackgroundColor(this.hass!, this._config!);
       iconContainerStyles['background'] = bgColor;
@@ -653,6 +671,12 @@ export class UnifiedRoomCard extends LitElement {
     if (applyUnavailableStyles) {
       // Unavailable state color
       iconStyles['color'] = unavailableConfig.icon_color;
+    } else if (stateMapColor && showImgCell) {
+      // Icon state map with img_cell - use white/contrast for readability
+      iconStyles['color'] = 'var(--text-primary-color, #fff)';
+    } else if (stateMapColor) {
+      // Icon state map without img_cell - apply color directly to icon
+      iconStyles['color'] = stateMapColor;
     } else if (isActive && showImgCell) {
       // For active state with img-cell, use white/contrast color
       iconStyles['color'] = 'var(--text-primary-color, #fff)';

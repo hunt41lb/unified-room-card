@@ -83,6 +83,20 @@ export interface StateConfig {
 }
 
 // =============================================================================
+// ICON STATE MAP CONFIGURATION
+// =============================================================================
+
+export interface IconStateMapEntry {
+  icon?: string;               // Icon to display for this state
+  color?: string;              // Icon color override for this state
+}
+
+export interface IconStateMapConfig {
+  entity?: string;             // Entity to monitor (defaults to primary entity if omitted)
+  states: Record<string, IconStateMapEntry>;  // Map of state values to icon/color overrides
+}
+
+// =============================================================================
 // UNAVAILABLE STATE HANDLING CONFIGURATION
 // =============================================================================
 
@@ -262,6 +276,9 @@ export interface UnifiedRoomCardConfig {
   icon_horizontal_position?: IconHorizontalPositionType;
   icon_vertical_position?: IconVerticalPositionType;
   icon_background_opacity?: number;  // Opacity of icon background when active (0-1, default: 0.3)
+
+  // Icon State Map - Dynamic icon/color based on entity state
+  icon_state_map?: IconStateMapConfig;
 
   // Entity Domain/State Handling
   active_states?: string[];  // Custom states considered "active" (overrides domain defaults)
