@@ -1,5 +1,5 @@
-/**
- * Unified Room Card
+/* Unified Room Card
+ * unified-room-card/src/unified-room-card.ts
  *
  * A comprehensive room status card for Home Assistant with support for
  * climate, persistent, and intermittent entities.
@@ -20,7 +20,6 @@ import {
   DEFAULT_TAP_ACTION,
   DEFAULT_HOLD_ACTION,
   DEFAULT_DOUBLE_TAP_ACTION,
-  COMMON_STATES,
   ICON_HORIZONTAL_POSITION_OPTIONS,
   ICON_VERTICAL_POSITION_OPTIONS,
   DOMAIN_ACTIVE_STATES,
@@ -61,6 +60,19 @@ import {
   isUpdateBadgeMode,
   type UpdateAnimationState
 } from './components';
+
+// Import utilities
+import {
+  getDomain,
+  getPrimaryDomain,
+  isUnavailable,
+  getAllPrimaryEntities,
+  getPrimaryEntity,
+  isPrimaryEntityUnavailable,
+  isGroupActive,
+  getUnavailableConfig,
+  hasRelevantStateChanged,
+} from './utils';
 
 // =============================================================================
 // CONSOLE REGISTRATION LOG
@@ -254,82 +266,7 @@ export class UnifiedRoomCard extends LitElement {
       if (!oldHass) return true;
 
       // Check if any relevant entity states have changed
-      return this._hasRelevantStateChanged(oldHass);
-    }
-
-    return false;
-  }
-
-  /**
-   * Check if any entity relevant to this card has changed state
-   */
-  private _hasRelevantStateChanged(oldHass: HomeAssistant): boolean {
-    if (!this._config || !this.hass) return false;
-
-    const entitiesToCheck: string[] = [];
-
-    // Main entity and additional entities
-    if (this._config.entity) {
-      entitiesToCheck.push(this._config.entity);
-    }
-    if (this._config.entities?.length) {
-      entitiesToCheck.push(...this._config.entities);
-    }
-
-    // Persistent entities
-    if (this._config.persistent_entities?.entities) {
-      entitiesToCheck.push(
-        ...this._config.persistent_entities.entities.map((e) => e.entity)
-      );
-    }
-
-    // Intermittent entities
-    if (this._config.intermittent_entities?.entities) {
-      entitiesToCheck.push(
-        ...this._config.intermittent_entities.entities.map((e) => e.entity)
-      );
-    }
-
-    // Climate entities
-    if (this._config.climate_entities) {
-      const climate = this._config.climate_entities;
-      if (climate.primary_entities) entitiesToCheck.push(...climate.primary_entities);
-      if (climate.temperature_entities) entitiesToCheck.push(...climate.temperature_entities);
-      if (climate.humidity_entities) entitiesToCheck.push(...climate.humidity_entities);
-      if (climate.air_quality_entities) entitiesToCheck.push(...climate.air_quality_entities);
-      if (climate.illuminance_entities) entitiesToCheck.push(...climate.illuminance_entities);
-    }
-
-    // Power entities
-    if (this._config.power_entities?.entities) {
-      entitiesToCheck.push(...this._config.power_entities.entities);
-    }
-
-    // Battery entities
-    if (this._config.battery_entities?.entities) {
-      entitiesToCheck.push(...this._config.battery_entities.entities);
-    }
-
-    // Update entities
-    if (this._config.update_entities?.entities) {
-      entitiesToCheck.push(...this._config.update_entities.entities);
-    }
-
-    // Glow effect entities
-    if (this._config.glow_effects?.length) {
-      entitiesToCheck.push(
-        ...this._config.glow_effects.map((g) => g.entity).filter(Boolean)
-      );
-    }
-
-    // Check if any of these entities have changed
-    for (const entityId of entitiesToCheck) {
-      const oldState = oldHass.states[entityId];
-      const newState = this.hass.states[entityId];
-
-      if (oldState !== newState) {
-        return true;
-      }
+      return hasRelevantStateChanged(this._config, oldHass, this.hass!);
     }
 
     return false;
@@ -345,10 +282,10 @@ export class UnifiedRoomCard extends LitElement {
     }
 
     // Get primary entity for display purposes
-    const mainEntity = this._getPrimaryEntity();
+    const mainEntity = getPrimaryEntity(this.hass, this._config);
 
     // Check if ANY entity in the group is active
-    const isActive = this._isGroupActive();
+    const isActive = isGroupActive(this.hass, this._config);
 
     // Calculate border color from border_entity
     const borderStyle = this._getBorderStyle();
@@ -357,9 +294,9 @@ export class UnifiedRoomCard extends LitElement {
     const activeGlow = this._getActiveGlowEffect();
 
     // Check unavailable state
-    const isUnavailable = this._isPrimaryEntityUnavailable();
-    const unavailableConfig = this._getUnavailableConfig();
-    const applyUnavailableStyles = isUnavailable && unavailableConfig.behavior !== 'off';
+    const entityUnavailable = isPrimaryEntityUnavailable(this.hass, this._config);
+    const unavailableConfig = getUnavailableConfig(this._config);
+    const applyUnavailableStyles = entityUnavailable && unavailableConfig.behavior !== 'off';
 
     const cardDynamicStyles = getCardDynamicStyles({
       cardHeight: this._config.card_height,
@@ -597,7 +534,7 @@ export class UnifiedRoomCard extends LitElement {
    * Get border color for entity based on domain and state
    */
   private _getBorderEntityColor(entity: { entity_id: string; state: string; attributes: Record<string, unknown> }): string | undefined {
-    const domain = this._getDomain(entity.entity_id);
+    const domain = getDomain(entity.entity_id);
 
     // Special handling for climate - use hvac_action
     if (domain === 'climate') {
@@ -680,21 +617,21 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _renderIcon(): TemplateResult | typeof nothing {
     // Get primary entity for display purposes
-    const mainEntity = this._getPrimaryEntity();
+    const mainEntity = getPrimaryEntity(this.hass!, this._config!);
 
     // Check if ANY entity in the group is active
-    const isActive = this._isGroupActive();
+    const isActive = isGroupActive(this.hass!, this._config!);
 
     // Get domain from primary entity
-    const domain = this._getPrimaryDomain() || '';
+    const domain = getPrimaryDomain(this._config!) || '';
 
     const showIcon = this._config?.show_icon !== false;
     const showImgCell = this._config?.show_img_cell ?? true;
 
     // Check for unavailable state and get appropriate icon
-    const isUnavailable = this._isPrimaryEntityUnavailable();
-    const unavailableConfig = this._getUnavailableConfig();
-    const applyUnavailableStyles = isUnavailable && unavailableConfig.behavior !== 'off';
+    const entityUnavailable = isPrimaryEntityUnavailable(this.hass!, this._config!);
+    const unavailableConfig = getUnavailableConfig(this._config!);
+    const applyUnavailableStyles = entityUnavailable && unavailableConfig.behavior !== 'off';
 
     // Icon priority: unavailable custom icon > config icon > entity default
     let icon = this._config?.icon || this._getDefaultIcon(mainEntity);
@@ -851,7 +788,7 @@ export class UnifiedRoomCard extends LitElement {
   private _renderStateArea(): TemplateResult | typeof nothing {
     if (!this._config?.show_state) return nothing;
 
-    const mainEntity = this._getPrimaryEntity();
+    const mainEntity = getPrimaryEntity(this.hass!, this._config!);
     if (!mainEntity) return nothing;
 
     // Only render as standalone grid area if 'state' is defined in grid template
@@ -876,7 +813,7 @@ export class UnifiedRoomCard extends LitElement {
       return `rgba(255, 193, 7, ${opacity})`; // Amber fallback
     }
 
-    const domain = this._getDomain(entity.entity_id);
+    const domain = getDomain(entity.entity_id);
 
     // Climate entities - use hvac_action attribute for actual heating/cooling state
     if (domain === 'climate') {
@@ -972,67 +909,18 @@ export class UnifiedRoomCard extends LitElement {
   // ===========================================================================
 
   /**
-   * Get all primary entities (entity + entities array)
-   */
-  private _getAllPrimaryEntities(): string[] {
-    const entities: string[] = [];
-    if (this._config?.entity) {
-      entities.push(this._config.entity);
-    }
-    if (this._config?.entities?.length) {
-      entities.push(...this._config.entities);
-    }
-    return entities;
-  }
-
-  /**
-   * Get the domain of the primary entity
-   */
-  private _getPrimaryDomain(): string | undefined {
-    if (!this._config?.entity) return undefined;
-    return this._getDomain(this._config.entity);
-  }
-
-  /**
-   * Check if ANY entity in the primary group is active
-   */
-  private _isGroupActive(): boolean {
-    if (!this.hass) return false;
-
-    const entities = this._getAllPrimaryEntities();
-    if (entities.length === 0) return false;
-
-    for (const entityId of entities) {
-      const entity = this.hass.states[entityId];
-      if (entity && this._isEntityActive(entity.entity_id, entity.state, entity.attributes)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Get the primary entity state object
-   * Returns the first entity for backwards compatibility
-   */
-  private _getPrimaryEntity(): { entity_id: string; state: string; attributes: Record<string, unknown> } | undefined {
-    if (!this.hass || !this._config?.entity) return undefined;
-    return this.hass.states[this._config.entity];
-  }
-
-  /**
    * Get averaged background color for light groups
    * Averages RGB values from all active lights in the group
    */
   private _getGroupBackgroundColor(): string {
     if (!this.hass) return 'var(--state-active-color, var(--amber-color, #ffc107))';
 
-    const entities = this._getAllPrimaryEntities();
-    const domain = this._getPrimaryDomain();
+    const entities = getAllPrimaryEntities(this._config!);
+    const domain = getPrimaryDomain(this._config!);
 
     // Only average colors for lights
     if (domain !== 'light') {
-      const primaryEntity = this._getPrimaryEntity();
+      const primaryEntity = getPrimaryEntity(this.hass, this._config!);
       return this._getEntityBackgroundColor(primaryEntity);
     }
 
@@ -1060,7 +948,7 @@ export class UnifiedRoomCard extends LitElement {
     }
 
     // Fallback to primary entity color
-    const primaryEntity = this._getPrimaryEntity();
+    const primaryEntity = getPrimaryEntity(this.hass, this._config!);
     return this._getEntityBackgroundColor(primaryEntity);
   }
 
@@ -1070,12 +958,12 @@ export class UnifiedRoomCard extends LitElement {
   private _getGroupIconColor(): string {
     if (!this.hass) return 'var(--state-light-active-color, var(--amber-color, #ffc107))';
 
-    const entities = this._getAllPrimaryEntities();
-    const domain = this._getPrimaryDomain();
+    const entities = getAllPrimaryEntities(this._config!);
+    const domain = getPrimaryDomain(this._config!);
 
     // Only average colors for lights
     if (domain !== 'light') {
-      const primaryEntity = this._getPrimaryEntity();
+      const primaryEntity = getPrimaryEntity(this.hass, this._config!);
       if (!primaryEntity) return 'var(--state-active-color, var(--amber-color, #ffc107))';
       return this._getLightIconColor(primaryEntity);
     }
@@ -1177,7 +1065,7 @@ export class UnifiedRoomCard extends LitElement {
    * Get glow color from entity based on domain and state
    */
   private _getEntityGlowColor(entity: HassEntity): string {
-    const domain = entity.entity_id.split('.')[0];
+    const domain = getDomain(entity.entity_id);
 
     // Light entities - use rgb_color if available
     if (domain === 'light' && entity.state === 'on') {
@@ -1228,44 +1116,6 @@ export class UnifiedRoomCard extends LitElement {
 
     // Default - use primary color
     return 'var(--primary-color)';
-  }
-
-  /**
-   * Check if entity is unavailable
-   */
-  private _isUnavailable(entity: { state: string }): boolean {
-    return ['unavailable', 'unknown'].includes(entity.state);
-  }
-
-  /**
-   * Check if the primary entity is unavailable
-   */
-  private _isPrimaryEntityUnavailable(): boolean {
-    const entity = this._getPrimaryEntity();
-    if (!entity) return true; // Entity doesn't exist
-    return this._isUnavailable(entity);
-  }
-
-  /**
-   * Get unavailable handling config with defaults
-   */
-  private _getUnavailableConfig(): {
-    behavior: string;
-    icon?: string;
-    icon_color: string;
-    background_color: string;
-    opacity: number;
-    show_badge: boolean;
-  } {
-    const config = this._config?.unavailable_handling || { behavior: 'off' };
-    return {
-      behavior: config.behavior || 'off',
-      icon: config.icon,
-      icon_color: config.icon_color || 'var(--disabled-text-color)',
-      background_color: config.background_color || 'var(--secondary-background-color)',
-      opacity: config.opacity ?? 0.5,
-      show_badge: config.show_badge || false,
-    };
   }
 
   /**
@@ -1361,9 +1211,9 @@ export class UnifiedRoomCard extends LitElement {
     defaultIconSize: string
   ): TemplateResult {
     const entity = this.hass?.states[entityConfig.entity];
-    const isUnavailable = !entity || this._isUnavailable(entity);
+    const entityUnavailable = !entity || isUnavailable(entity);
     const state = entity?.state || 'unavailable';
-    const domain = entityConfig.entity.split('.')[0];
+    const domain = getDomain(entityConfig.entity);
 
     // Find state-specific config
     const stateConfig = entityConfig.states?.find(s => s.state === state);
@@ -1380,7 +1230,7 @@ export class UnifiedRoomCard extends LitElement {
     // Determine color (priority: state config > domain state colors > default)
     let color = stateConfig?.color;
     if (!color) {
-      color = this._getPersistentEntityColor(domain, state, isUnavailable);
+      color = this._getPersistentEntityColor(domain, state, entityUnavailable);
     }
 
     // Icon size (entity-specific or default)
@@ -1653,7 +1503,7 @@ export class UnifiedRoomCard extends LitElement {
     }
 
     const state = entity.state;
-    const domain = entityConfig.entity.split('.')[0];
+    const domain = getDomain(entityConfig.entity);
 
     // Priority: entity-specific > section-wide > domain defaults
     const activeStates = entityConfig.active_states || sectionActiveStates || DOMAIN_ACTIVE_STATES[domain] || ['on'];
@@ -1683,7 +1533,7 @@ export class UnifiedRoomCard extends LitElement {
     if (!entity) return nothing;
 
     const state = entity.state;
-    const domain = entityConfig.entity.split('.')[0];
+    const domain = getDomain(entityConfig.entity);
 
     // Determine icon
     let icon = entityConfig.icon;
@@ -1890,54 +1740,6 @@ export class UnifiedRoomCard extends LitElement {
   }
 
   /**
-   * Extract domain from entity_id
-   */
-  private _getDomain(entityId: string): string {
-    return entityId.split('.')[0];
-  }
-
-  /**
-   * Check if entity is in an "active" state
-   * Uses domain-specific active states, with config override
-   * For climate entities, checks hvac_action attribute
-   */
-  private _isEntityActive(entityId: string, state: string, attributes?: Record<string, unknown>): boolean {
-    // If custom active_states defined in config, use those
-    if (this._config?.active_states && this._config.active_states.length > 0) {
-      return this._config.active_states.includes(state);
-    }
-
-    const domain = this._getDomain(entityId);
-
-    // Special handling for climate - use hvac_action attribute
-    if (domain === 'climate' && attributes) {
-      const hvacAction = attributes.hvac_action as string | undefined;
-      if (hvacAction) {
-        // Active if actually heating, cooling, drying, or fan running
-        return ['heating', 'cooling', 'drying', 'fan', 'preheating'].includes(hvacAction);
-      }
-    }
-
-    // Otherwise, use domain-specific defaults
-    const domainActiveStates = DOMAIN_ACTIVE_STATES[domain];
-
-    if (domainActiveStates) {
-      return domainActiveStates.includes(state);
-    }
-
-    // Fallback to common active states
-    const fallbackActiveStates = [
-      COMMON_STATES.ON,
-      COMMON_STATES.UNLOCKED,
-      COMMON_STATES.OPEN,
-      COMMON_STATES.HOME,
-      COMMON_STATES.HEATING,
-      COMMON_STATES.COOLING,
-    ];
-    return fallbackActiveStates.includes(state as typeof fallbackActiveStates[number]);
-  }
-
-  /**
    * Get default icon for entity based on domain and state
    * For climate entities, uses hvac_action attribute
    */
@@ -1951,7 +1753,7 @@ export class UnifiedRoomCard extends LitElement {
       return entity.attributes.icon as string;
     }
 
-    const domain = this._getDomain(entity.entity_id);
+    const domain = getDomain(entity.entity_id);
 
     // Special handling for climate - use hvac_action for icon
     if (domain === 'climate') {
@@ -1989,7 +1791,7 @@ export class UnifiedRoomCard extends LitElement {
   private _getEntityStateColor(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string | undefined {
     if (!entity) return undefined;
 
-    const domain = this._getDomain(entity.entity_id);
+    const domain = getDomain(entity.entity_id);
     const stateColors = DOMAIN_STATE_COLORS[domain];
 
     if (stateColors && stateColors[entity.state]) {
@@ -2060,7 +1862,7 @@ export class UnifiedRoomCard extends LitElement {
     if (!this.hass || !this._config) return;
 
     const primaryEntityId = this._config.entity;
-    const allEntities = this._getAllPrimaryEntities();
+    const allEntities = getAllPrimaryEntities(this._config);
 
     switch (actionConfig.action) {
       case 'toggle':
