@@ -21,6 +21,7 @@ import {
   BORDER_WIDTH_OPTIONS,
   BORDER_STYLE_OPTIONS,
   BADGE_POSITION_DROPDOWN_OPTIONS,
+  type TapActionType,
 } from './constants';
 
 import type {
@@ -392,7 +393,9 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     this._config = {
       ...this._config,
-      unavailable_handling: (newConfig.behavior === 'off' && !hasCustomProps) ? undefined : newConfig as typeof currentConfig,
+      unavailable_handling: (newConfig.behavior === 'off' && !hasCustomProps)
+        ? undefined
+        : newConfig as unknown as typeof currentConfig,
     };
 
     this._dispatchConfigChanged();
@@ -405,7 +408,6 @@ export class UnifiedRoomCardEditor extends LitElement {
     const expanded = this._accordionState.mainIcon;
     const showIcon = this._config?.show_icon !== false;
     const showBackground = this._config?.show_img_cell !== false;
-    const animateIcon = this._config?.animate_icon || false;
 
     return html`
       <div class="sub-accordion">
@@ -988,7 +990,7 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-input">
               <ha-select
                 .value=${entityConfig.tap_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value)}
+                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
                 <mwc-list-item value="more-info">More Info</mwc-list-item>
@@ -1003,7 +1005,7 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-input">
               <ha-select
                 .value=${entityConfig.hold_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value)}
+                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
                 <mwc-list-item value="more-info">More Info</mwc-list-item>
@@ -1248,7 +1250,7 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-input">
               <ha-select
                 .value=${entityConfig.tap_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value)}
+                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
                 <mwc-list-item value="more-info">More Info</mwc-list-item>
@@ -1263,7 +1265,7 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-input">
               <ha-select
                 .value=${entityConfig.hold_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value)}
+                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
                 <mwc-list-item value="more-info">More Info</mwc-list-item>
@@ -2087,7 +2089,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     if (!this._config) return;
 
     // Guard against unnecessary updates when value hasn't changed
-    const currentValue = (this._config as Record<string, unknown>)[key];
+    const currentValue = (this._config as unknown as Record<string, unknown>)[key];
     if (currentValue === value) {
       return;
     }
@@ -2104,7 +2106,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     // Remove empty values
     if (value === '' || value === undefined || value === null) {
-      delete (newConfig as Record<string, unknown>)[key];
+      delete (newConfig as unknown as Record<string, unknown>)[key];
     }
 
     this._config = newConfig;
@@ -2117,7 +2119,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _gridValueChanged(key: string, value: string): void {
     if (!this._config) return;
 
-    const grid = { ...this._config.grid } || {};
+    const grid = { ...this._config.grid };
 
     if (value) {
       (grid as Record<string, string>)[key] = value;
@@ -2182,7 +2184,7 @@ export class UnifiedRoomCardEditor extends LitElement {
 
     // Clean up empty values
     if (!value) {
-      delete (newConfig[actionKey] as Record<string, unknown>)[dataKey];
+      delete (newConfig[actionKey] as unknown as Record<string, unknown>)[dataKey];
     }
 
     this._config = newConfig;
@@ -2195,7 +2197,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _climateValueChanged(key: string, value: unknown): void {
     if (!this._config) return;
 
-    const climateEntities = { ...this._config.climate_entities } || {};
+    const climateEntities = { ...this._config.climate_entities };
 
     // Handle arrays vs single values
     if (Array.isArray(value) && value.length === 0) {
@@ -2220,7 +2222,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _powerValueChanged(key: string, value: unknown): void {
     if (!this._config) return;
 
-    const powerEntities = { ...this._config.power_entities } || {};
+    const powerEntities = { ...this._config.power_entities } ;
 
     // Handle arrays vs single values
     if (Array.isArray(value) && value.length === 0) {
@@ -2245,12 +2247,12 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _persistentValueChanged(key: string, value: unknown): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities } ;
 
     if (value === '' || value === undefined || value === null) {
-      delete (persistentEntities as Record<string, unknown>)[key];
+      delete (persistentEntities as unknown as Record<string, unknown>)[key];
     } else {
-      (persistentEntities as Record<string, unknown>)[key] = value;
+      (persistentEntities as unknown as Record<string, unknown>)[key] = value;
     }
 
     this._config = {
@@ -2274,7 +2276,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _addPersistentEntity(): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     entities.push({ entity: '' });
@@ -2295,7 +2297,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _removePersistentEntity(index: number): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     entities.splice(index, 1);
@@ -2318,13 +2320,13 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updatePersistentEntity(index: number, key: string, value: unknown): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     if (entities[index]) {
-      (entities[index] as Record<string, unknown>)[key] = value || undefined;
+      (entities[index] as unknown as Record<string, unknown>)[key] = value || undefined;
       if (!value) {
-        delete (entities[index] as Record<string, unknown>)[key];
+        delete (entities[index] as unknown as Record<string, unknown>)[key];
       }
     }
 
@@ -2344,7 +2346,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _addPersistentEntityState(entityIndex: number): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     if (entities[entityIndex]) {
@@ -2369,7 +2371,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _removePersistentEntityState(entityIndex: number, stateIndex: number): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     if (entities[entityIndex]) {
@@ -2396,7 +2398,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updatePersistentEntityState(entityIndex: number, stateIndex: number, key: string, value: unknown): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     if (entities[entityIndex]) {
@@ -2404,9 +2406,9 @@ export class UnifiedRoomCardEditor extends LitElement {
       const states = [...(entity.states || [])];
 
       if (states[stateIndex]) {
-        (states[stateIndex] as Record<string, unknown>)[key] = value || undefined;
+        (states[stateIndex] as unknown as Record<string, unknown>)[key] = value || undefined;
         if (!value) {
-          delete (states[stateIndex] as Record<string, unknown>)[key];
+          delete (states[stateIndex] as unknown as Record<string, unknown>)[key];
         }
       }
 
@@ -2473,10 +2475,10 @@ export class UnifiedRoomCardEditor extends LitElement {
   /**
    * Update tap/hold action for persistent entity
    */
-  private _updatePersistentEntityAction(index: number, actionKey: 'tap_action' | 'hold_action', actionValue: string): void {
+  private _updatePersistentEntityAction(index: number, actionKey: 'tap_action' | 'hold_action', actionValue: TapActionType): void {
     if (!this._config) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     if (entities[index]) {
@@ -2515,7 +2517,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     const defaults = DOMAIN_STATE_DEFAULTS[domain];
     if (!defaults) return;
 
-    const persistentEntities = { ...this._config.persistent_entities } || {};
+    const persistentEntities = { ...this._config.persistent_entities };
     const entities = [...(persistentEntities.entities || [])];
 
     if (entities[index]) {
@@ -2565,7 +2567,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _addIntermittentEntity(): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     entities.push({ entity: '' });
@@ -2586,7 +2588,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _removeIntermittentEntity(index: number): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     entities.splice(index, 1);
@@ -2609,7 +2611,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _intermittentValueChanged(key: string, value: unknown): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
 
     if (value) {
       (intermittentEntities as Record<string, unknown>)[key] = value;
@@ -2631,13 +2633,13 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updateIntermittentEntity(index: number, key: string, value: unknown): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     if (entities[index]) {
-      (entities[index] as Record<string, unknown>)[key] = value || undefined;
+      (entities[index] as unknown as Record<string, unknown>)[key] = value || undefined;
       if (!value) {
-        delete (entities[index] as Record<string, unknown>)[key];
+        delete (entities[index] as unknown as Record<string, unknown>)[key];
       }
     }
 
@@ -2657,7 +2659,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updateIntermittentEntityActiveStates(index: number, value: string): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     if (entities[index]) {
@@ -2683,10 +2685,10 @@ export class UnifiedRoomCardEditor extends LitElement {
   /**
    * Update tap/hold action for intermittent entity
    */
-  private _updateIntermittentEntityAction(index: number, actionKey: 'tap_action' | 'hold_action', actionValue: string): void {
+  private _updateIntermittentEntityAction(index: number, actionKey: 'tap_action' | 'hold_action', actionValue: TapActionType): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     if (entities[index]) {
@@ -2722,7 +2724,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _addIntermittentEntityState(entityIndex: number): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     if (entities[entityIndex]) {
@@ -2747,7 +2749,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _removeIntermittentEntityState(entityIndex: number, stateIndex: number): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     if (entities[entityIndex]) {
@@ -2774,7 +2776,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updateIntermittentEntityState(entityIndex: number, stateIndex: number, key: string, value: unknown): void {
     if (!this._config) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     if (entities[entityIndex]) {
@@ -2782,9 +2784,9 @@ export class UnifiedRoomCardEditor extends LitElement {
       const states = [...(entity.states || [])];
 
       if (states[stateIndex]) {
-        (states[stateIndex] as Record<string, unknown>)[key] = value || undefined;
+        (states[stateIndex] as unknown as Record<string, unknown>)[key] = value || undefined;
         if (!value) {
-          delete (states[stateIndex] as Record<string, unknown>)[key];
+          delete (states[stateIndex] as unknown as Record<string, unknown>)[key];
         }
       }
 
@@ -2828,7 +2830,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     const defaults = DOMAIN_STATE_DEFAULTS[domain];
     if (!defaults) return;
 
-    const intermittentEntities = { ...this._config.intermittent_entities } || {};
+    const intermittentEntities = { ...this._config.intermittent_entities };
     const entities = [...(intermittentEntities.entities || [])];
 
     if (entities[index]) {
@@ -2898,7 +2900,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _batteryValueChanged(key: string, value: unknown): void {
     if (!this._config) return;
 
-    const batteryEntities = { ...this._config.battery_entities } || {};
+    const batteryEntities = { ...this._config.battery_entities };
 
     if (value !== undefined && value !== '' && value !== null) {
       (batteryEntities as Record<string, unknown>)[key] = value;
@@ -2920,7 +2922,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _batteryActionChanged(actionKey: string, actionValue: string): void {
     if (!this._config) return;
 
-    const batteryEntities = { ...this._config.battery_entities } || {};
+    const batteryEntities = { ...this._config.battery_entities };
     const existingAction = (batteryEntities as Record<string, unknown>)[actionKey] as { action?: string } | undefined;
 
     // Guard against unnecessary updates
@@ -2948,7 +2950,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _addBatteryEntity(): void {
     if (!this._config) return;
 
-    const batteryEntities = { ...this._config.battery_entities } || {};
+    const batteryEntities = { ...this._config.battery_entities };
     const entities = [...(batteryEntities.entities || [])];
 
     entities.push('');
@@ -2968,7 +2970,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _removeBatteryEntity(index: number): void {
     if (!this._config) return;
 
-    const batteryEntities = { ...this._config.battery_entities } || {};
+    const batteryEntities = { ...this._config.battery_entities };
     const entities = [...(batteryEntities.entities || [])];
 
     entities.splice(index, 1);
@@ -2988,7 +2990,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updateBatteryEntity(index: number, value: string): void {
     if (!this._config) return;
 
-    const batteryEntities = { ...this._config.battery_entities } || {};
+    const batteryEntities = { ...this._config.battery_entities };
     const entities = [...(batteryEntities.entities || [])];
 
     entities[index] = value;
@@ -3012,7 +3014,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updateValueChanged(key: string, value: unknown): void {
     if (!this._config) return;
 
-    const updateEntities = { ...this._config.update_entities } || {};
+    const updateEntities = { ...this._config.update_entities };
 
     if (value !== undefined && value !== '' && value !== null) {
       (updateEntities as Record<string, unknown>)[key] = value;
@@ -3034,7 +3036,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updateActionChanged(actionKey: string, actionValue: string): void {
     if (!this._config) return;
 
-    const updateEntities = { ...this._config.update_entities } || {};
+    const updateEntities = { ...this._config.update_entities };
     const existingAction = (updateEntities as Record<string, unknown>)[actionKey] as { action?: string } | undefined;
 
     // Guard against unnecessary updates
@@ -3062,7 +3064,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _addUpdateEntity(): void {
     if (!this._config) return;
 
-    const updateEntities = { ...this._config.update_entities } || {};
+    const updateEntities = { ...this._config.update_entities };
     const entities = [...(updateEntities.entities || [])];
 
     entities.push('');
@@ -3082,7 +3084,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _removeUpdateEntity(index: number): void {
     if (!this._config) return;
 
-    const updateEntities = { ...this._config.update_entities } || {};
+    const updateEntities = { ...this._config.update_entities };
     const entities = [...(updateEntities.entities || [])];
 
     entities.splice(index, 1);
@@ -3102,7 +3104,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _updateUpdateEntity(index: number, value: string): void {
     if (!this._config) return;
 
-    const updateEntities = { ...this._config.update_entities } || {};
+    const updateEntities = { ...this._config.update_entities };
     const entities = [...(updateEntities.entities || [])];
 
     entities[index] = value;
