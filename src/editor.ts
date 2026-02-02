@@ -628,11 +628,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                     @selected=${(e: CustomEvent) => this._valueChanged('border_width', (e.target as HTMLSelectElement).value)}
                     @closed=${(e: Event) => e.stopPropagation()}
                   >
-                    <mwc-list-item value="1px">1px</mwc-list-item>
-                    <mwc-list-item value="2px">2px</mwc-list-item>
-                    <mwc-list-item value="3px">3px</mwc-list-item>
-                    <mwc-list-item value="4px">4px</mwc-list-item>
-                    <mwc-list-item value="5px">5px</mwc-list-item>
+                    ${BORDER_WIDTH_OPTIONS.map(opt => html`
+                      <mwc-list-item value=${opt.value}>${opt.label}</mwc-list-item>
+                    `)}
                   </ha-select>
                 </div>
               </div>
@@ -644,12 +642,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                     @selected=${(e: CustomEvent) => this._valueChanged('border_style', (e.target as HTMLSelectElement).value)}
                     @closed=${(e: Event) => e.stopPropagation()}
                   >
-                    <mwc-list-item value="solid">Solid</mwc-list-item>
-                    <mwc-list-item value="dashed">Dashed</mwc-list-item>
-                    <mwc-list-item value="dotted">Dotted</mwc-list-item>
-                    <mwc-list-item value="double">Double</mwc-list-item>
-                    <mwc-list-item value="groove">Groove</mwc-list-item>
-                    <mwc-list-item value="ridge">Ridge</mwc-list-item>
+                    ${BORDER_STYLE_OPTIONS.map(opt => html`
+                      <mwc-list-item value=${opt.value}>${opt.label}</mwc-list-item>
+                    `)}
                   </ha-select>
                 </div>
               </div>
