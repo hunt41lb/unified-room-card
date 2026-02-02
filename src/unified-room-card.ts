@@ -2136,7 +2136,7 @@ declare global {
 (window as Window & { customCards?: Array<{ type: string; name: string; description: string }> }).customCards =
   (window as Window & { customCards?: Array<{ type: string; name: string; description: string }> }).customCards || [];
 
-(window as Window & { customCards?: Array<{ type: string; name: string; description: string }> }).customCards.push({
+(window as Window & { customCards?: Array<{ type: string; name: string; description: string }> }).customCards!.push({
   type: CARD_TAG,
   name: CARD_NAME.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
   description: CARD_DESCRIPTION,
