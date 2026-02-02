@@ -249,6 +249,16 @@ export function getRelevantEntityIds(config: UnifiedRoomCardConfig): string[] {
     );
   }
 
+  // Border entity
+  if (config.border_entity) {
+    entityIds.push(config.border_entity);
+  }
+
+  // Icon state map entity
+  if (config.icon_state_map?.entity) {
+    entityIds.push(config.icon_state_map.entity);
+  }
+
   return entityIds;
 }
 
