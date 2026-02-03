@@ -1,6 +1,6 @@
 /**
  * Update Entities Component
- * 
+ *
  * Renders a single update icon when any entities have pending updates.
  * Supports periodic spin animation to draw attention.
  * Supports both inline (status section) and badge display modes.
@@ -14,9 +14,9 @@ import {
   DEFAULT_BADGE_SIZE,
   DEFAULT_BADGE_ICON_SIZE,
   DEFAULT_BADGE_POSITION,
-  BADGE_POSITION_OPTIONS,
   type BadgePositionType,
 } from '../constants';
+import { getBadgePositionStyles } from '../utils/style-helpers';
 
 // =============================================================================
 // CONSTANTS
@@ -56,7 +56,7 @@ function getPendingUpdateEntities(
   for (const entityId of entities) {
     const entity = hass.states[entityId];
     if (!entity) continue;
-    
+
     // Update entities have state 'on' when update is available
     if (entity.state === 'on') {
       pendingUpdateEntities.push(entityId);
@@ -74,7 +74,7 @@ function buildUpdateTooltip(
   pendingEntities: string[]
 ): string {
   if (pendingEntities.length === 0) return '';
-  
+
   if (pendingEntities.length === 1) {
     const entity = hass.states[pendingEntities[0]];
     if (!entity) return '1 update available';
@@ -82,31 +82,14 @@ function buildUpdateTooltip(
     const version = entity.attributes.latest_version || 'available';
     return `${name}: Update ${version}`;
   }
-  
+
   // Multiple updates - show count and list
   const names = pendingEntities.map(entityId => {
     const entity = hass.states[entityId];
     return entity?.attributes.friendly_name || entityId;
   });
-  
-  return `${pendingEntities.length} updates available:\n${names.join('\n')}`;
-}
 
-/**
- * Get badge position styles based on position setting
- */
-function getBadgePositionStyles(position: BadgePositionType): Record<string, string> {
-  switch (position) {
-    case BADGE_POSITION_OPTIONS.TOP_LEFT:
-      return { top: '-10px', left: '-10px', right: 'auto', bottom: 'auto' };
-    case BADGE_POSITION_OPTIONS.BOTTOM_RIGHT:
-      return { top: 'auto', left: 'auto', right: '-10px', bottom: '-10px' };
-    case BADGE_POSITION_OPTIONS.BOTTOM_LEFT:
-      return { top: 'auto', left: '-10px', right: 'auto', bottom: '-10px' };
-    case BADGE_POSITION_OPTIONS.TOP_RIGHT:
-    default:
-      return { top: '-10px', left: 'auto', right: '-10px', bottom: 'auto' };
-  }
+  return `${pendingEntities.length} updates available:\n${names.join('\n')}`;
 }
 
 // =============================================================================
@@ -124,7 +107,7 @@ export function renderUpdateEntities(
   animationState: UpdateAnimationState
 ): TemplateResult | typeof nothing {
   if (!config) return nothing;
-  
+
   // Skip rendering in inline mode if badge mode is enabled
   if (config.show_as_badge) return nothing;
 
@@ -155,7 +138,7 @@ export function renderUpdateEntities(
   };
 
   return html`
-    <div 
+    <div
       class="intermittent-entity"
       @click=${(e: Event) => { e.stopPropagation(); onAction(tapAction, primaryEntityId); }}
       @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); onAction(holdAction, primaryEntityId); }}
@@ -223,7 +206,7 @@ export function renderUpdateBadge(
   const tooltip = buildUpdateTooltip(hass, pendingEntities);
 
   return html`
-    <div 
+    <div
       class="alert-badge alert-badge-update"
       style=${styleMap(badgeStyles)}
       @click=${(e: Event) => { e.stopPropagation(); onAction(tapAction, primaryEntityId); }}

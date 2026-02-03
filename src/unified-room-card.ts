@@ -8,7 +8,6 @@
 import { LitElement, html, PropertyValues, TemplateResult, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 // Internal imports
 import {
@@ -20,8 +19,6 @@ import {
   DEFAULT_TAP_ACTION,
   DEFAULT_HOLD_ACTION,
   DEFAULT_DOUBLE_TAP_ACTION,
-  ICON_HORIZONTAL_POSITION_OPTIONS,
-  ICON_VERTICAL_POSITION_OPTIONS,
 } from './constants';
 
 import type {
@@ -33,7 +30,6 @@ import type {
 import {
   cardStyles,
   getCardDynamicStyles,
-  getAnimationClass,
 } from './styles';
 
 // Import editor (side effect: registers the custom element)
@@ -54,24 +50,19 @@ import {
   isUpdateBadgeMode,
   renderPersistentEntities,
   renderIntermittentEntities,
+  renderIconSection,
   type UpdateAnimationState
 } from './components';
 
 // Import utilities
 import {
-  getPrimaryDomain,
   getPrimaryEntity,
   isPrimaryEntityUnavailable,
   isGroupActive,
   getUnavailableConfig,
   hasRelevantStateChanged,
   getBorderEntityColor,
-  getClimateIconColor,
-  getEntityStateColor,
-  getGroupBackgroundColor,
-  getGroupIconColor,
   getActiveGlowEffect,
-  getDefaultIcon,
   executeEntityAction,
   executeCardAction,
   fireMoreInfo,
@@ -356,7 +347,7 @@ export class UnifiedRoomCard extends LitElement {
         ${this._renderUpdateBadge()}
         ${this._renderName()}
         ${this._renderLabel()}
-        ${this._renderIcon()}
+        ${this.hass && this._config ? renderIconSection(this.hass, this._config) : nothing}
         ${this._renderStateArea()}
         ${this.hass ? renderClimateSection(this.hass, this._config?.climate_entities, this._config?.power_entities) : nothing}
         ${this._renderEntitySections(gridAreas)}
@@ -588,200 +579,6 @@ export class UnifiedRoomCard extends LitElement {
     return html`
       <div class="label-section">
         ${this._config.label}
-      </div>
-    `;
-  }
-
-  /**
-   * Render main icon section
-   */
-  private _renderIcon(): TemplateResult | typeof nothing {
-    // Get primary entity for display purposes
-    const mainEntity = getPrimaryEntity(this.hass!, this._config!);
-
-    // Check if ANY entity in the group is active
-    const isActive = isGroupActive(this.hass!, this._config!);
-
-    // Get domain from primary entity
-    const domain = getPrimaryDomain(this._config!) || '';
-
-    const showIcon = this._config?.show_icon !== false;
-    const showImgCell = this._config?.show_img_cell ?? true;
-
-    // Check for unavailable state and get appropriate icon
-    const entityUnavailable = isPrimaryEntityUnavailable(this.hass!, this._config!);
-    const unavailableConfig = getUnavailableConfig(this._config!);
-    const applyUnavailableStyles = entityUnavailable && unavailableConfig.behavior !== 'off';
-
-    // Resolve icon_state_map match (if configured)
-    let stateMapIcon: string | undefined;
-    let stateMapColor: string | undefined;
-    if (this._config?.icon_state_map?.states && this.hass) {
-      const mapEntityId = this._config.icon_state_map.entity || this._config.entity;
-      const mapEntity = mapEntityId ? this.hass.states[mapEntityId] : undefined;
-      if (mapEntity) {
-        const mapEntry = this._config.icon_state_map.states[mapEntity.state];
-        if (mapEntry) {
-          stateMapIcon = mapEntry.icon;
-          stateMapColor = mapEntry.color;
-        }
-      }
-    }
-
-    // Icon priority: unavailable custom icon > state map icon > config icon > entity default
-    let icon = stateMapIcon || this._config?.icon || getDefaultIcon(mainEntity);
-    if (applyUnavailableStyles && unavailableConfig.icon) {
-      icon = unavailableConfig.icon;
-    }
-
-    // Get animation class (only when active and animation is configured)
-    const animationClass = isActive && this._config?.icon_animation && this._config.icon_animation !== 'none'
-      ? getAnimationClass(this._config.icon_animation)
-      : '';
-
-    const iconContainerClasses: Record<string, boolean> = {
-      'icon-container': true,
-      'with-img-cell': showImgCell,
-      'active': isActive,
-    };
-
-    // Only add animation class if it's not empty
-    if (animationClass) {
-      iconContainerClasses[animationClass] = true;
-    }
-
-    // Build icon container styles
-    const iconContainerStyles: Record<string, string> = {};
-
-    // Apply spin duration if spin animation is enabled
-    if (this._config?.icon_animation === 'spin' && isActive) {
-      const spinDuration = this._config?.spin_duration || 2;
-      iconContainerStyles['--spin-duration'] = `${spinDuration}s`;
-    }
-
-    // Apply custom img_cell size if specified
-    if (showImgCell && this._config?.img_cell_size) {
-      iconContainerStyles['width'] = this._config.img_cell_size;
-      iconContainerStyles['height'] = this._config.img_cell_size;
-    }
-
-    // Apply dynamic background color for active state with img_cell
-    // Use averaged color for light groups
-    if (applyUnavailableStyles && showImgCell) {
-      // Unavailable state background
-      iconContainerStyles['background'] = unavailableConfig.background_color;
-    } else if (stateMapColor && showImgCell) {
-      // Icon state map color overrides background when img_cell is shown
-      iconContainerStyles['background'] = stateMapColor;
-    } else if (isActive && showImgCell) {
-      const bgColor = getGroupBackgroundColor(this.hass!, this._config!);
-      iconContainerStyles['background'] = bgColor;
-    }
-
-    // Icon styles
-    const iconStyles: Record<string, string> = {};
-    if (this._config?.icon_size) {
-      iconStyles['--mdc-icon-size'] = this._config.icon_size;
-      // Also apply size to container when no img_cell
-      if (!showImgCell) {
-        iconContainerStyles['width'] = this._config.icon_size;
-        iconContainerStyles['height'] = this._config.icon_size;
-      }
-    }
-
-    // Determine icon color based on state and configuration
-    if (applyUnavailableStyles) {
-      // Unavailable state color
-      iconStyles['color'] = unavailableConfig.icon_color;
-    } else if (stateMapColor && showImgCell) {
-      // Icon state map with img_cell - use white/contrast for readability
-      iconStyles['color'] = 'var(--text-primary-color, #fff)';
-    } else if (stateMapColor) {
-      // Icon state map without img_cell - apply color directly to icon
-      iconStyles['color'] = stateMapColor;
-    } else if (isActive && showImgCell) {
-      // For active state with img-cell, use white/contrast color
-      iconStyles['color'] = 'var(--text-primary-color, #fff)';
-    } else if (mainEntity && isActive) {
-      // Active state WITHOUT img_cell - use domain-specific colors
-      if (domain === 'light') {
-        // Use averaged light color for groups
-        iconStyles['color'] = getGroupIconColor(this.hass!, this._config!);
-      } else if (domain === 'climate') {
-        // Use climate hvac_action colors
-        iconStyles['color'] = getClimateIconColor(mainEntity);
-      } else {
-        // Other domains - use generic active color or state color
-        const stateColor = getEntityStateColor(mainEntity);
-        if (stateColor) {
-          iconStyles['color'] = stateColor;
-        } else {
-          iconStyles['color'] = 'var(--state-active-color, var(--amber-color, #ffc107))';
-        }
-      }
-    } else if (mainEntity && domain === 'climate') {
-      // Climate not active but may still be heating/cooling - check hvac_action
-      iconStyles['color'] = getClimateIconColor(mainEntity);
-    } else if (mainEntity) {
-      // Inactive state - check for domain-specific state color (like lock states)
-      const stateColor = getEntityStateColor(mainEntity);
-      if (stateColor) {
-        iconStyles['color'] = stateColor;
-      }
-    }
-
-    // Build icon section styles for positioning
-    const iconSectionStyles: Record<string, string> = {};
-
-    // Horizontal positioning
-    const hPos = this._config?.icon_horizontal_position || ICON_HORIZONTAL_POSITION_OPTIONS.RIGHT;
-    switch (hPos) {
-      case ICON_HORIZONTAL_POSITION_OPTIONS.LEFT:
-        iconSectionStyles['justify-self'] = 'start';
-        break;
-      case ICON_HORIZONTAL_POSITION_OPTIONS.CENTER:
-        iconSectionStyles['justify-self'] = 'center';
-        break;
-      case ICON_HORIZONTAL_POSITION_OPTIONS.RIGHT:
-      default:
-        iconSectionStyles['justify-self'] = 'end';
-        break;
-    }
-
-    // Vertical positioning
-    const vPos = this._config?.icon_vertical_position || ICON_VERTICAL_POSITION_OPTIONS.TOP;
-    switch (vPos) {
-      case ICON_VERTICAL_POSITION_OPTIONS.TOP:
-        iconSectionStyles['align-self'] = 'start';
-        break;
-      case ICON_VERTICAL_POSITION_OPTIONS.CENTER:
-        iconSectionStyles['align-self'] = 'center';
-        break;
-      case ICON_VERTICAL_POSITION_OPTIONS.BOTTOM:
-        iconSectionStyles['align-self'] = 'end';
-        break;
-    }
-
-    return html`
-      <div class="icon-section" style=${styleMap(iconSectionStyles)}>
-        ${this._config?.show_state && mainEntity && !/\bstate\b/.test(this._config?.grid?.template_areas || '')
-          ? html`<span class="state-text">${mainEntity.state}</span>`
-          : nothing}
-        <div class="icon-wrapper">
-          ${showIcon
-            ? html`
-                <div
-                  class=${classMap(iconContainerClasses)}
-                  style=${styleMap(iconContainerStyles)}
-                >
-                  <ha-icon
-                    .icon=${icon}
-                    style=${styleMap(iconStyles)}
-                  ></ha-icon>
-                </div>
-              `
-            : nothing}
-        </div>
       </div>
     `;
   }

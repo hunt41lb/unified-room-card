@@ -32,6 +32,8 @@ import type {
 
 import { editorStyles } from './styles';
 
+import { getDomain } from './utils';
+
 // =============================================================================
 // EDITOR CLASS
 // =============================================================================
@@ -141,7 +143,7 @@ export class UnifiedRoomCardEditor extends LitElement {
    */
   private _renderBasicSettingsSubSection(): TemplateResult {
     const expanded = this._accordionState.mainBasic;
-    const primaryDomain = this._config?.entity ? this._config.entity.split('.')[0] : undefined;
+    const primaryDomain = this._config?.entity ? getDomain(this._config.entity) : undefined;
 
     return html`
       <div class="sub-accordion">
@@ -923,7 +925,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _renderPersistentEntityConfig(entityConfig: { entity: string; icon?: string; icon_size?: string; tap_action?: { action: string }; hold_action?: { action: string }; states?: Array<{ state: string; icon?: string; color?: string }> }, index: number): TemplateResult {
     const entityId = entityConfig.entity || '';
     const entityExists = entityId && this.hass?.states[entityId];
-    const domain = entityId ? entityId.split('.')[0] : '';
+    const domain = entityId ? getDomain(entityId) : '';
     const hasDomainDefaults = DOMAINS_WITH_DEFAULTS.includes(domain);
 
     return html`
@@ -1155,7 +1157,7 @@ export class UnifiedRoomCardEditor extends LitElement {
   private _renderIntermittentEntityConfig(entityConfig: { entity: string; icon?: string; icon_size?: string; active_states?: string[]; tap_action?: { action: string }; hold_action?: { action: string }; animation?: string; states?: Array<{ state: string; icon?: string; color?: string }> }, index: number): TemplateResult {
     const entityId = entityConfig.entity || '';
     const entityExists = entityId && this.hass?.states[entityId];
-    const domain = entityId ? entityId.split('.')[0] : '';
+    const domain = entityId ? getDomain(entityId) : '';
     const hasDomainDefaults = DOMAINS_WITH_DEFAULTS.includes(domain);
 
     return html`

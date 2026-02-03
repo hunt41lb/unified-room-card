@@ -1,6 +1,6 @@
 /**
  * Battery Entities Component
- * 
+ *
  * Renders battery icons for entities below the low threshold.
  * Shows dynamic battery icons based on level.
  * Supports both inline (status section) and badge display modes.
@@ -8,15 +8,15 @@
 
 import { html, TemplateResult, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
-import { classMap } from 'lit/directives/class-map.js';
+
 import type { HomeAssistant, BatteryEntitiesConfig, TapActionConfig } from '../types';
 import {
   DEFAULT_BADGE_SIZE,
   DEFAULT_BADGE_ICON_SIZE,
   DEFAULT_BADGE_POSITION,
-  BADGE_POSITION_OPTIONS,
   type BadgePositionType,
 } from '../constants';
+import { getBadgePositionStyles } from '../utils/style-helpers';
 
 // =============================================================================
 // TYPES
@@ -72,7 +72,7 @@ function getLowBatteryEntities(
   for (const entityId of entities) {
     const entity = hass.states[entityId];
     if (!entity) continue;
-    
+
     const level = getBatteryLevel(entity);
     if (level !== null && level <= lowThreshold) {
       lowBatteryEntities.push(entityId);
@@ -90,7 +90,7 @@ function buildBatteryTooltip(
   lowBatteryEntities: string[]
 ): string {
   if (lowBatteryEntities.length === 0) return '';
-  
+
   if (lowBatteryEntities.length === 1) {
     const entity = hass.states[lowBatteryEntities[0]];
     if (!entity) return '1 low battery';
@@ -98,7 +98,7 @@ function buildBatteryTooltip(
     const level = getBatteryLevel(entity);
     return `${name}: ${level}%`;
   }
-  
+
   // Multiple low batteries - show count and list
   const items = lowBatteryEntities.map(entityId => {
     const entity = hass.states[entityId];
@@ -106,25 +106,8 @@ function buildBatteryTooltip(
     const level = getBatteryLevel(entity);
     return `${name}: ${level}%`;
   });
-  
-  return `${lowBatteryEntities.length} low batteries:\n${items.join('\n')}`;
-}
 
-/**
- * Get badge position styles based on position setting
- */
-function getBadgePositionStyles(position: BadgePositionType): Record<string, string> {
-  switch (position) {
-    case BADGE_POSITION_OPTIONS.TOP_LEFT:
-      return { top: '-10px', left: '-10px', right: 'auto', bottom: 'auto' };
-    case BADGE_POSITION_OPTIONS.BOTTOM_RIGHT:
-      return { top: 'auto', left: 'auto', right: '-10px', bottom: '-10px' };
-    case BADGE_POSITION_OPTIONS.BOTTOM_LEFT:
-      return { top: 'auto', left: '-10px', right: 'auto', bottom: '-10px' };
-    case BADGE_POSITION_OPTIONS.TOP_RIGHT:
-    default:
-      return { top: '-10px', left: 'auto', right: '-10px', bottom: 'auto' };
-  }
+  return `${lowBatteryEntities.length} low batteries:\n${items.join('\n')}`;
 }
 
 // =============================================================================
@@ -136,8 +119,8 @@ function getBadgePositionStyles(position: BadgePositionType): Record<string, str
  */
 function renderBatteryEntity(
   hass: HomeAssistant,
-  entityId: string, 
-  iconSize: string, 
+  entityId: string,
+  iconSize: string,
   color: string,
   config: BatteryEntitiesConfig,
   onAction: BatteryActionHandler
@@ -157,7 +140,7 @@ function renderBatteryEntity(
   const holdAction = config.hold_action || { action: 'more-info' as const };
 
   return html`
-    <div 
+    <div
       class="intermittent-entity"
       @click=${(e: Event) => { e.stopPropagation(); onAction(tapAction, entityId); }}
       @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); onAction(holdAction, entityId); }}
@@ -185,7 +168,7 @@ export function renderBatteryEntities(
   onAction: BatteryActionHandler
 ): TemplateResult | typeof nothing {
   if (!config) return nothing;
-  
+
   // Skip rendering in inline mode if badge mode is enabled
   if (config.show_as_badge) return nothing;
 
@@ -196,7 +179,7 @@ export function renderBatteryEntities(
   const color = 'var(--state-sensor-battery-low-color, var(--error-color, #db4437))';
 
   return html`
-    ${lowBatteryEntities.map(entityId => 
+    ${lowBatteryEntities.map(entityId =>
       renderBatteryEntity(hass, entityId, iconSize, color, config, onAction)
     )}
   `;
@@ -256,7 +239,7 @@ export function renderBatteryBadge(
   const tooltip = buildBatteryTooltip(hass, lowBatteryEntities);
 
   return html`
-    <div 
+    <div
       class="alert-badge alert-badge-battery"
       style=${styleMap(badgeStyles)}
       @click=${(e: Event) => { e.stopPropagation(); onAction(tapAction, primaryEntityId); }}

@@ -1,12 +1,13 @@
 /**
  * Climate Section Component
- * 
+ *
  * Renders temperature, humidity, air quality, illuminance, and power data.
  * Handles averaging calculations and unit normalization.
  */
 
 import { html, TemplateResult, nothing } from 'lit';
 import type { HomeAssistant, ClimateEntitiesConfig, PowerEntitiesConfig } from '../types';
+import { isUnavailable } from '../utils/entity-helpers';
 
 // =============================================================================
 // TYPES
@@ -21,13 +22,6 @@ interface AverageResult {
 // =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
-
-/**
- * Check if entity is unavailable
- */
-function isUnavailable(entity: { state: string }): boolean {
-  return ['unavailable', 'unknown'].includes(entity.state);
-}
 
 /**
  * Calculate average from multiple entity states
@@ -210,7 +204,7 @@ function getPowerValue(
 
     const unitRaw = entity.attributes.unit_of_measurement;
     const unit = (typeof unitRaw === 'string' ? unitRaw : 'W').toLowerCase();
-    
+
     // Normalize to watts
     if (unit === 'kw') {
       totalWatts += value * 1000;
@@ -279,7 +273,7 @@ export function renderClimateSection(
 
   // Build secondary values array
   const secondaryValues: { label: string; value: string }[] = [];
-  
+
   if (humidity) {
     secondaryValues.push({ label: 'humidity', value: humidity });
   }

@@ -50,3 +50,7 @@ export {
   executeEntityAction,
   executeCardAction,
 } from './action-handler';
+
+export {
+  getBadgePositionStyles,
+} from './style-helpers';
