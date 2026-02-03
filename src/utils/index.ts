@@ -32,3 +32,10 @@ export {
   getPersistentEntityColor,
   getIntermittentEntityColor,
 } from './color-resolver';
+
+export {
+  getBinarySensorIcon,
+  getDefaultIcon,
+  getPersistentEntityDefaultIcon,
+  getIntermittentEntityDefaultIcon,
+} from './icon-resolver';
