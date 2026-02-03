@@ -223,4 +223,5 @@ export function getIntermittentEntityDefaultIcon(
 
   // Fall back to domain default
   return DOMAIN_DEFAULT_ICONS[domain] || 'mdi:alert-circle';
+
 }
