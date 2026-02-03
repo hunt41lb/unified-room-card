@@ -22,8 +22,6 @@ import {
   DEFAULT_DOUBLE_TAP_ACTION,
   ICON_HORIZONTAL_POSITION_OPTIONS,
   ICON_VERTICAL_POSITION_OPTIONS,
-  DOMAIN_ACTIVE_STATES,
-  AnimationType,
 } from './constants';
 
 import type {
@@ -55,12 +53,12 @@ import {
   isSpinAnimationEnabled,
   isUpdateBadgeMode,
   renderPersistentEntities,
+  renderIntermittentEntities,
   type UpdateAnimationState
 } from './components';
 
 // Import utilities
 import {
-  getDomain,
   getPrimaryDomain,
   getPrimaryEntity,
   isPrimaryEntityUnavailable,
@@ -73,9 +71,7 @@ import {
   getGroupBackgroundColor,
   getGroupIconColor,
   getActiveGlowEffect,
-  getIntermittentEntityColor,
   getDefaultIcon,
-  getIntermittentEntityDefaultIcon,
   executeEntityAction,
   executeCardAction,
   fireMoreInfo,
@@ -424,7 +420,15 @@ export class UnifiedRoomCard extends LitElement {
         (entityId) => fireMoreInfo(this, entityId),
         true
       ) : nothing}
-      ${hasIntermittentArea ? this._renderIntermittentEntities(true, includeBatteryWithIntermittent, includeUpdateWithIntermittent) : nothing}
+      ${hasIntermittentArea ? renderIntermittentEntities(
+        this.hass!,
+        this._config?.intermittent_entities,
+        this._handleIntermittentAction.bind(this),
+        true,
+        includeBatteryWithIntermittent ? this._config?.battery_entities : undefined,
+        includeUpdateWithIntermittent ? this._config?.update_entities : undefined,
+        this._updateAnimationState
+      ) : nothing}
       ${hasBatteryArea ? this._renderBatterySection() : nothing}
       ${hasUpdateArea ? this._renderUpdateSection() : nothing}
     `;
@@ -518,7 +522,12 @@ export class UnifiedRoomCard extends LitElement {
           (entityId) => fireMoreInfo(this, entityId),
           false
         )}
-        ${this._renderIntermittentEntities(false, false, false)}
+        ${renderIntermittentEntities(
+          this.hass!,
+          this._config?.intermittent_entities,
+          this._handleIntermittentAction.bind(this),
+          false
+        )}
         ${hasBattery && this.hass ? renderBatteryEntities(this.hass, this._config?.battery_entities, this._handleEntityAction.bind(this)) : nothing}
         ${hasUpdate && this.hass ? renderUpdateEntities(this.hass, this._config?.update_entities, this._handleEntityAction.bind(this), this._updateAnimationState) : nothing}
       </div>
@@ -803,160 +812,6 @@ export class UnifiedRoomCard extends LitElement {
   private _handlePersistentAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
     executeEntityAction(this.hass, action, entityId, this);
-  }
-
-  /**
-   * Render intermittent entities section
-   * Only shows entities when they are in an "active" state
-   * @param legacyGrid - If true, uses grid-area: intermittent for custom grid layouts
-   * @param includeBattery - If true, includes battery entities in this section
-   * @param includeUpdate - If true, includes update entities in this section
-   */
-  private _renderIntermittentEntities(
-    legacyGrid: boolean = false,
-    includeBattery: boolean = false,
-    includeUpdate: boolean = false
-  ): TemplateResult | typeof nothing {
-    const config = this._config?.intermittent_entities;
-    const defaultIconSize = config?.icon_size || '21px';
-    const gap = config?.gap || '4px';
-    const sectionActiveStates = config?.active_states;
-    const sectionAnimation = config?.animation;
-
-    // Filter to only active entities
-    const activeEntities = (config?.entities || []).filter(entityConfig =>
-      this._isIntermittentEntityActive(entityConfig, sectionActiveStates)
-    );
-
-    // Check if battery/update have content
-    const hasBatteryContent = includeBattery && this.hass && this._config?.battery_entities &&
-      getLowBatteryCount(this.hass, this._config.battery_entities) > 0;
-    const hasUpdateContent = includeUpdate && this.hass && this._config?.update_entities &&
-      getPendingUpdateCount(this.hass, this._config.update_entities) > 0;
-
-    // Don't render section if no content at all
-    if (activeEntities.length === 0 && !hasBatteryContent && !hasUpdateContent) {
-      return nothing;
-    }
-
-    const sectionStyles: Record<string, string> = {
-      'gap': gap,
-    };
-
-    const classes = {
-      'intermittent-section': true,
-      'legacy-grid': legacyGrid,
-    };
-
-    return html`
-      <div class=${classMap(classes)} style=${styleMap(sectionStyles)}>
-        ${activeEntities.map((entityConfig) =>
-          this._renderIntermittentEntity(entityConfig, defaultIconSize, sectionAnimation)
-        )}
-        ${hasBatteryContent ? renderBatteryEntities(this.hass!, this._config!.battery_entities, this._handleEntityAction.bind(this)) : nothing}
-        ${hasUpdateContent ? renderUpdateEntities(this.hass!, this._config!.update_entities, this._handleEntityAction.bind(this), this._updateAnimationState) : nothing}
-      </div>
-    `;
-  }
-
-  /**
-   * Check if an intermittent entity should be displayed (is "active")
-   */
-  private _isIntermittentEntityActive(
-    entityConfig: { entity: string; active_states?: string[] },
-    sectionActiveStates?: string[]
-  ): boolean {
-    if (!this.hass) return false;
-
-    const entity = this.hass.states[entityConfig.entity];
-    if (!entity) return false;
-
-    // Check if unavailable - don't show
-    if (['unavailable', 'unknown'].includes(entity.state)) {
-      return false;
-    }
-
-    const state = entity.state;
-    const domain = getDomain(entityConfig.entity);
-
-    // Priority: entity-specific > section-wide > domain defaults
-    const activeStates = entityConfig.active_states || sectionActiveStates || DOMAIN_ACTIVE_STATES[domain] || ['on'];
-
-    return activeStates.includes(state);
-  }
-
-  /**
-   * Render a single intermittent entity
-   */
-  private _renderIntermittentEntity(
-    entityConfig: {
-      entity: string;
-      icon?: string;
-      icon_size?: string;
-      states?: Array<{ state: string; icon?: string; color?: string; animation?: string }>;
-      animation?: AnimationType;
-      tap_action?: TapActionConfig;
-      hold_action?: TapActionConfig;
-    },
-    defaultIconSize: string,
-    sectionAnimation?: AnimationType
-  ): TemplateResult | typeof nothing {
-    if (!this.hass) return nothing;
-
-    const entity = this.hass.states[entityConfig.entity];
-    if (!entity) return nothing;
-
-    const state = entity.state;
-    const domain = getDomain(entityConfig.entity);
-
-    // Determine icon
-    let icon = entityConfig.icon;
-    const stateConfig = entityConfig.states?.find(s => s.state === state);
-    if (stateConfig?.icon) {
-      icon = stateConfig.icon;
-    } else if (!icon) {
-      icon = getIntermittentEntityDefaultIcon(domain, state, entity);
-    }
-
-    // Determine color
-    let color = getIntermittentEntityColor(domain, state);
-    if (stateConfig?.color) {
-      color = stateConfig.color;
-    }
-
-    // Determine animation (state > entity > section)
-    const animation = stateConfig?.animation || entityConfig.animation || sectionAnimation;
-
-    // Determine icon size
-    const iconSize = entityConfig.icon_size || defaultIconSize;
-
-    // Handle tap action
-    const tapAction = entityConfig.tap_action || { action: 'more-info' as const };
-    const holdAction = entityConfig.hold_action || { action: 'more-info' as const };
-
-    const iconStyles: Record<string, string> = {
-      '--mdc-icon-size': iconSize,
-      'color': color,
-    };
-
-    const entityClasses = {
-      'intermittent-entity': true,
-      [`animation-${animation}`]: !!animation,
-    };
-
-    return html`
-      <div
-        class=${classMap(entityClasses)}
-        @click=${(e: Event) => { e.stopPropagation(); this._handleIntermittentAction(tapAction, entityConfig.entity); }}
-        @contextmenu=${(e: Event) => { e.preventDefault(); e.stopPropagation(); this._handleIntermittentAction(holdAction, entityConfig.entity); }}
-        title="${entity.attributes.friendly_name || entityConfig.entity}: ${state}"
-      >
-        <ha-icon
-          .icon=${icon}
-          style=${styleMap(iconStyles)}
-        ></ha-icon>
-      </div>
-    `;
   }
 
   /**
