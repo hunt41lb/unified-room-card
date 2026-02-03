@@ -23,8 +23,6 @@ import {
   ICON_HORIZONTAL_POSITION_OPTIONS,
   ICON_VERTICAL_POSITION_OPTIONS,
   DOMAIN_ACTIVE_STATES,
-  DOMAIN_DEFAULT_ICONS,
-  DOMAIN_STATE_ICONS,
   AnimationType,
 } from './constants';
 
@@ -78,6 +76,9 @@ import {
   getActiveGlowEffect,
   getPersistentEntityColor,
   getIntermittentEntityColor,
+  getDefaultIcon,
+  getPersistentEntityDefaultIcon,
+  getIntermittentEntityDefaultIcon,
 } from './utils';
 
 // =============================================================================
@@ -607,7 +608,7 @@ export class UnifiedRoomCard extends LitElement {
     }
 
     // Icon priority: unavailable custom icon > state map icon > config icon > entity default
-    let icon = stateMapIcon || this._config?.icon || this._getDefaultIcon(mainEntity);
+    let icon = stateMapIcon || this._config?.icon || getDefaultIcon(mainEntity);
     if (applyUnavailableStyles && unavailableConfig.icon) {
       icon = unavailableConfig.icon;
     }
@@ -890,7 +891,7 @@ export class UnifiedRoomCard extends LitElement {
       icon = entity.attributes.icon as string;
     }
     if (!icon) {
-      icon = this._getPersistentEntityDefaultIcon(domain, state);
+      icon = getPersistentEntityDefaultIcon(domain, state);
     }
 
     // Determine color (priority: state config > domain state colors > default)
@@ -942,52 +943,6 @@ export class UnifiedRoomCard extends LitElement {
         ></ha-icon>
       </div>
     `;
-  }
-
-  /**
-   * Get default icon for persistent entity based on domain and state
-   */
-  private _getPersistentEntityDefaultIcon(domain: string, state: string): string {
-    // Lock icons
-    if (domain === 'lock') {
-      switch (state) {
-        case 'locked': return 'mdi:lock';
-        case 'unlocked': return 'mdi:lock-open';
-        case 'locking': return 'mdi:lock-clock';
-        case 'unlocking': return 'mdi:lock-clock';
-        case 'jammed': return 'mdi:lock-alert';
-        default: return 'mdi:lock-question';
-      }
-    }
-
-    // Binary sensor icons
-    if (domain === 'binary_sensor') {
-      return state === 'on' ? 'mdi:motion-sensor' : 'mdi:motion-sensor-off';
-    }
-
-    // Door/window sensors (cover domain)
-    if (domain === 'cover') {
-      switch (state) {
-        case 'open': return 'mdi:door-open';
-        case 'closed': return 'mdi:door-closed';
-        case 'opening': return 'mdi:door-open';
-        case 'closing': return 'mdi:door-closed';
-        default: return 'mdi:door';
-      }
-    }
-
-    // Switch
-    if (domain === 'switch') {
-      return state === 'on' ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off';
-    }
-
-    // Light
-    if (domain === 'light') {
-      return state === 'on' ? 'mdi:lightbulb' : 'mdi:lightbulb-off';
-    }
-
-    // Default
-    return 'mdi:help-circle';
   }
 
   /**
@@ -1148,7 +1103,7 @@ export class UnifiedRoomCard extends LitElement {
     if (stateConfig?.icon) {
       icon = stateConfig.icon;
     } else if (!icon) {
-      icon = this._getIntermittentEntityDefaultIcon(domain, state, entity);
+      icon = getIntermittentEntityDefaultIcon(domain, state, entity);
     }
 
     // Determine color
@@ -1190,74 +1145,6 @@ export class UnifiedRoomCard extends LitElement {
         ></ha-icon>
       </div>
     `;
-  }
-
-  /**
-   * Get default icon for intermittent entity based on domain and state
-   */
-  private _getIntermittentEntityDefaultIcon(domain: string, state: string, entity: { attributes: Record<string, unknown> }): string {
-    // Check for entity-provided icon
-    if (entity.attributes.icon) {
-      return entity.attributes.icon as string;
-    }
-
-    // Binary sensor has device_class-specific icons
-    if (domain === 'binary_sensor') {
-      const deviceClass = entity.attributes.device_class as string;
-      return this._getBinarySensorIcon(deviceClass, state);
-    }
-
-    // Check domain state icons
-    if (DOMAIN_STATE_ICONS[domain]?.[state]) {
-      return DOMAIN_STATE_ICONS[domain][state];
-    }
-
-    // Fall back to domain default
-    return DOMAIN_DEFAULT_ICONS[domain] || 'mdi:alert-circle';
-  }
-
-  /**
-   * Get binary sensor icon based on device_class and state
-   */
-  private _getBinarySensorIcon(deviceClass: string | undefined, state: string): string {
-    const isOn = state === 'on';
-
-    const deviceClassIcons: Record<string, { on: string; off: string }> = {
-      motion: { on: 'mdi:motion-sensor', off: 'mdi:motion-sensor-off' },
-      occupancy: { on: 'mdi:home-account', off: 'mdi:home-outline' },
-      door: { on: 'mdi:door-open', off: 'mdi:door-closed' },
-      window: { on: 'mdi:window-open', off: 'mdi:window-closed' },
-      garage_door: { on: 'mdi:garage-open', off: 'mdi:garage' },
-      opening: { on: 'mdi:square-outline', off: 'mdi:square' },
-      lock: { on: 'mdi:lock-open', off: 'mdi:lock' },
-      moisture: { on: 'mdi:water', off: 'mdi:water-off' },
-      smoke: { on: 'mdi:smoke-detector-alert', off: 'mdi:smoke-detector' },
-      gas: { on: 'mdi:gas-cylinder', off: 'mdi:gas-cylinder' },
-      co: { on: 'mdi:molecule-co', off: 'mdi:molecule-co' },
-      safety: { on: 'mdi:shield-alert', off: 'mdi:shield-check' },
-      sound: { on: 'mdi:volume-high', off: 'mdi:volume-off' },
-      vibration: { on: 'mdi:vibrate', off: 'mdi:vibrate-off' },
-      presence: { on: 'mdi:home', off: 'mdi:home-outline' },
-      light: { on: 'mdi:brightness-7', off: 'mdi:brightness-5' },
-      battery: { on: 'mdi:battery-alert', off: 'mdi:battery' },
-      battery_charging: { on: 'mdi:battery-charging', off: 'mdi:battery' },
-      plug: { on: 'mdi:power-plug', off: 'mdi:power-plug-off' },
-      power: { on: 'mdi:flash', off: 'mdi:flash-off' },
-      running: { on: 'mdi:play', off: 'mdi:stop' },
-      problem: { on: 'mdi:alert-circle', off: 'mdi:check-circle' },
-      tamper: { on: 'mdi:alert', off: 'mdi:check' },
-      update: { on: 'mdi:package-up', off: 'mdi:package' },
-      connectivity: { on: 'mdi:wifi', off: 'mdi:wifi-off' },
-      cold: { on: 'mdi:snowflake', off: 'mdi:snowflake-off' },
-      heat: { on: 'mdi:fire', off: 'mdi:fire-off' },
-    };
-
-    if (deviceClass && deviceClassIcons[deviceClass]) {
-      return isOn ? deviceClassIcons[deviceClass].on : deviceClassIcons[deviceClass].off;
-    }
-
-    // Default binary sensor icon
-    return isOn ? 'mdi:checkbox-marked-circle' : 'mdi:checkbox-blank-circle-outline';
   }
 
   /**
@@ -1326,52 +1213,6 @@ export class UnifiedRoomCard extends LitElement {
       default:
         break;
     }
-  }
-
-  /**
-   * Get default icon for entity based on domain and state
-   * For climate entities, uses hvac_action attribute
-   */
-  private _getDefaultIcon(entity?: { entity_id: string; state: string; attributes: Record<string, unknown> }): string {
-    if (!entity) {
-      return 'mdi:home';
-    }
-
-    // Use entity's icon if available
-    if (entity.attributes.icon) {
-      return entity.attributes.icon as string;
-    }
-
-    const domain = getDomain(entity.entity_id);
-
-    // Special handling for climate - use hvac_action for icon
-    if (domain === 'climate') {
-      const hvacAction = entity.attributes.hvac_action as string | undefined;
-      if (hvacAction) {
-        switch (hvacAction) {
-          case 'heating':
-          case 'preheating':
-            return 'mdi:fire';
-          case 'cooling':
-            return 'mdi:snowflake';
-          case 'drying':
-            return 'mdi:water-percent';
-          case 'fan':
-            return 'mdi:fan';
-          default:
-            return 'mdi:thermostat';
-        }
-      }
-    }
-
-    // Check for state-specific icon
-    const stateIcons = DOMAIN_STATE_ICONS[domain];
-    if (stateIcons && stateIcons[entity.state]) {
-      return stateIcons[entity.state];
-    }
-
-    // Fall back to domain default icon
-    return DOMAIN_DEFAULT_ICONS[domain] || 'mdi:home';
   }
 
   // ===========================================================================
