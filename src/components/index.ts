@@ -37,3 +37,10 @@ export {
   type PersistentActionHandler,
   type MoreInfoHandler,
 } from './persistent-section';
+
+export {
+  renderIntermittentEntities,
+  hasActiveIntermittentEntities,
+  getActiveIntermittentCount,
+  type IntermittentActionHandler,
+} from './intermittent-section';
