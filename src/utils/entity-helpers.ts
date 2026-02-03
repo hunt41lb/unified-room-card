@@ -282,4 +282,5 @@ export function hasRelevantStateChanged(
   }
 
   return false;
+
 }
