@@ -1,5 +1,5 @@
-/**
- * Animations Component
+/* Animations Component
+ * unified-room-card/src/components/animations.ts
  * 
  * Reusable animation utilities for periodic and state-based animations.
  * Supports spin, pulse, glow, and flash effects.
