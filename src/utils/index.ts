@@ -39,3 +39,14 @@ export {
   getPersistentEntityDefaultIcon,
   getIntermittentEntityDefaultIcon,
 } from './icon-resolver';
+
+export {
+  fireMoreInfo,
+  fireAssist,
+  navigate,
+  openUrl,
+  toggleEntity,
+  callService,
+  executeEntityAction,
+  executeCardAction,
+} from './action-handler';
