@@ -1,32 +1,39 @@
 /**
  * Components Index
- * 
+ *
  * Re-exports all component render functions for easy importing.
  */
 
 export { renderClimateSection } from './climate-section';
 
-export { 
-  renderBatteryEntities, 
+export {
+  renderBatteryEntities,
   renderBatteryBadge,
   getLowBatteryCount,
   isBatteryBadgeMode,
 } from './battery-entities';
 
-export { 
+export {
   renderUpdateEntities,
   renderUpdateBadge,
-  getPendingUpdateCount, 
-  getSpinInterval, 
+  getPendingUpdateCount,
+  getSpinInterval,
   isSpinAnimationEnabled,
   isUpdateBadgeMode,
-  type UpdateAnimationState 
+  type UpdateAnimationState
 } from './update-entities';
 
-export { 
-  animationKeyframes, 
-  animationClasses, 
+export {
+  animationKeyframes,
+  animationClasses,
   PeriodicAnimationController,
   getAnimationClass,
-  type AnimationName 
+  type AnimationName
 } from './animations';
+
+export {
+  renderPersistentEntities,
+  hasPersistentEntities,
+  type PersistentActionHandler,
+  type MoreInfoHandler,
+} from './persistent-section';
