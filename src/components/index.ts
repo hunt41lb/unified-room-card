@@ -44,3 +44,5 @@ export {
   getActiveIntermittentCount,
   type IntermittentActionHandler,
 } from './intermittent-section';
+
+export { renderIconSection } from './icon-section';
