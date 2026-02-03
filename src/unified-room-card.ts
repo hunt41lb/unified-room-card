@@ -62,7 +62,6 @@ import {
   getDomain,
   getPrimaryDomain,
   isUnavailable,
-  getAllPrimaryEntities,
   getPrimaryEntity,
   isPrimaryEntityUnavailable,
   isGroupActive,
@@ -79,6 +78,9 @@ import {
   getDefaultIcon,
   getPersistentEntityDefaultIcon,
   getIntermittentEntityDefaultIcon,
+  executeEntityAction,
+  executeCardAction,
+  fireMoreInfo,
 } from './utils';
 
 // =============================================================================
@@ -918,7 +920,7 @@ export class UnifiedRoomCard extends LitElement {
         this._handlePersistentAction(entityConfig.tap_action, entityConfig.entity);
       } else {
         // Default: show more-info dialog
-        this._fireMoreInfo(entityConfig.entity);
+        fireMoreInfo(this, entityConfig.entity);
       }
     };
 
@@ -950,47 +952,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handlePersistentAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
-
-    switch (action.action) {
-      case 'more-info':
-        this._fireMoreInfo(entityId);
-        break;
-      case 'toggle':
-        this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
-        break;
-      case 'navigate':
-        if (action.navigation_path) {
-          window.history.pushState(null, '', action.navigation_path);
-          window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
-        }
-        break;
-      case 'url':
-        if (action.url_path) {
-          window.open(action.url_path, '_blank');
-        }
-        break;
-      case 'perform-action':
-        if (action.service) {
-          const [domain, service] = action.service.split('.');
-          this.hass.callService(domain, service, action.service_data || {});
-        }
-        break;
-      case 'none':
-      default:
-        break;
-    }
-  }
-
-  /**
-   * Fire more-info dialog for entity
-   */
-  private _fireMoreInfo(entityId: string): void {
-    const event = new CustomEvent('hass-more-info', {
-      bubbles: true,
-      composed: true,
-      detail: { entityId },
-    });
-    this.dispatchEvent(event);
+    executeEntityAction(this.hass, action, entityId, this);
   }
 
   /**
@@ -1152,35 +1114,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handleIntermittentAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
-
-    switch (action.action) {
-      case 'more-info':
-        this._fireMoreInfo(entityId);
-        break;
-      case 'toggle':
-        this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
-        break;
-      case 'navigate':
-        if (action.navigation_path) {
-          window.history.pushState(null, '', action.navigation_path);
-          window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
-        }
-        break;
-      case 'url':
-        if (action.url_path) {
-          window.open(action.url_path, '_blank');
-        }
-        break;
-      case 'perform-action':
-        if (action.service) {
-          const [serviceDomain, service] = action.service.split('.');
-          this.hass.callService(serviceDomain, service, action.service_data || {});
-        }
-        break;
-      case 'none':
-      default:
-        break;
-    }
+    executeEntityAction(this.hass, action, entityId, this);
   }
 
 
@@ -1193,26 +1127,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handleEntityAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
-
-    switch (action.action) {
-      case 'more-info':
-        this._fireMoreInfo(entityId);
-        break;
-      case 'navigate':
-        if (action.navigation_path) {
-          window.history.pushState(null, '', action.navigation_path);
-          window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
-        }
-        break;
-      case 'url':
-        if (action.url_path) {
-          window.open(action.url_path, '_blank');
-        }
-        break;
-      case 'none':
-      default:
-        break;
-    }
+    executeEntityAction(this.hass, action, entityId, this);
   }
 
   // ===========================================================================
@@ -1272,69 +1187,12 @@ export class UnifiedRoomCard extends LitElement {
   /**
    * Execute tap action
    */
+  /**
+   * Execute tap action using action-handler utility
+   */
   private _handleAction(actionConfig: TapActionConfig): void {
     if (!this.hass || !this._config) return;
-
-    const primaryEntityId = this._config.entity;
-    const allEntities = getAllPrimaryEntities(this._config);
-
-    switch (actionConfig.action) {
-      case 'toggle':
-        if (allEntities.length > 0) {
-          // Toggle all entities in the group
-          this.hass.callService('homeassistant', 'toggle', {
-            entity_id: allEntities,
-          });
-        }
-        break;
-
-      case 'more-info':
-        if (primaryEntityId) {
-          const event = new CustomEvent('hass-more-info', {
-            bubbles: true,
-            composed: true,
-            detail: { entityId: primaryEntityId },
-          });
-          this.dispatchEvent(event);
-        }
-        break;
-
-      case 'navigate':
-        if (actionConfig.navigation_path) {
-          window.history.pushState(null, '', actionConfig.navigation_path);
-          const event = new CustomEvent('location-changed', {
-            bubbles: true,
-            composed: true,
-          });
-          window.dispatchEvent(event);
-        }
-        break;
-
-      case 'url':
-        if (actionConfig.url_path) {
-          window.open(actionConfig.url_path, '_blank');
-        }
-        break;
-
-      case 'perform-action':
-        if (actionConfig.service) {
-          const [domain, service] = actionConfig.service.split('.');
-          this.hass.callService(domain, service, actionConfig.service_data || {});
-        }
-        break;
-
-      case 'assist':
-        const assistEvent = new CustomEvent('hass-assist', {
-          bubbles: true,
-          composed: true,
-        });
-        this.dispatchEvent(assistEvent);
-        break;
-
-      case 'none':
-      default:
-        break;
-    }
+    executeCardAction(this.hass, actionConfig, this._config, this);
   }
 }
 

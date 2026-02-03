@@ -202,7 +202,18 @@ export const cardBaseStyles = css`
     overflow: visible;
     background: ${unsafeCSS(HA_CSS_VARIABLES.cardBackground)};
     border-radius: ${unsafeCSS(HA_CSS_VARIABLES.cardBorderRadius)};
-    transition: background-color 0.3s ease, opacity 0.3s ease;
+    transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.15s ease;
+  }
+
+  /* Hover effect */
+  ha-card:hover {
+    transform: scale(1.02);
+  }
+
+  /* Active/pressed effect */
+  ha-card:active {
+    transform: scale(0.98);
+    transition: transform 0.05s ease;
   }
 
   ha-card.state-on {
