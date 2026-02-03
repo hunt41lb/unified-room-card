@@ -54,6 +54,7 @@ import {
   getSpinInterval,
   isSpinAnimationEnabled,
   isUpdateBadgeMode,
+  renderPersistentEntities,
   type UpdateAnimationState
 } from './components';
 
@@ -61,7 +62,6 @@ import {
 import {
   getDomain,
   getPrimaryDomain,
-  isUnavailable,
   getPrimaryEntity,
   isPrimaryEntityUnavailable,
   isGroupActive,
@@ -73,10 +73,8 @@ import {
   getGroupBackgroundColor,
   getGroupIconColor,
   getActiveGlowEffect,
-  getPersistentEntityColor,
   getIntermittentEntityColor,
   getDefaultIcon,
-  getPersistentEntityDefaultIcon,
   getIntermittentEntityDefaultIcon,
   executeEntityAction,
   executeCardAction,
@@ -419,7 +417,13 @@ export class UnifiedRoomCard extends LitElement {
     const includeUpdateWithIntermittent = !hasUpdateArea;
 
     return html`
-      ${hasPersistentArea ? this._renderPersistentEntities(true) : nothing}
+      ${hasPersistentArea ? renderPersistentEntities(
+        this.hass!,
+        this._config?.persistent_entities,
+        this._handlePersistentAction.bind(this),
+        (entityId) => fireMoreInfo(this, entityId),
+        true
+      ) : nothing}
       ${hasIntermittentArea ? this._renderIntermittentEntities(true, includeBatteryWithIntermittent, includeUpdateWithIntermittent) : nothing}
       ${hasBatteryArea ? this._renderBatterySection() : nothing}
       ${hasUpdateArea ? this._renderUpdateSection() : nothing}
@@ -507,7 +511,13 @@ export class UnifiedRoomCard extends LitElement {
 
     return html`
       <div class="status-section">
-        ${this._renderPersistentEntities(false)}
+        ${renderPersistentEntities(
+          this.hass!,
+          this._config?.persistent_entities,
+          this._handlePersistentAction.bind(this),
+          (entityId) => fireMoreInfo(this, entityId),
+          false
+        )}
         ${this._renderIntermittentEntities(false, false, false)}
         ${hasBattery && this.hass ? renderBatteryEntities(this.hass, this._config?.battery_entities, this._handleEntityAction.bind(this)) : nothing}
         ${hasUpdate && this.hass ? renderUpdateEntities(this.hass, this._config?.update_entities, this._handleEntityAction.bind(this), this._updateAnimationState) : nothing}
@@ -783,166 +793,6 @@ export class UnifiedRoomCard extends LitElement {
     return html`
       <div class="state-section">
         ${mainEntity.state}
-      </div>
-    `;
-  }
-
-  /**
-   * Render persistent entities section
-   * These entities are always visible regardless of state
-   * @param legacyGrid - If true, uses grid-area: persistent for custom grid layouts
-   */
-  private _renderPersistentEntities(legacyGrid: boolean = false): TemplateResult | typeof nothing {
-    if (!this._config?.persistent_entities?.entities?.length || !this.hass) {
-      return nothing;
-    }
-
-    const config = this._config.persistent_entities;
-    const position = config.position || 'right';
-    const defaultIconSize = config.icon_size || '21px';
-    const gap = config.gap || '4px';
-
-    // Build section styles
-    const sectionStyles: Record<string, string> = {
-      'gap': gap,
-    };
-
-    // Only apply positioning styles in legacy grid mode or when position is explicitly set
-    if (legacyGrid) {
-      // Handle custom padding or use smart defaults based on position
-      if (config.padding) {
-        sectionStyles['padding'] = config.padding;
-      } else {
-        switch (position) {
-          case 'left':
-            sectionStyles['padding'] = '0 0 1px 14px';
-            break;
-          case 'center':
-            sectionStyles['padding'] = '0 0 1px 0';
-            break;
-          case 'right':
-          default:
-            sectionStyles['padding'] = '0 0 1px 2px';
-            if (!config.margin) {
-              sectionStyles['margin'] = '0 3px 0 0';
-            }
-            break;
-        }
-      }
-
-      // Handle custom margin
-      if (config.margin) {
-        sectionStyles['margin'] = config.margin;
-      }
-
-      switch (position) {
-        case 'left':
-          sectionStyles['justify-self'] = 'start';
-          break;
-        case 'center':
-          sectionStyles['justify-self'] = 'center';
-          break;
-        case 'right':
-        default:
-          sectionStyles['justify-self'] = 'end';
-          break;
-      }
-    }
-
-    const entities = config.entities || [];
-    const classes = {
-      'persistent-section': true,
-      'legacy-grid': legacyGrid,
-    };
-
-    return html`
-      <div class=${classMap(classes)} style=${styleMap(sectionStyles)}>
-        ${entities.map((entityConfig) =>
-          this._renderPersistentEntity(entityConfig, defaultIconSize)
-        )}
-      </div>
-    `;
-  }
-
-  /**
-   * Render a single persistent entity
-   */
-  private _renderPersistentEntity(
-    entityConfig: {
-      entity: string;
-      icon?: string;
-      icon_size?: string;
-      states?: Array<{ state: string; icon?: string; color?: string; animation?: string }>;
-      tap_action?: TapActionConfig;
-      hold_action?: TapActionConfig;
-      double_tap_action?: TapActionConfig;
-    },
-    defaultIconSize: string
-  ): TemplateResult {
-    const entity = this.hass?.states[entityConfig.entity];
-    const entityUnavailable = !entity || isUnavailable(entity);
-    const state = entity?.state || 'unavailable';
-    const domain = getDomain(entityConfig.entity);
-
-    // Find state-specific config
-    const stateConfig = entityConfig.states?.find(s => s.state === state);
-
-    // Determine icon (priority: state config > entity config > entity attribute > domain default)
-    let icon = stateConfig?.icon || entityConfig.icon;
-    if (!icon && entity?.attributes.icon) {
-      icon = entity.attributes.icon as string;
-    }
-    if (!icon) {
-      icon = getPersistentEntityDefaultIcon(domain, state);
-    }
-
-    // Determine color (priority: state config > domain state colors > default)
-    let color = stateConfig?.color;
-    if (!color) {
-      color = getPersistentEntityColor(domain, state, entityUnavailable);
-    }
-
-    // Icon size (entity-specific or default)
-    const iconSize = entityConfig.icon_size || defaultIconSize;
-
-    // Icon styles
-    const iconStyles: Record<string, string> = {
-      'width': iconSize,
-      'height': iconSize,
-      'color': color,
-      '--mdc-icon-size': iconSize,
-    };
-
-    // Handle tap action
-    const handleTap = (e: Event) => {
-      e.stopPropagation();
-      if (entityConfig.tap_action) {
-        this._handlePersistentAction(entityConfig.tap_action, entityConfig.entity);
-      } else {
-        // Default: show more-info dialog
-        fireMoreInfo(this, entityConfig.entity);
-      }
-    };
-
-    const handleHold = (e: Event) => {
-      e.stopPropagation();
-      e.preventDefault();
-      if (entityConfig.hold_action) {
-        this._handlePersistentAction(entityConfig.hold_action, entityConfig.entity);
-      }
-    };
-
-    return html`
-      <div
-        class="persistent-entity"
-        @click=${handleTap}
-        @contextmenu=${handleHold}
-        title="${entity?.attributes.friendly_name || entityConfig.entity}: ${state}"
-      >
-        <ha-icon
-          .icon=${icon}
-          style=${styleMap(iconStyles)}
-        ></ha-icon>
       </div>
     `;
   }
