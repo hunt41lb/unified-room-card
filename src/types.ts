@@ -112,6 +112,22 @@ export interface UnavailableHandlingConfig {
 }
 
 // =============================================================================
+// TEXT STYLE CONFIGURATION (for name, label, state sections)
+// =============================================================================
+
+export type TextAlignType = 'left' | 'center' | 'right';
+
+export interface TextStyleConfig {
+  padding?: string;            // CSS padding (e.g., "0 14px 2px 14px")
+  margin?: string;             // CSS margin (e.g., "0 0 0 0")
+  font_size?: string;          // Font size (e.g., "12px", "1rem")
+  font_weight?: string;        // Font weight (e.g., "400", "500", "bold")
+  text_align?: TextAlignType;  // Text alignment: left, center, right
+  color?: string;              // Text color (CSS variable or color value)
+  line_height?: string;        // Line height (e.g., "1.2", "16px")
+}
+
+// =============================================================================
 // INDIVIDUAL ENTITY CONFIGURATION
 // =============================================================================
 
@@ -317,6 +333,11 @@ export interface UnifiedRoomCardConfig {
   background_color?: string;
   active_background_color?: string;
   background_gradient?: string;
+
+  // Text Section Styling (NEW)
+  name_style?: TextStyleConfig;    // Custom styling for card name
+  label_style?: TextStyleConfig;   // Custom styling for card label
+  state_style?: TextStyleConfig;   // Custom styling for state display
 
   // Glow Effects
   glow_effects?: GlowEffectConfig[];

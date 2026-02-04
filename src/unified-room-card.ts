@@ -30,6 +30,7 @@ import type {
 import {
   cardStyles,
   getCardDynamicStyles,
+  getTextSectionStyles,
 } from './styles';
 
 // Import editor (side effect: registers the custom element)
@@ -554,37 +555,43 @@ export class UnifiedRoomCard extends LitElement {
   // ===========================================================================
 
   /**
-   * Render card name section
+   * Render card name section with optional custom styling
    */
   private _renderName(): TemplateResult | typeof nothing {
     if (!this._config?.show_name || !this._config.name) {
       return nothing;
     }
 
+    // Generate dynamic inline styles from name_style config
+    const customStyles = getTextSectionStyles(this._config.name_style);
+
     return html`
-      <div class="name-section">
+      <div class="name-section" style=${customStyles}>
         ${this._config.name}
       </div>
     `;
   }
 
   /**
-   * Render card label section (e.g., "Ground Floor")
+   * Render card label section with optional custom styling
    */
   private _renderLabel(): TemplateResult | typeof nothing {
     if (!this._config?.show_label || !this._config.label) {
       return nothing;
     }
 
+    // Generate dynamic inline styles from label_style config
+    const customStyles = getTextSectionStyles(this._config.label_style);
+
     return html`
-      <div class="label-section">
+      <div class="label-section" style=${customStyles}>
         ${this._config.label}
       </div>
     `;
   }
 
   /**
-   * Render standalone state area (when 'state' is a grid area)
+   * Render standalone state area with optional custom styling
    */
   private _renderStateArea(): TemplateResult | typeof nothing {
     if (!this._config?.show_state) return nothing;
@@ -596,8 +603,11 @@ export class UnifiedRoomCard extends LitElement {
     const templateAreas = this._config?.grid?.template_areas || '';
     if (!/\bstate\b/.test(templateAreas)) return nothing;
 
+    // Generate dynamic inline styles from state_style config
+    const customStyles = getTextSectionStyles(this._config.state_style);
+
     return html`
-      <div class="state-section">
+      <div class="state-section" style=${customStyles}>
         ${mainEntity.state}
       </div>
     `;
