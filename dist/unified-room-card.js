@@ -652,139 +652,197 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
     min-width: 0;
   }
 
-  .form-label {
-    flex: 0 0 140px;
+  .form-row-triple {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+
+  .form-row-triple:last-child {
+    margin-bottom: 0;
+  }
+
+  .form-row-triple .form-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-row-triple .form-label {
+    flex: 1;
+    font-size: 14px;
+    white-space: nowrap;
+    color: ${r(ve)};
+  }
+
+  .form-row-triple .form-input {
+    flex: 0 0 auto;
+  }
+
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid ${r(be)};
+  }
+
+  .switch-row:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .switch-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .switch-label-text {
     font-size: 14px;
     color: ${r(ve)};
   }
 
-  .form-input {
-    flex: 1;
-  }
-
-  /* Inline form row - text field with toggle on same row */
-  .form-row-inline {
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-    gap: 12px;
-  }
-
-  .form-row-inline:last-child {
-    margin-bottom: 0;
-  }
-
-  .form-row-inline .form-label {
-    flex: 0 0 auto;
-  }
-
-  .form-row-inline .form-input {
-    flex: 1;
-  }
-
-  .form-row-inline .form-toggle {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: ${r(_e)};
-  }
-
-  /* Helper text style */
-  .helper-text {
+  .switch-label-hint {
     font-size: 11px;
     color: ${r(_e)};
-    margin: -8px 0 12px 0;
-    padding-left: 140px;
     font-style: italic;
   }
 
-  .entity-list {
+  /* Entity cards within sections */
+  .entity-card {
     border: 1px solid ${r(be)};
     border-radius: 8px;
-    overflow: hidden;
+    margin-bottom: 12px;
+    overflow: visible;
   }
 
-  .entity-item {
-    border-bottom: 1px solid ${r(be)};
-  }
-
-  .entity-item:last-child {
-    border-bottom: none;
+  .entity-card:last-child {
+    margin-bottom: 0;
   }
 
   .entity-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 10px 12px;
     background: rgba(0, 0, 0, 0.02);
     cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: background 0.2s ease;
   }
 
   .entity-header:hover {
     background: rgba(0, 0, 0, 0.04);
   }
 
-  .entity-config {
+  .entity-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .entity-header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .entity-drag-handle {
+    cursor: grab;
+    color: ${r(_e)};
+    padding: 4px;
+    --mdc-icon-size: 18px;
+  }
+
+  .entity-icon {
+    color: ${r(ge)};
+    --mdc-icon-size: 20px;
+  }
+
+  .entity-name {
+    font-size: 14px;
+    color: ${r(ve)};
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .entity-id {
+    font-size: 11px;
+    color: ${r(_e)};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .entity-expand {
+    color: ${r(_e)};
+    transition: transform 0.2s ease;
+    --mdc-icon-size: 18px;
+  }
+
+  .entity-expand.expanded {
+    transform: rotate(180deg);
+  }
+
+  .entity-delete {
+    color: ${r(_e)};
+    cursor: pointer;
+    padding: 4px;
+    --mdc-icon-size: 18px;
+    transition: color 0.2s ease;
+  }
+
+  .entity-delete:hover {
+    color: var(--error-color, #db4437);
+  }
+
+  .entity-content {
     padding: 12px;
     display: none;
     border-top: 1px solid ${r(be)};
   }
 
-  .entity-config.expanded {
+  .entity-content.expanded {
     display: block;
+    overflow: visible;
   }
 
-  .add-entity-btn {
+  /* State config list */
+  .states-list {
+    margin-top: 12px;
+  }
+
+  .states-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 8px;
-    margin-top: 8px;
-    border: 1px dashed ${r(be)};
-    border-radius: 8px;
-    cursor: pointer;
-    color: ${r(_e)};
-    transition: all 0.2s ease;
-    gap: 4px;
-  }
-
-  .add-entity-btn:hover {
-    border-color: ${r(ge)};
-    color: ${r(ge)};
-  }
-
-  .entity-list-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    justify-content: space-between;
     margin-bottom: 8px;
   }
 
-  .entity-list-item ha-selector {
-    flex: 1;
-  }
-
-  .entity-list-item ha-icon {
-    cursor: pointer;
-    color: ${r(_e)};
-    transition: color 0.2s ease;
-  }
-
-  .entity-list-item ha-icon:hover {
-    color: var(--error-color, #db4437);
+  .states-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: ${r(ve)};
   }
 
   .add-state-btn {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 6px;
-    margin-top: 8px;
+    padding: 4px 8px;
     border: 1px dashed ${r(be)};
     border-radius: 4px;
+    background: transparent;
     cursor: pointer;
     color: ${r(_e)};
     transition: all 0.2s ease;
@@ -1005,7 +1063,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
   .add-entity-button ha-icon {
     --mdc-icon-size: 18px;
   }
-`;function Te(t){return t.split(".")[0]}function Ue(t){if(t.entity)return Te(t.entity)}function je(t){return["unavailable","unknown"].includes(t.state)}function Me(t,e,i,a){if(a&&a.length>0)return a.includes(e);const n=Te(t);if("climate"===n&&i){const t=i.hvac_action;if(t)return["heating","cooling","drying","fan","preheating"].includes(t)}const s=ie[n];return s?s.includes(e):[St,kt,At,Et,Pt,It].includes(e)}function Be(t){const e=[];return t.entity&&e.push(t.entity),t.entities?.length&&e.push(...t.entities),e}function Ne(t,e){if(e.entity)return t.states[e.entity]}function Oe(t,e){const i=Ne(t,e);return!i||je(i)}function De(t,e){const i=Be(e);if(0===i.length)return!1;for(const a of i){const i=t.states[a];if(i&&Me(a,i.state,i.attributes,e.active_states))return!0}return!1}function He(t){const e=t.unavailable_handling||{behavior:"off"};return{behavior:e.behavior||"off",icon:e.icon,icon_color:e.icon_color||"var(--disabled-text-color)",background_color:e.background_color||"var(--secondary-background-color)",opacity:e.opacity??.5,show_badge:e.show_badge||!1}}function Le(t,e=.3){if(!t)return`rgba(255, 193, 7, ${e})`;const i=Te(t.entity_id);if("climate"===i)switch(t.attributes.hvac_action){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return"var(--secondary-background-color)"}if("light"===i){if("on"===t.state){if(t.attributes.rgb_color){const i=t.attributes.rgb_color;return`rgba(${i[0]}, ${i[1]}, ${i[2]}, ${e})`}return`rgba(255, 193, 7, ${e})`}return"var(--secondary-background-color)"}if("lock"===i){const e=se[i]?.[t.state];return e||"var(--secondary-background-color)"}return(ie[i]||["on"]).includes(t.state)?`rgba(255, 193, 7, ${e})`:"var(--secondary-background-color)"}function Ve(t){switch(t.attributes.hvac_action){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return"var(--primary-text-color)"}}function Re(t){if(!t)return;const e=Te(t.entity_id),i=se[e];return i&&i[t.state]?i[t.state]:void 0}function Ge(t,e){const i=t||"auto";return"auto"===i?function(t){const e=Te(t.entity_id);if("light"===e&&"on"===t.state){const e=t.attributes.rgb_color;return e?`rgb(${e[0]}, ${e[1]}, ${e[2]})`:"var(--state-light-active-color, var(--amber-color, #ffc107))"}if("climate"===e)switch(t.attributes.hvac_action){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return"var(--primary-color)"}if("lock"===e)switch(t.state){case"locked":return"var(--state-lock-locked-color, #43a047)";case"unlocked":return"var(--state-lock-unlocked-color, #ffa600)";case"jammed":return"var(--state-lock-jammed-color, #db4437)";default:return"var(--primary-color)"}return"problem"===t.state||"error"===t.state||"jammed"===t.state?"var(--error-color, #db4437)":"var(--primary-color)"}(e):i}const We={motion:{on:"mdi:motion-sensor",off:"mdi:motion-sensor-off"},occupancy:{on:"mdi:home-account",off:"mdi:home-outline"},door:{on:"mdi:door-open",off:"mdi:door-closed"},window:{on:"mdi:window-open",off:"mdi:window-closed"},garage_door:{on:"mdi:garage-open",off:"mdi:garage"},opening:{on:"mdi:square-outline",off:"mdi:square"},lock:{on:"mdi:lock-open",off:"mdi:lock"},moisture:{on:"mdi:water",off:"mdi:water-off"},smoke:{on:"mdi:smoke-detector-alert",off:"mdi:smoke-detector"},gas:{on:"mdi:gas-cylinder",off:"mdi:gas-cylinder"},co:{on:"mdi:molecule-co",off:"mdi:molecule-co"},safety:{on:"mdi:shield-alert",off:"mdi:shield-check"},sound:{on:"mdi:volume-high",off:"mdi:volume-off"},vibration:{on:"mdi:vibrate",off:"mdi:vibrate-off"},presence:{on:"mdi:home",off:"mdi:home-outline"},light:{on:"mdi:brightness-7",off:"mdi:brightness-5"},battery:{on:"mdi:battery-alert",off:"mdi:battery"},battery_charging:{on:"mdi:battery-charging",off:"mdi:battery"},plug:{on:"mdi:power-plug",off:"mdi:power-plug-off"},power:{on:"mdi:flash",off:"mdi:flash-off"},running:{on:"mdi:play",off:"mdi:stop"},problem:{on:"mdi:alert-circle",off:"mdi:check-circle"},tamper:{on:"mdi:alert",off:"mdi:check"},update:{on:"mdi:package-up",off:"mdi:package"},connectivity:{on:"mdi:wifi",off:"mdi:wifi-off"},cold:{on:"mdi:snowflake",off:"mdi:snowflake-off"},heat:{on:"mdi:fire",off:"mdi:fire-off"}};function qe(t,e){const i=new CustomEvent("hass-more-info",{bubbles:!0,composed:!0,detail:{entityId:e}});t.dispatchEvent(i)}function Fe(t){const e=new CustomEvent("hass-assist",{bubbles:!0,composed:!0});t.dispatchEvent(e)}function Ze(t){window.history.pushState(null,"",t);const e=new CustomEvent("location-changed",{bubbles:!0,composed:!0});window.dispatchEvent(e)}function Je(t){window.open(t,"_blank")}function Qe(t,e){t.callService("homeassistant","toggle",{entity_id:e})}function Ke(t,e,i){const[a,n]=e.split(".");t.callService(a,n,i||{})}function Ye(t,e,i,a){switch(e.action){case"more-info":qe(a,i);break;case"toggle":Qe(t,i);break;case"navigate":e.navigation_path&&Ze(e.navigation_path);break;case"url":e.url_path&&Je(e.url_path);break;case"perform-action":e.service&&Ke(t,e.service,e.service_data);break;case"assist":Fe(a)}}function Xe(t){switch(t){case he:return{top:"-10px",left:"-10px",right:"auto",bottom:"auto"};case pe:return{top:"auto",left:"auto",right:"-10px",bottom:"-10px"};case ue:return{top:"auto",left:"-10px",right:"auto",bottom:"-10px"};default:return{top:"-10px",left:"auto",right:"-10px",bottom:"auto"}}}let ti=class extends lt{constructor(){super(...arguments),this._accordionState={main:!0,mainBasic:!0,mainIcon:!1,mainAppearance:!1,mainActions:!1,persistent:!1,intermittent:!1,climate:!1,power:!1,battery:!1,update:!1,grid:!1},this._persistentEntityExpanded=-1,this._intermittentEntityExpanded=-1,this._customColorInputs=new Set,this._intermittentCustomColorInputs=new Set,this._showUnavailableCustomColorInput=!1,this._iconStateMapCustomColors=new Set}setConfig(t){this._config=t}render(){return this.hass&&this._config?W`
+`;function Te(t){if(!t)return"";const e=[];if(t.padding&&e.push(`padding: ${t.padding};`),t.margin&&e.push(`margin: ${t.margin};`),t.font_size&&e.push(`font-size: ${t.font_size};`),t.font_weight&&e.push(`font-weight: ${t.font_weight};`),t.text_align){e.push(`text-align: ${t.text_align};`);const i="left"===t.text_align?"start":"right"===t.text_align?"end":"center";e.push(`justify-self: ${i};`)}return t.color&&e.push(`color: ${t.color};`),t.line_height&&e.push(`line-height: ${t.line_height};`),e.join(" ")}function Ue(t){return t.split(".")[0]}function je(t){if(t.entity)return Ue(t.entity)}function Me(t){return["unavailable","unknown"].includes(t.state)}function Be(t,e,i,a){if(a&&a.length>0)return a.includes(e);const n=Ue(t);if("climate"===n&&i){const t=i.hvac_action;if(t)return["heating","cooling","drying","fan","preheating"].includes(t)}const s=ie[n];return s?s.includes(e):[St,kt,At,Et,Pt,It].includes(e)}function Ne(t){const e=[];return t.entity&&e.push(t.entity),t.entities?.length&&e.push(...t.entities),e}function Oe(t,e){if(e.entity)return t.states[e.entity]}function De(t,e){const i=Oe(t,e);return!i||Me(i)}function He(t,e){const i=Ne(e);if(0===i.length)return!1;for(const a of i){const i=t.states[a];if(i&&Be(a,i.state,i.attributes,e.active_states))return!0}return!1}function Le(t){const e=t.unavailable_handling||{behavior:"off"};return{behavior:e.behavior||"off",icon:e.icon,icon_color:e.icon_color||"var(--disabled-text-color)",background_color:e.background_color||"var(--secondary-background-color)",opacity:e.opacity??.5,show_badge:e.show_badge||!1}}function Ve(t,e=.3){if(!t)return`rgba(255, 193, 7, ${e})`;const i=Ue(t.entity_id);if("climate"===i)switch(t.attributes.hvac_action){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return"var(--secondary-background-color)"}if("light"===i){if("on"===t.state){if(t.attributes.rgb_color){const i=t.attributes.rgb_color;return`rgba(${i[0]}, ${i[1]}, ${i[2]}, ${e})`}return`rgba(255, 193, 7, ${e})`}return"var(--secondary-background-color)"}if("lock"===i){const e=se[i]?.[t.state];return e||"var(--secondary-background-color)"}return(ie[i]||["on"]).includes(t.state)?`rgba(255, 193, 7, ${e})`:"var(--secondary-background-color)"}function Re(t){switch(t.attributes.hvac_action){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return"var(--primary-text-color)"}}function Ge(t){if(!t)return;const e=Ue(t.entity_id),i=se[e];return i&&i[t.state]?i[t.state]:void 0}function We(t,e){const i=t||"auto";return"auto"===i?function(t){const e=Ue(t.entity_id);if("light"===e&&"on"===t.state){const e=t.attributes.rgb_color;return e?`rgb(${e[0]}, ${e[1]}, ${e[2]})`:"var(--state-light-active-color, var(--amber-color, #ffc107))"}if("climate"===e)switch(t.attributes.hvac_action){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return"var(--primary-color)"}if("lock"===e)switch(t.state){case"locked":return"var(--state-lock-locked-color, #43a047)";case"unlocked":return"var(--state-lock-unlocked-color, #ffa600)";case"jammed":return"var(--state-lock-jammed-color, #db4437)";default:return"var(--primary-color)"}return"problem"===t.state||"error"===t.state||"jammed"===t.state?"var(--error-color, #db4437)":"var(--primary-color)"}(e):i}const qe={motion:{on:"mdi:motion-sensor",off:"mdi:motion-sensor-off"},occupancy:{on:"mdi:home-account",off:"mdi:home-outline"},door:{on:"mdi:door-open",off:"mdi:door-closed"},window:{on:"mdi:window-open",off:"mdi:window-closed"},garage_door:{on:"mdi:garage-open",off:"mdi:garage"},opening:{on:"mdi:square-outline",off:"mdi:square"},lock:{on:"mdi:lock-open",off:"mdi:lock"},moisture:{on:"mdi:water",off:"mdi:water-off"},smoke:{on:"mdi:smoke-detector-alert",off:"mdi:smoke-detector"},gas:{on:"mdi:gas-cylinder",off:"mdi:gas-cylinder"},co:{on:"mdi:molecule-co",off:"mdi:molecule-co"},safety:{on:"mdi:shield-alert",off:"mdi:shield-check"},sound:{on:"mdi:volume-high",off:"mdi:volume-off"},vibration:{on:"mdi:vibrate",off:"mdi:vibrate-off"},presence:{on:"mdi:home",off:"mdi:home-outline"},light:{on:"mdi:brightness-7",off:"mdi:brightness-5"},battery:{on:"mdi:battery-alert",off:"mdi:battery"},battery_charging:{on:"mdi:battery-charging",off:"mdi:battery"},plug:{on:"mdi:power-plug",off:"mdi:power-plug-off"},power:{on:"mdi:flash",off:"mdi:flash-off"},running:{on:"mdi:play",off:"mdi:stop"},problem:{on:"mdi:alert-circle",off:"mdi:check-circle"},tamper:{on:"mdi:alert",off:"mdi:check"},update:{on:"mdi:package-up",off:"mdi:package"},connectivity:{on:"mdi:wifi",off:"mdi:wifi-off"},cold:{on:"mdi:snowflake",off:"mdi:snowflake-off"},heat:{on:"mdi:fire",off:"mdi:fire-off"}};function Fe(t,e){const i=new CustomEvent("hass-more-info",{bubbles:!0,composed:!0,detail:{entityId:e}});t.dispatchEvent(i)}function Ze(t){const e=new CustomEvent("hass-assist",{bubbles:!0,composed:!0});t.dispatchEvent(e)}function Je(t){window.history.pushState(null,"",t);const e=new CustomEvent("location-changed",{bubbles:!0,composed:!0});window.dispatchEvent(e)}function Qe(t){window.open(t,"_blank")}function Ke(t,e){t.callService("homeassistant","toggle",{entity_id:e})}function Ye(t,e,i){const[a,n]=e.split(".");t.callService(a,n,i||{})}function Xe(t,e,i,a){switch(e.action){case"more-info":Fe(a,i);break;case"toggle":Ke(t,i);break;case"navigate":e.navigation_path&&Je(e.navigation_path);break;case"url":e.url_path&&Qe(e.url_path);break;case"perform-action":e.service&&Ye(t,e.service,e.service_data);break;case"assist":Ze(a)}}function ti(t){switch(t){case he:return{top:"-10px",left:"-10px",right:"auto",bottom:"auto"};case pe:return{top:"auto",left:"auto",right:"-10px",bottom:"-10px"};case ue:return{top:"auto",left:"-10px",right:"auto",bottom:"-10px"};default:return{top:"-10px",left:"auto",right:"-10px",bottom:"auto"}}}let ei=class extends lt{constructor(){super(...arguments),this._accordionState={main:!0,mainBasic:!0,mainIcon:!1,mainAppearance:!1,mainActions:!1,persistent:!1,intermittent:!1,climate:!1,power:!1,battery:!1,update:!1,grid:!1},this._persistentEntityExpanded=-1,this._intermittentEntityExpanded=-1,this._customColorInputs=new Set,this._intermittentCustomColorInputs=new Set,this._showUnavailableCustomColorInput=!1,this._iconStateMapCustomColors=new Set}setConfig(t){this._config=t}render(){return this.hass&&this._config?W`
       <div class="editor-container">
         ${this._renderMainSection()}
         ${this._renderPersistentSection()}
@@ -1032,7 +1090,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
           ${this._renderActionsSubSection()}
         </div>
       </div>
-    `}_renderBasicSettingsSubSection(){const t=this._accordionState.mainBasic,e=this._config?.entity?Te(this._config.entity):void 0;return W`
+    `}_renderBasicSettingsSubSection(){const t=this._accordionState.mainBasic,e=this._config?.entity?Ue(this._config.entity):void 0;return W`
       <div class="sub-accordion">
         <div
           class="sub-accordion-header ${t?"expanded":""}"
@@ -1692,7 +1750,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
           </div>
         </div>
       </div>
-    `}_renderPersistentEntityConfig(t,e){const i=t.entity||"",a=i&&this.hass?.states[i],n=i?Te(i):"",s=re.includes(n);return W`
+    `}_renderPersistentEntityConfig(t,e){const i=t.entity||"",a=i&&this.hass?.states[i],n=i?Ue(i):"",s=re.includes(n);return W`
       <div class="entity-row">
         <div class="entity-header" @click=${()=>this._togglePersistentEntityExpand(e)}>
           <div class="entity-name-wrapper">
@@ -1893,7 +1951,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
           </div>
         </div>
       </div>
-    `}_renderIntermittentEntityConfig(t,e){const i=t.entity||"",a=i&&this.hass?.states[i],n=i?Te(i):"",s=re.includes(n);return W`
+    `}_renderIntermittentEntityConfig(t,e){const i=t.entity||"",a=i&&this.hass?.states[i],n=i?Ue(i):"",s=re.includes(n);return W`
       <div class="entity-row">
         <div class="entity-header" @click=${()=>this._toggleIntermittentEntityExpand(e)}>
           <div class="entity-name-wrapper">
@@ -2770,8 +2828,8 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
           </div>
         </div>
       </div>
-    `}_addGlowEffect(){if(!this._config)return;const t=[...this._config.glow_effects||[]];t.push({entity:"",states:[],color:"auto",spread:4,animation:"none"}),this._config={...this._config,glow_effects:t},this._dispatchConfigChanged()}_updateGlowEffect(t,e,i){if(!this._config?.glow_effects)return;const a=[...this._config.glow_effects];a[t]={...a[t],[e]:i},this._config={...this._config,glow_effects:a},this._dispatchConfigChanged()}_removeGlowEffect(t){if(!this._config?.glow_effects)return;const e=[...this._config.glow_effects];e.splice(t,1),this._config={...this._config,glow_effects:e.length>0?e:void 0},this._dispatchConfigChanged()}_dispatchConfigChanged(){const t=new CustomEvent("config-changed",{detail:{config:this._config},bubbles:!0,composed:!0});this.dispatchEvent(t)}};function ei(t,e,i=1){const a=[];let n="";for(const i of e){const e=t.states[i];if(!e||je(e))continue;const s=parseFloat(e.state);isNaN(s)||(a.push(s),!n&&e.attributes.unit_of_measurement&&(n=e.attributes.unit_of_measurement))}if(0===a.length)return{value:null,unit:"",count:0};const s=a.reduce((t,e)=>t+e,0)/a.length;return{value:parseFloat(s.toFixed(i)),unit:n,count:a.length}}ti.styles=ze,t([mt({attribute:!1}),e("design:type",Object)],ti.prototype,"hass",void 0),t([ft(),e("design:type",Object)],ti.prototype,"_config",void 0),t([ft(),e("design:type",Object)],ti.prototype,"_accordionState",void 0),t([ft(),e("design:type",Number)],ti.prototype,"_persistentEntityExpanded",void 0),t([ft(),e("design:type",Number)],ti.prototype,"_intermittentEntityExpanded",void 0),t([ft(),e("design:type",Set)],ti.prototype,"_customColorInputs",void 0),t([ft(),e("design:type",Set)],ti.prototype,"_intermittentCustomColorInputs",void 0),t([ft(),e("design:type",Boolean)],ti.prototype,"_showUnavailableCustomColorInput",void 0),t([ft(),e("design:type",Set)],ti.prototype,"_iconStateMapCustomColors",void 0),ti=t([ht(wt)],ti);const ii="important",ai=" !"+ii,ni=gt(class extends vt{constructor(t){if(super(t),1!==t.type||"style"!==t.name||t.strings?.length>2)throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.")}render(t){return Object.keys(t).reduce((e,i)=>{const a=t[i];return null==a?e:e+`${i=i.includes("-")?i:i.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g,"-$&").toLowerCase()}:${a};`},"")}update(t,[e]){const{style:i}=t.element;if(void 0===this.ft)return this.ft=new Set(Object.keys(e)),this.render(e);for(const t of this.ft)null==e[t]&&(this.ft.delete(t),t.includes("-")?i.removeProperty(t):i[t]=null);for(const t in e){const a=e[t];if(null!=a){this.ft.add(t);const e="string"==typeof a&&a.endsWith(ai);t.includes("-")||e?i.setProperty(t,e?a.slice(0,-11):a,e?ii:""):i[t]=a}}return q}});function si(t){const e=parseFloat(t.state);return isNaN(e)?null:e}function oi(t){return null===t?"mdi:battery-unknown":t<=10?"mdi:battery-alert":t<=20?"mdi:battery-10":t<=30?"mdi:battery-20":t<=40?"mdi:battery-30":t<=50?"mdi:battery-40":t<=60?"mdi:battery-50":t<=70?"mdi:battery-60":t<=80?"mdi:battery-70":t<=90?"mdi:battery-80":"mdi:battery"}function ri(t,e){const i=e.low_threshold??20,a=e.entities||[],n=[];for(const e of a){const a=t.states[e];if(!a)continue;const s=si(a);null!==s&&s<=i&&n.push(e)}return n}function ci(t,e,i){if(!e)return F;if(e.show_as_badge)return F;const a=ri(t,e);if(0===a.length)return F;const n=e.icon_size||"21px";return W`
-    ${a.map(a=>function(t,e,i,a,n,s){const o=t.states[e];if(!o)return F;const r=si(o),c=oi(r),l={"--mdc-icon-size":i,color:"var(--state-sensor-battery-low-color, var(--error-color, #db4437))"},d=n.tap_action||{action:"more-info"},h=n.hold_action||{action:"more-info"};return W`
+    `}_addGlowEffect(){if(!this._config)return;const t=[...this._config.glow_effects||[]];t.push({entity:"",states:[],color:"auto",spread:4,animation:"none"}),this._config={...this._config,glow_effects:t},this._dispatchConfigChanged()}_updateGlowEffect(t,e,i){if(!this._config?.glow_effects)return;const a=[...this._config.glow_effects];a[t]={...a[t],[e]:i},this._config={...this._config,glow_effects:a},this._dispatchConfigChanged()}_removeGlowEffect(t){if(!this._config?.glow_effects)return;const e=[...this._config.glow_effects];e.splice(t,1),this._config={...this._config,glow_effects:e.length>0?e:void 0},this._dispatchConfigChanged()}_dispatchConfigChanged(){const t=new CustomEvent("config-changed",{detail:{config:this._config},bubbles:!0,composed:!0});this.dispatchEvent(t)}};function ii(t,e,i=1){const a=[];let n="";for(const i of e){const e=t.states[i];if(!e||Me(e))continue;const s=parseFloat(e.state);isNaN(s)||(a.push(s),!n&&e.attributes.unit_of_measurement&&(n=e.attributes.unit_of_measurement))}if(0===a.length)return{value:null,unit:"",count:0};const s=a.reduce((t,e)=>t+e,0)/a.length;return{value:parseFloat(s.toFixed(i)),unit:n,count:a.length}}ei.styles=ze,t([mt({attribute:!1}),e("design:type",Object)],ei.prototype,"hass",void 0),t([ft(),e("design:type",Object)],ei.prototype,"_config",void 0),t([ft(),e("design:type",Object)],ei.prototype,"_accordionState",void 0),t([ft(),e("design:type",Number)],ei.prototype,"_persistentEntityExpanded",void 0),t([ft(),e("design:type",Number)],ei.prototype,"_intermittentEntityExpanded",void 0),t([ft(),e("design:type",Set)],ei.prototype,"_customColorInputs",void 0),t([ft(),e("design:type",Set)],ei.prototype,"_intermittentCustomColorInputs",void 0),t([ft(),e("design:type",Boolean)],ei.prototype,"_showUnavailableCustomColorInput",void 0),t([ft(),e("design:type",Set)],ei.prototype,"_iconStateMapCustomColors",void 0),ei=t([ht(wt)],ei);const ai="important",ni=" !"+ai,si=gt(class extends vt{constructor(t){if(super(t),1!==t.type||"style"!==t.name||t.strings?.length>2)throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.")}render(t){return Object.keys(t).reduce((e,i)=>{const a=t[i];return null==a?e:e+`${i=i.includes("-")?i:i.replace(/(?:^(webkit|moz|ms|o)|)(?=[A-Z])/g,"-$&").toLowerCase()}:${a};`},"")}update(t,[e]){const{style:i}=t.element;if(void 0===this.ft)return this.ft=new Set(Object.keys(e)),this.render(e);for(const t of this.ft)null==e[t]&&(this.ft.delete(t),t.includes("-")?i.removeProperty(t):i[t]=null);for(const t in e){const a=e[t];if(null!=a){this.ft.add(t);const e="string"==typeof a&&a.endsWith(ni);t.includes("-")||e?i.setProperty(t,e?a.slice(0,-11):a,e?ai:""):i[t]=a}}return q}});function oi(t){const e=parseFloat(t.state);return isNaN(e)?null:e}function ri(t){return null===t?"mdi:battery-unknown":t<=10?"mdi:battery-alert":t<=20?"mdi:battery-10":t<=30?"mdi:battery-20":t<=40?"mdi:battery-30":t<=50?"mdi:battery-40":t<=60?"mdi:battery-50":t<=70?"mdi:battery-60":t<=80?"mdi:battery-70":t<=90?"mdi:battery-80":"mdi:battery"}function ci(t,e){const i=e.low_threshold??20,a=e.entities||[],n=[];for(const e of a){const a=t.states[e];if(!a)continue;const s=oi(a);null!==s&&s<=i&&n.push(e)}return n}function li(t,e,i){if(!e)return F;if(e.show_as_badge)return F;const a=ci(t,e);if(0===a.length)return F;const n=e.icon_size||"21px";return W`
+    ${a.map(a=>function(t,e,i,a,n,s){const o=t.states[e];if(!o)return F;const r=oi(o),c=ri(r),l={"--mdc-icon-size":i,color:"var(--state-sensor-battery-low-color, var(--error-color, #db4437))"},d=n.tap_action||{action:"more-info"},h=n.hold_action||{action:"more-info"};return W`
     <div
       class="intermittent-entity"
       @click=${t=>{t.stopPropagation(),s(d,e)}}
@@ -2780,11 +2838,11 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
     >
       <ha-icon
         .icon=${c}
-        style=${ni(l)}
+        style=${si(l)}
       ></ha-icon>
     </div>
   `}(t,a,n,0,e,i))}
-  `}function li(t,e){return e?ri(t,e).length:0}const di="mdi:update";function hi(t,e){const i=e.entities||[],a=[];for(const e of i){const i=t.states[e];i&&"on"===i.state&&a.push(e)}return a}function pi(t,e){if(0===e.length)return"";if(1===e.length){const i=t.states[e[0]];return i?`${i.attributes.friendly_name||e[0]}: Update ${i.attributes.latest_version||"available"}`:"1 update available"}const i=e.map(e=>{const i=t.states[e];return i?.attributes.friendly_name||e});return`${e.length} updates available:\n${i.join("\n")}`}function ui(t,e,i,a){if(!e)return F;if(e.show_as_badge)return F;const n=hi(t,e);if(0===n.length)return F;const s=e.icon_size||"21px",o=e.color||"var(--state-update-active-color, var(--info-color, #039be5))",r=e.icon||di,c=!0===e.spin_animation,l={"--mdc-icon-size":s,color:o},d=e.tap_action||{action:"more-info"},h=e.hold_action||{action:"more-info"},p=n[0],u=pi(t,n),m={"update-icon":!0,"spin-animation":c&&a.isSpinning};return W`
+  `}function di(t,e){return e?ci(t,e).length:0}const hi="mdi:update";function pi(t,e){const i=e.entities||[],a=[];for(const e of i){const i=t.states[e];i&&"on"===i.state&&a.push(e)}return a}function ui(t,e){if(0===e.length)return"";if(1===e.length){const i=t.states[e[0]];return i?`${i.attributes.friendly_name||e[0]}: Update ${i.attributes.latest_version||"available"}`:"1 update available"}const i=e.map(e=>{const i=t.states[e];return i?.attributes.friendly_name||e});return`${e.length} updates available:\n${i.join("\n")}`}function mi(t,e,i,a){if(!e)return F;if(e.show_as_badge)return F;const n=pi(t,e);if(0===n.length)return F;const s=e.icon_size||"21px",o=e.color||"var(--state-update-active-color, var(--info-color, #039be5))",r=e.icon||hi,c=!0===e.spin_animation,l={"--mdc-icon-size":s,color:o},d=e.tap_action||{action:"more-info"},h=e.hold_action||{action:"more-info"},p=n[0],u=ui(t,n),m={"update-icon":!0,"spin-animation":c&&a.isSpinning};return W`
     <div
       class="intermittent-entity"
       @click=${t=>{t.stopPropagation(),i(d,p)}}
@@ -2794,15 +2852,15 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
       <ha-icon
         class=${_t(m)}
         .icon=${r}
-        style=${ni(l)}
+        style=${si(l)}
       ></ha-icon>
       ${n.length>1?W`
         <span class="update-badge">${n.length}</span>
       `:F}
     </div>
-  `}function mi(t,e){return e?hi(t,e).length:0}function fi(t,e,i,a,n=!1){if(!e?.entities?.length)return F;const s=e.position||"right",o=e.icon_size||"21px",r={gap:e.gap||"4px"};if(n){if(e.padding)r.padding=e.padding;else switch(s){case"left":r.padding="0 0 1px 14px";break;case"center":r.padding="0 0 1px 0";break;default:r.padding="0 0 1px 2px",e.margin||(r.margin="0 3px 0 0")}switch(e.margin&&(r.margin=e.margin),s){case"left":r["justify-self"]="start";break;case"center":r["justify-self"]="center";break;default:r["justify-self"]="end"}}const c=e.entities||[];return W`
-    <div class=${_t({"persistent-section":!0,"legacy-grid":n})} style=${ni(r)}>
-      ${c.map(e=>function(t,e,i,a,n){const s=t.states[e.entity],o=!s||je(s),r=s?.state||"unavailable",c=Te(e.entity),l=e.states?.find(t=>t.state===r);let d=l?.icon||e.icon;!d&&s?.attributes.icon&&(d=s.attributes.icon),d||(d=function(t,e){if("lock"===t)switch(e){case"locked":return"mdi:lock";case"unlocked":return"mdi:lock-open";case"locking":case"unlocking":return"mdi:lock-clock";case"jammed":return"mdi:lock-alert";default:return"mdi:lock-question"}if("binary_sensor"===t)return"on"===e?"mdi:motion-sensor":"mdi:motion-sensor-off";if("cover"===t)switch(e){case"open":case"opening":return"mdi:door-open";case"closed":case"closing":return"mdi:door-closed";default:return"mdi:door"}return"switch"===t?"on"===e?"mdi:toggle-switch":"mdi:toggle-switch-off":"light"===t?"on"===e?"mdi:lightbulb":"mdi:lightbulb-off":"mdi:help-circle"}(c,r));let h=l?.color;h||(h=function(t,e,i){if(i)return"var(--disabled-text-color, #9e9e9e)";if("lock"===t)switch(e){case"locked":return"var(--state-lock-locked-color, #43a047)";case"unlocked":return"var(--state-lock-unlocked-color, #ffc107)";case"locking":return"var(--state-lock-locking-color, #ffc107)";case"unlocking":return"var(--state-lock-unlocking-color, #ffc107)";case"jammed":return"var(--state-lock-jammed-color, #db4437)";case"open":return"var(--state-lock-open-color, #db4437)";default:return"var(--primary-text-color)"}if("binary_sensor"===t)return"on"===e?"var(--state-binary_sensor-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)";if("cover"===t)switch(e){case"open":case"opening":return"var(--state-cover-open-color, #ffc107)";case"closed":case"closing":return"var(--state-cover-closed-color, #43a047)";default:return"var(--primary-text-color)"}return"switch"===t?"on"===e?"var(--state-switch-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)":"light"===t?"on"===e?"var(--state-light-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)":"on"===e||"home"===e||"open"===e?"var(--state-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)"}(c,r,o));const p=e.icon_size||i,u={width:p,height:p,color:h,"--mdc-icon-size":p};return W`
+  `}function fi(t,e){return e?pi(t,e).length:0}function gi(t,e,i,a,n=!1){if(!e?.entities?.length)return F;const s=e.position||"right",o=e.icon_size||"21px",r={gap:e.gap||"4px"};if(n){if(e.padding)r.padding=e.padding;else switch(s){case"left":r.padding="0 0 1px 14px";break;case"center":r.padding="0 0 1px 0";break;default:r.padding="0 0 1px 2px",e.margin||(r.margin="0 3px 0 0")}switch(e.margin&&(r.margin=e.margin),s){case"left":r["justify-self"]="start";break;case"center":r["justify-self"]="center";break;default:r["justify-self"]="end"}}const c=e.entities||[];return W`
+    <div class=${_t({"persistent-section":!0,"legacy-grid":n})} style=${si(r)}>
+      ${c.map(e=>function(t,e,i,a,n){const s=t.states[e.entity],o=!s||Me(s),r=s?.state||"unavailable",c=Ue(e.entity),l=e.states?.find(t=>t.state===r);let d=l?.icon||e.icon;!d&&s?.attributes.icon&&(d=s.attributes.icon),d||(d=function(t,e){if("lock"===t)switch(e){case"locked":return"mdi:lock";case"unlocked":return"mdi:lock-open";case"locking":case"unlocking":return"mdi:lock-clock";case"jammed":return"mdi:lock-alert";default:return"mdi:lock-question"}if("binary_sensor"===t)return"on"===e?"mdi:motion-sensor":"mdi:motion-sensor-off";if("cover"===t)switch(e){case"open":case"opening":return"mdi:door-open";case"closed":case"closing":return"mdi:door-closed";default:return"mdi:door"}return"switch"===t?"on"===e?"mdi:toggle-switch":"mdi:toggle-switch-off":"light"===t?"on"===e?"mdi:lightbulb":"mdi:lightbulb-off":"mdi:help-circle"}(c,r));let h=l?.color;h||(h=function(t,e,i){if(i)return"var(--disabled-text-color, #9e9e9e)";if("lock"===t)switch(e){case"locked":return"var(--state-lock-locked-color, #43a047)";case"unlocked":return"var(--state-lock-unlocked-color, #ffc107)";case"locking":return"var(--state-lock-locking-color, #ffc107)";case"unlocking":return"var(--state-lock-unlocking-color, #ffc107)";case"jammed":return"var(--state-lock-jammed-color, #db4437)";case"open":return"var(--state-lock-open-color, #db4437)";default:return"var(--primary-text-color)"}if("binary_sensor"===t)return"on"===e?"var(--state-binary_sensor-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)";if("cover"===t)switch(e){case"open":case"opening":return"var(--state-cover-open-color, #ffc107)";case"closed":case"closing":return"var(--state-cover-closed-color, #43a047)";default:return"var(--primary-text-color)"}return"switch"===t?"on"===e?"var(--state-switch-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)":"light"===t?"on"===e?"var(--state-light-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)":"on"===e||"home"===e||"open"===e?"var(--state-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)"}(c,r,o));const p=e.icon_size||i,u={width:p,height:p,color:h,"--mdc-icon-size":p};return W`
     <div
       class="persistent-entity"
       @click=${t=>{t.stopPropagation(),e.tap_action?a(e.tap_action,e.entity):n(e.entity)}}
@@ -2811,12 +2869,12 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
     >
       <ha-icon
         .icon=${d}
-        style=${ni(u)}
+        style=${si(u)}
       ></ha-icon>
     </div>
   `}(t,e,o,i,a))}
     </div>
-  `}function gi(t,e,i,a,n){const s=t.states[e.entity];if(!s)return F;const o=s.state,r=Te(e.entity);let c=e.icon;const l=e.states?.find(t=>t.state===o);l?.icon?c=l.icon:c||(c=function(t,e,i){return i.attributes.icon?i.attributes.icon:"binary_sensor"===t?function(t,e){const i="on"===e;return t&&We[t]?i?We[t].on:We[t].off:i?"mdi:checkbox-marked-circle":"mdi:checkbox-blank-circle-outline"}(i.attributes.device_class,e):ne[t]?.[e]?ne[t][e]:ae[t]||"mdi:alert-circle"}(r,o,s));let d=function(t,e){return se[t]?.[e]?se[t][e]:(ie[t]||["on"]).includes(e)?"var(--state-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)"}(r,o);l?.color&&(d=l.color);const h=l?.animation||e.animation||a,p=e.icon_size||i,u=e.tap_action||{action:"more-info"},m=e.hold_action||{action:"more-info"},f={"--mdc-icon-size":p,color:d};return W`
+  `}function vi(t,e,i,a,n){const s=t.states[e.entity];if(!s)return F;const o=s.state,r=Ue(e.entity);let c=e.icon;const l=e.states?.find(t=>t.state===o);l?.icon?c=l.icon:c||(c=function(t,e,i){return i.attributes.icon?i.attributes.icon:"binary_sensor"===t?function(t,e){const i="on"===e;return t&&qe[t]?i?qe[t].on:qe[t].off:i?"mdi:checkbox-marked-circle":"mdi:checkbox-blank-circle-outline"}(i.attributes.device_class,e):ne[t]?.[e]?ne[t][e]:ae[t]||"mdi:alert-circle"}(r,o,s));let d=function(t,e){return se[t]?.[e]?se[t][e]:(ie[t]||["on"]).includes(e)?"var(--state-active-color, var(--amber-color, #ffc107))":"var(--primary-text-color)"}(r,o);l?.color&&(d=l.color);const h=l?.animation||e.animation||a,p=e.icon_size||i,u=e.tap_action||{action:"more-info"},m=e.hold_action||{action:"more-info"},f={"--mdc-icon-size":p,color:d};return W`
     <div
       class=${_t({"intermittent-entity":!0,[`animation-${h}`]:!!h})}
       @click=${t=>{t.stopPropagation(),n(u,e.entity)}}
@@ -2825,33 +2883,33 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
     >
       <ha-icon
         .icon=${c}
-        style=${ni(f)}
+        style=${si(f)}
       ></ha-icon>
     </div>
-  `}function vi(t,e,i,a=!1,n,s,o){const r=e?.icon_size||"21px",c=e?.gap||"4px",l=e?.active_states,d=e?.animation,h=(e?.entities||[]).filter(e=>function(t,e,i){const a=t.states[e.entity];if(!a)return!1;if(["unavailable","unknown"].includes(a.state))return!1;const n=a.state,s=Te(e.entity);return(e.active_states||i||ie[s]||["on"]).includes(n)}(t,e,l)),p=n&&li(t,n)>0,u=s&&mi(t,s)>0;if(0===h.length&&!p&&!u)return F;const m={gap:c};return W`
-    <div class=${_t({"intermittent-section":!0,"legacy-grid":a})} style=${ni(m)}>
-      ${h.map(e=>gi(t,e,r,d,i))}
-      ${p?ci(t,n,i):F}
-      ${u&&o?ui(t,s,i,o):F}
+  `}function _i(t,e,i,a=!1,n,s,o){const r=e?.icon_size||"21px",c=e?.gap||"4px",l=e?.active_states,d=e?.animation,h=(e?.entities||[]).filter(e=>function(t,e,i){const a=t.states[e.entity];if(!a)return!1;if(["unavailable","unknown"].includes(a.state))return!1;const n=a.state,s=Ue(e.entity);return(e.active_states||i||ie[s]||["on"]).includes(n)}(t,e,l)),p=n&&di(t,n)>0,u=s&&fi(t,s)>0;if(0===h.length&&!p&&!u)return F;const m={gap:c};return W`
+    <div class=${_t({"intermittent-section":!0,"legacy-grid":a})} style=${si(m)}>
+      ${h.map(e=>vi(t,e,r,d,i))}
+      ${p?li(t,n,i):F}
+      ${u&&o?mi(t,s,i,o):F}
     </div>
-  `}function _i(t,e){const i=Ne(t,e),a=De(t,e),n=Ue(e)||"",s=!1!==e.show_icon,o=e.show_img_cell??!0,r=Oe(t,e),c=He(e),l=r&&"off"!==c.behavior,d=function(t,e){if(!e.icon_state_map?.states)return{};const i=e.icon_state_map.entity||e.entity,a=i?t.states[i]:void 0;return a&&e.icon_state_map.states[a.state]||{}}(t,e),h=function(t,e,i,a,n){return a&&n?n:i||t.icon||function(t){if(!t)return"mdi:home";if(t.attributes.icon)return t.attributes.icon;const e=Te(t.entity_id);if("climate"===e){const e=t.attributes.hvac_action;if(e)switch(e){case"heating":case"preheating":return"mdi:fire";case"cooling":return"mdi:snowflake";case"drying":return"mdi:water-percent";case"fan":return"mdi:fan";default:return"mdi:thermostat"}}const i=ne[e];return i&&i[t.state]?i[t.state]:ae[e]||"mdi:home"}(e)}(e,i,d.icon,l,c.icon);var p;const u=function(t,e,i){const a={"icon-container":!0,"with-img-cell":t,active:e};return i&&(a[i]=!0),a}(o,a,a&&e.icon_animation&&"none"!==e.icon_animation&&(p=e.icon_animation)&&"none"!==p?`animation-${p}`:""),m=function(t,e,i,a,n,s,o){const r={};if("spin"===e.icon_animation&&a){const t=e.spin_duration||2;r["--spin-duration"]=`${t}s`}if(i&&e.img_cell_size&&(r.width=e.img_cell_size,r.height=e.img_cell_size),n&&i)r.background=s;else if(o&&i)r.background=o;else if(a&&i){const i=function(t,e){const i=Be(e),a=Ue(e),n=e.icon_background_opacity??.3;if("light"!==a)return Le(Ne(t,e),n);const s=[];for(const e of i){const i=t.states[e];if(!i||"on"!==i.state)continue;const a=i.attributes.rgb_color;a&&s.push({r:a[0],g:a[1],b:a[2]})}if(s.length>0){const t=Math.round(s.reduce((t,e)=>t+e.r,0)/s.length),e=Math.round(s.reduce((t,e)=>t+e.g,0)/s.length),i=Math.round(s.reduce((t,e)=>t+e.b,0)/s.length);return`rgba(${t}, ${e}, ${i}, ${n})`}return Le(Ne(t,e),n)}(t,e);r.background=i}return r}(t,e,o,a,l,c.background_color,d.color),f=function(t,e,i,a,n,s,o,r,c,l){const d={};if(e.icon_size&&(d["--mdc-icon-size"]=e.icon_size,n||(l.width=e.icon_size,l.height=e.icon_size)),o)d.color=r;else if(c&&n)d.color="var(--text-primary-color, #fff)";else if(c)d.color=c;else if(s&&n)d.color="var(--text-primary-color, #fff)";else if(i&&s)if("light"===a)d.color=function(t,e){const i=Be(e);if("light"!==Ue(e)){const i=Ne(t,e);return i?function(t){if("on"===t.state&&t.attributes.rgb_color){const e=t.attributes.rgb_color;return`rgb(${e[0]}, ${e[1]}, ${e[2]})`}return"var(--state-light-active-color, var(--amber-color, #ffc107))"}(i):"var(--state-active-color, var(--amber-color, #ffc107))"}const a=[];for(const e of i){const i=t.states[e];if(!i||"on"!==i.state)continue;const n=i.attributes.rgb_color;n&&a.push({r:n[0],g:n[1],b:n[2]})}if(a.length>0){const t=Math.round(a.reduce((t,e)=>t+e.r,0)/a.length),e=Math.round(a.reduce((t,e)=>t+e.g,0)/a.length),i=Math.round(a.reduce((t,e)=>t+e.b,0)/a.length);return`rgb(${t}, ${e}, ${i})`}return"var(--state-light-active-color, var(--amber-color, #ffc107))"}(t,e);else if("climate"===a)d.color=Ve(i);else{const t=Re(i);d.color=t||"var(--state-active-color, var(--amber-color, #ffc107))"}else if(i&&"climate"===a)d.color=Ve(i);else if(i){const t=Re(i);t&&(d.color=t)}return d}(t,e,i,n,o,a,l,c.icon_color,d.color,m),g=function(t){const e={};switch(t.icon_horizontal_position||Ut){case zt:e["justify-self"]="start";break;case Tt:e["justify-self"]="center";break;default:e["justify-self"]="end"}switch(t.icon_vertical_position||Mt){case Mt:e["align-self"]="start";break;case Bt:e["align-self"]="center";break;case Nt:e["align-self"]="end"}return e}(e),v=e.show_state&&i&&!/\bstate\b/.test(e.grid?.template_areas||"");return W`
-    <div class="icon-section" style=${ni(g)}>
+  `}function bi(t,e){const i=Oe(t,e),a=He(t,e),n=je(e)||"",s=!1!==e.show_icon,o=e.show_img_cell??!0,r=De(t,e),c=Le(e),l=r&&"off"!==c.behavior,d=function(t,e){if(!e.icon_state_map?.states)return{};const i=e.icon_state_map.entity||e.entity,a=i?t.states[i]:void 0;return a&&e.icon_state_map.states[a.state]||{}}(t,e),h=function(t,e,i,a,n){return a&&n?n:i||t.icon||function(t){if(!t)return"mdi:home";if(t.attributes.icon)return t.attributes.icon;const e=Ue(t.entity_id);if("climate"===e){const e=t.attributes.hvac_action;if(e)switch(e){case"heating":case"preheating":return"mdi:fire";case"cooling":return"mdi:snowflake";case"drying":return"mdi:water-percent";case"fan":return"mdi:fan";default:return"mdi:thermostat"}}const i=ne[e];return i&&i[t.state]?i[t.state]:ae[e]||"mdi:home"}(e)}(e,i,d.icon,l,c.icon);var p;const u=function(t,e,i){const a={"icon-container":!0,"with-img-cell":t,active:e};return i&&(a[i]=!0),a}(o,a,a&&e.icon_animation&&"none"!==e.icon_animation&&(p=e.icon_animation)&&"none"!==p?`animation-${p}`:""),m=function(t,e,i,a,n,s,o){const r={};if("spin"===e.icon_animation&&a){const t=e.spin_duration||2;r["--spin-duration"]=`${t}s`}if(i&&e.img_cell_size&&(r.width=e.img_cell_size,r.height=e.img_cell_size),n&&i)r.background=s;else if(o&&i)r.background=o;else if(a&&i){const i=function(t,e){const i=Ne(e),a=je(e),n=e.icon_background_opacity??.3;if("light"!==a)return Ve(Oe(t,e),n);const s=[];for(const e of i){const i=t.states[e];if(!i||"on"!==i.state)continue;const a=i.attributes.rgb_color;a&&s.push({r:a[0],g:a[1],b:a[2]})}if(s.length>0){const t=Math.round(s.reduce((t,e)=>t+e.r,0)/s.length),e=Math.round(s.reduce((t,e)=>t+e.g,0)/s.length),i=Math.round(s.reduce((t,e)=>t+e.b,0)/s.length);return`rgba(${t}, ${e}, ${i}, ${n})`}return Ve(Oe(t,e),n)}(t,e);r.background=i}return r}(t,e,o,a,l,c.background_color,d.color),f=function(t,e,i,a,n,s,o,r,c,l){const d={};if(e.icon_size&&(d["--mdc-icon-size"]=e.icon_size,n||(l.width=e.icon_size,l.height=e.icon_size)),o)d.color=r;else if(c&&n)d.color="var(--text-primary-color, #fff)";else if(c)d.color=c;else if(s&&n)d.color="var(--text-primary-color, #fff)";else if(i&&s)if("light"===a)d.color=function(t,e){const i=Ne(e);if("light"!==je(e)){const i=Oe(t,e);return i?function(t){if("on"===t.state&&t.attributes.rgb_color){const e=t.attributes.rgb_color;return`rgb(${e[0]}, ${e[1]}, ${e[2]})`}return"var(--state-light-active-color, var(--amber-color, #ffc107))"}(i):"var(--state-active-color, var(--amber-color, #ffc107))"}const a=[];for(const e of i){const i=t.states[e];if(!i||"on"!==i.state)continue;const n=i.attributes.rgb_color;n&&a.push({r:n[0],g:n[1],b:n[2]})}if(a.length>0){const t=Math.round(a.reduce((t,e)=>t+e.r,0)/a.length),e=Math.round(a.reduce((t,e)=>t+e.g,0)/a.length),i=Math.round(a.reduce((t,e)=>t+e.b,0)/a.length);return`rgb(${t}, ${e}, ${i})`}return"var(--state-light-active-color, var(--amber-color, #ffc107))"}(t,e);else if("climate"===a)d.color=Re(i);else{const t=Ge(i);d.color=t||"var(--state-active-color, var(--amber-color, #ffc107))"}else if(i&&"climate"===a)d.color=Re(i);else if(i){const t=Ge(i);t&&(d.color=t)}return d}(t,e,i,n,o,a,l,c.icon_color,d.color,m),g=function(t){const e={};switch(t.icon_horizontal_position||Ut){case zt:e["justify-self"]="start";break;case Tt:e["justify-self"]="center";break;default:e["justify-self"]="end"}switch(t.icon_vertical_position||Mt){case Mt:e["align-self"]="start";break;case Bt:e["align-self"]="center";break;case Nt:e["align-self"]="end"}return e}(e),v=e.show_state&&i&&!/\bstate\b/.test(e.grid?.template_areas||"");return W`
+    <div class="icon-section" style=${si(g)}>
       ${v?W`<span class="state-text">${i.state}</span>`:F}
       <div class="icon-wrapper">
         ${s?W`
               <div
                 class=${_t(u)}
-                style=${ni(m)}
+                style=${si(m)}
               >
                 <ha-icon
                   .icon=${h}
-                  style=${ni(f)}
+                  style=${si(f)}
                 ></ha-icon>
               </div>
             `:F}
       </div>
     </div>
-  `}var bi;c`
+  `}var yi;c`
   @keyframes spin {
     from {
       transform: rotate(0deg);
@@ -2907,7 +2965,7 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
   .animate-flash {
     animation: flash 1s ease-in-out infinite;
   }
-`,console.info(`%c ${bt.toUpperCase()} %c v2.0.3-u1.0 `,"color: white; background: #3498db; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;","color: #3498db; background: #ecf0f1; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;");let yi=bi=class extends lt{constructor(){super(...arguments),this._tapCount=0,this._updateAnimationState={isSpinning:!1}}setConfig(t){if(!t)throw new Error("Invalid configuration");this._config={show_name:!0,show_icon:!0,show_state:!1,show_img_cell:!0,icon_animation:"none",tap_action:{action:"toggle"},hold_action:{action:"none"},double_tap_action:{action:"more-info"},...t}}getCardSize(){return 2}disconnectedCallback(){super.disconnectedCallback(),this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._stopUpdateSpinTimer()}_startUpdateSpinTimer(){if(this._stopUpdateSpinTimer(),t=this._config?.update_entities,!0!==t?.spin_animation)return;var t;if(!this.hass||0===mi(this.hass,this._config?.update_entities))return;const e=function(t){const e=t?.spin_interval??60;return 1e3*Math.max(10,e)}(this._config?.update_entities);this._triggerUpdateSpin(),this._updateSpinTimer=setInterval(()=>{this._triggerUpdateSpin()},e)}_stopUpdateSpinTimer(){this._updateSpinTimer&&(clearInterval(this._updateSpinTimer),this._updateSpinTimer=void 0),this._spinAnimationTimeout&&(clearTimeout(this._spinAnimationTimeout),this._spinAnimationTimeout=void 0)}_triggerUpdateSpin(){this._updateAnimationState={isSpinning:!0},this._spinAnimationTimeout=setTimeout(()=>{this._updateAnimationState={isSpinning:!1}},1e3)}static getConfigElement(){return document.createElement(wt)}static getStubConfig(){return{type:`custom:${yt}`,name:"Room Name",entity:"",show_name:!0,show_icon:!0}}updated(t){super.updated(t),this._config?.grid_area?this.style.gridArea=this._config.grid_area:this.style.removeProperty("grid-area"),(t.has("hass")||t.has("_config"))&&(t.get("hass")&&!t.has("_config")||this._startUpdateSpinTimer())}shouldUpdate(t){if(t.has("_config"))return!0;if(t.has("_updateAnimationState"))return!0;if(t.has("hass")&&this._config){const e=t.get("hass");return!e||function(t,e,i){const a=function(t){const e=[];if(t.entity&&e.push(t.entity),t.entities?.length&&e.push(...t.entities),t.persistent_entities?.entities&&e.push(...t.persistent_entities.entities.map(t=>t.entity)),t.intermittent_entities?.entities&&e.push(...t.intermittent_entities.entities.map(t=>t.entity)),t.climate_entities){const i=t.climate_entities;i.primary_entities&&e.push(...i.primary_entities),i.temperature_entities&&e.push(...i.temperature_entities),i.humidity_entities&&e.push(...i.humidity_entities),i.air_quality_entities&&e.push(...i.air_quality_entities),i.illuminance_entities&&e.push(...i.illuminance_entities)}return t.power_entities?.entities&&e.push(...t.power_entities.entities),t.battery_entities?.entities&&e.push(...t.battery_entities.entities),t.update_entities?.entities&&e.push(...t.update_entities.entities),t.glow_effects?.length&&e.push(...t.glow_effects.map(t=>t.entity).filter(Boolean)),t.border_entity&&e.push(t.border_entity),t.icon_state_map?.entity&&e.push(t.icon_state_map.entity),e}(t);for(const t of a)if(e.states[t]!==i.states[t])return!0;return!1}(this._config,e,this.hass)}return!1}render(){if(!this._config||!this.hass)return F;const t=Ne(this.hass,this._config),e=De(this.hass,this._config),i=this._getBorderStyle(),a=function(t,e){if(e.glow_effects?.length)for(const i of e.glow_effects){if(!i.entity)continue;const e=t.states[i.entity];if(!e)continue;const a=[];if(i.state&&a.push(i.state),i.states?.length&&a.push(...i.states),0!==a.length&&a.includes(e.state))return{color:Ge(i.color,e),spread:i.spread??4,animation:i.animation||"none"}}}(this.hass,this._config),n=Oe(this.hass,this._config),s=He(this._config),o=n&&"off"!==s.behavior,r=function(t){const e=[];if(t.cardHeight&&e.push(`height: ${t.cardHeight};`),t.cardWidth&&e.push(`width: ${t.cardWidth};`),t.gridTemplateAreas&&e.push(`grid-template-areas: ${t.gridTemplateAreas};`),t.gridTemplateColumns&&e.push(`grid-template-columns: ${t.gridTemplateColumns};`),t.gridTemplateRows&&e.push(`grid-template-rows: ${t.gridTemplateRows};`),t.backgroundGradient?e.push(`background: ${t.backgroundGradient};`):t.backgroundColor&&e.push(`background-color: ${t.backgroundColor};`),t.borderStyle&&e.push(`border: ${t.borderStyle};`),t.glowColor){const i=t.glowSpread??4;e.push(`--glow-color: ${t.glowColor};`),e.push(`--glow-spread: ${i}px;`)}return void 0!==t.unavailableOpacity&&e.push(`opacity: ${t.unavailableOpacity};`),e.join(" ")}({cardHeight:this._config.card_height,cardWidth:this._config.card_width,gridTemplateAreas:this._config.grid?.template_areas,gridTemplateColumns:this._config.grid?.template_columns,gridTemplateRows:this._config.grid?.template_rows,backgroundColor:this._config.background_color,activeBackgroundColor:e?this._config.active_background_color:void 0,backgroundGradient:this._config.background_gradient,borderStyle:i,glowColor:a?.color,glowSpread:a?.spread,glowAnimation:a?.animation,unavailableOpacity:o?s.opacity:void 0}),c={"state-on":e&&!o,"state-off":!e&&!!t&&!o,"state-unavailable":o};a&&!o&&("pulse"===a.animation?c["card-glow-pulse"]=!0:"breathe"===a.animation?c["card-glow-breathe"]=!0:c["card-glow"]=!0);const l=this._getDefinedGridAreas();return W`
+`,console.info(`%c ${bt.toUpperCase()} %c v2.0.3-u1.0 `,"color: white; background: #3498db; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;","color: #3498db; background: #ecf0f1; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;");let wi=yi=class extends lt{constructor(){super(...arguments),this._tapCount=0,this._updateAnimationState={isSpinning:!1}}setConfig(t){if(!t)throw new Error("Invalid configuration");this._config={show_name:!0,show_icon:!0,show_state:!1,show_img_cell:!0,icon_animation:"none",tap_action:{action:"toggle"},hold_action:{action:"none"},double_tap_action:{action:"more-info"},...t}}getCardSize(){return 2}disconnectedCallback(){super.disconnectedCallback(),this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._stopUpdateSpinTimer()}_startUpdateSpinTimer(){if(this._stopUpdateSpinTimer(),t=this._config?.update_entities,!0!==t?.spin_animation)return;var t;if(!this.hass||0===fi(this.hass,this._config?.update_entities))return;const e=function(t){const e=t?.spin_interval??60;return 1e3*Math.max(10,e)}(this._config?.update_entities);this._triggerUpdateSpin(),this._updateSpinTimer=setInterval(()=>{this._triggerUpdateSpin()},e)}_stopUpdateSpinTimer(){this._updateSpinTimer&&(clearInterval(this._updateSpinTimer),this._updateSpinTimer=void 0),this._spinAnimationTimeout&&(clearTimeout(this._spinAnimationTimeout),this._spinAnimationTimeout=void 0)}_triggerUpdateSpin(){this._updateAnimationState={isSpinning:!0},this._spinAnimationTimeout=setTimeout(()=>{this._updateAnimationState={isSpinning:!1}},1e3)}static getConfigElement(){return document.createElement(wt)}static getStubConfig(){return{type:`custom:${yt}`,name:"Room Name",entity:"",show_name:!0,show_icon:!0}}updated(t){super.updated(t),this._config?.grid_area?this.style.gridArea=this._config.grid_area:this.style.removeProperty("grid-area"),(t.has("hass")||t.has("_config"))&&(t.get("hass")&&!t.has("_config")||this._startUpdateSpinTimer())}shouldUpdate(t){if(t.has("_config"))return!0;if(t.has("_updateAnimationState"))return!0;if(t.has("hass")&&this._config){const e=t.get("hass");return!e||function(t,e,i){const a=function(t){const e=[];if(t.entity&&e.push(t.entity),t.entities?.length&&e.push(...t.entities),t.persistent_entities?.entities&&e.push(...t.persistent_entities.entities.map(t=>t.entity)),t.intermittent_entities?.entities&&e.push(...t.intermittent_entities.entities.map(t=>t.entity)),t.climate_entities){const i=t.climate_entities;i.primary_entities&&e.push(...i.primary_entities),i.temperature_entities&&e.push(...i.temperature_entities),i.humidity_entities&&e.push(...i.humidity_entities),i.air_quality_entities&&e.push(...i.air_quality_entities),i.illuminance_entities&&e.push(...i.illuminance_entities)}return t.power_entities?.entities&&e.push(...t.power_entities.entities),t.battery_entities?.entities&&e.push(...t.battery_entities.entities),t.update_entities?.entities&&e.push(...t.update_entities.entities),t.glow_effects?.length&&e.push(...t.glow_effects.map(t=>t.entity).filter(Boolean)),t.border_entity&&e.push(t.border_entity),t.icon_state_map?.entity&&e.push(t.icon_state_map.entity),e}(t);for(const t of a)if(e.states[t]!==i.states[t])return!0;return!1}(this._config,e,this.hass)}return!1}render(){if(!this._config||!this.hass)return F;const t=Oe(this.hass,this._config),e=He(this.hass,this._config),i=this._getBorderStyle(),a=function(t,e){if(e.glow_effects?.length)for(const i of e.glow_effects){if(!i.entity)continue;const e=t.states[i.entity];if(!e)continue;const a=[];if(i.state&&a.push(i.state),i.states?.length&&a.push(...i.states),0!==a.length&&a.includes(e.state))return{color:We(i.color,e),spread:i.spread??4,animation:i.animation||"none"}}}(this.hass,this._config),n=De(this.hass,this._config),s=Le(this._config),o=n&&"off"!==s.behavior,r=function(t){const e=[];if(t.cardHeight&&e.push(`height: ${t.cardHeight};`),t.cardWidth&&e.push(`width: ${t.cardWidth};`),t.gridTemplateAreas&&e.push(`grid-template-areas: ${t.gridTemplateAreas};`),t.gridTemplateColumns&&e.push(`grid-template-columns: ${t.gridTemplateColumns};`),t.gridTemplateRows&&e.push(`grid-template-rows: ${t.gridTemplateRows};`),t.backgroundGradient?e.push(`background: ${t.backgroundGradient};`):t.backgroundColor&&e.push(`background-color: ${t.backgroundColor};`),t.borderStyle&&e.push(`border: ${t.borderStyle};`),t.glowColor){const i=t.glowSpread??4;e.push(`--glow-color: ${t.glowColor};`),e.push(`--glow-spread: ${i}px;`)}return void 0!==t.unavailableOpacity&&e.push(`opacity: ${t.unavailableOpacity};`),e.join(" ")}({cardHeight:this._config.card_height,cardWidth:this._config.card_width,gridTemplateAreas:this._config.grid?.template_areas,gridTemplateColumns:this._config.grid?.template_columns,gridTemplateRows:this._config.grid?.template_rows,backgroundColor:this._config.background_color,activeBackgroundColor:e?this._config.active_background_color:void 0,backgroundGradient:this._config.background_gradient,borderStyle:i,glowColor:a?.color,glowSpread:a?.spread,glowAnimation:a?.animation,unavailableOpacity:o?s.opacity:void 0}),c={"state-on":e&&!o,"state-off":!e&&!!t&&!o,"state-unavailable":o};a&&!o&&("pulse"===a.animation?c["card-glow-pulse"]=!0:"breathe"===a.animation?c["card-glow-breathe"]=!0:c["card-glow"]=!0);const l=this._getDefinedGridAreas();return W`
       <ha-card
         class=${_t(c)}
         style=${r}
@@ -2923,9 +2981,9 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
         ${this._renderUpdateBadge()}
         ${this._renderName()}
         ${this._renderLabel()}
-        ${this.hass&&this._config?_i(this.hass,this._config):F}
+        ${this.hass&&this._config?bi(this.hass,this._config):F}
         ${this._renderStateArea()}
-        ${this.hass?function(t,e,i){if(!e&&!i)return F;const a=e?.decimal_places??0,n=i?.decimal_places??0,s=!1!==e?.show_primary_unit,o=!1!==e?.show_temperature_unit,r=!1!==e?.show_humidity_unit,c=!1!==e?.show_air_quality_unit,l=!1!==e?.show_illuminance_unit,d=!1!==i?.show_unit;let h=null;e?.primary_entities&&e.primary_entities.length>0&&(h=function(t,e,i=0,a=!0){if(!e?.primary_entities||0===e.primary_entities.length)return null;const n=ei(t,e.primary_entities,i);return null===n.value?null:a&&n.unit?`${n.value}${n.unit}`:String(n.value)}(t,e,a,s)),h||(h=function(t,e,i=0,a=!0){if(!e?.temperature_entities||0===e.temperature_entities.length)return null;const n=ei(t,e.temperature_entities,i);if(null!==n.value){const t=a&&n.unit||"°";return`${n.value}${t}`}return null}(t,e,a,o));const p=function(t,e,i=0,a=!0){if(!e?.humidity_entities||0===e.humidity_entities.length)return null;const n=ei(t,e.humidity_entities,i);if(null!==n.value){const t=a?"%":"";return`${n.value}${t}`}return null}(t,e,a,r),u=function(t,e,i=0,a=!0){if(!e?.air_quality_entities||0===e.air_quality_entities.length)return null;const n=ei(t,e.air_quality_entities,i);if(null!==n.value){const t=a&&n.unit?n.unit:"";return`${n.value}${t}`}return null}(t,e,a,c),m=function(t,e,i=0,a=!0){if(!e?.illuminance_entities||0===e.illuminance_entities.length)return null;const n=ei(t,e.illuminance_entities,i);if(null!==n.value){const t=a?"lx":"";return`${n.value}${t}`}return null}(t,e,a,l),f=function(t,e,i=0,a=!0){if(!e?.entities||0===e.entities.length)return null;let n=0,s=0;for(const i of e.entities){const e=t.states[i];if(!e||je(e))continue;const a=parseFloat(e.state);if(isNaN(a))continue;const o=e.attributes.unit_of_measurement,r=("string"==typeof o?o:"W").toLowerCase();n+="kw"===r?1e3*a:"mw"===r?1e6*a:"gw"===r?1e9*a:a,s++}if(0===s)return null;if(n>=1e3){const t=(n/1e3).toFixed(i);return a?`${t}kW`:t}const o=n.toFixed(i);return a?`${o}W`:o}(t,i,n,d),g=[];return p&&g.push({label:"humidity",value:p}),u&&g.push({label:"air quality",value:u}),m&&g.push({label:"illuminance",value:m}),f&&g.push({label:"power",value:f}),W`
+        ${this.hass?function(t,e,i){if(!e&&!i)return F;const a=e?.decimal_places??0,n=i?.decimal_places??0,s=!1!==e?.show_primary_unit,o=!1!==e?.show_temperature_unit,r=!1!==e?.show_humidity_unit,c=!1!==e?.show_air_quality_unit,l=!1!==e?.show_illuminance_unit,d=!1!==i?.show_unit;let h=null;e?.primary_entities&&e.primary_entities.length>0&&(h=function(t,e,i=0,a=!0){if(!e?.primary_entities||0===e.primary_entities.length)return null;const n=ii(t,e.primary_entities,i);return null===n.value?null:a&&n.unit?`${n.value}${n.unit}`:String(n.value)}(t,e,a,s)),h||(h=function(t,e,i=0,a=!0){if(!e?.temperature_entities||0===e.temperature_entities.length)return null;const n=ii(t,e.temperature_entities,i);if(null!==n.value){const t=a&&n.unit||"°";return`${n.value}${t}`}return null}(t,e,a,o));const p=function(t,e,i=0,a=!0){if(!e?.humidity_entities||0===e.humidity_entities.length)return null;const n=ii(t,e.humidity_entities,i);if(null!==n.value){const t=a?"%":"";return`${n.value}${t}`}return null}(t,e,a,r),u=function(t,e,i=0,a=!0){if(!e?.air_quality_entities||0===e.air_quality_entities.length)return null;const n=ii(t,e.air_quality_entities,i);if(null!==n.value){const t=a&&n.unit?n.unit:"";return`${n.value}${t}`}return null}(t,e,a,c),m=function(t,e,i=0,a=!0){if(!e?.illuminance_entities||0===e.illuminance_entities.length)return null;const n=ii(t,e.illuminance_entities,i);if(null!==n.value){const t=a?"lx":"";return`${n.value}${t}`}return null}(t,e,a,l),f=function(t,e,i=0,a=!0){if(!e?.entities||0===e.entities.length)return null;let n=0,s=0;for(const i of e.entities){const e=t.states[i];if(!e||Me(e))continue;const a=parseFloat(e.state);if(isNaN(a))continue;const o=e.attributes.unit_of_measurement,r=("string"==typeof o?o:"W").toLowerCase();n+="kw"===r?1e3*a:"mw"===r?1e6*a:"gw"===r?1e9*a:a,s++}if(0===s)return null;if(n>=1e3){const t=(n/1e3).toFixed(i);return a?`${t}kW`:t}const o=n.toFixed(i);return a?`${o}W`:o}(t,i,n,d),g=[];return p&&g.push({label:"humidity",value:p}),u&&g.push({label:"air quality",value:u}),m&&g.push({label:"illuminance",value:m}),f&&g.push({label:"power",value:f}),W`
     <div class="climate-section">
       ${h?W`
         <span class="climate-primary">${h}</span>
@@ -2942,35 +3000,35 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
         ${this._renderEntitySections(l)}
       </ha-card>
     `}_getDefinedGridAreas(){const t=this._config?.grid?.template_areas||"";return{hasCustomGrid:t.length>0,hasNameArea:t.includes("name"),hasLabelArea:t.includes("label"),hasStateArea:/\bstate\b/.test(t),hasPersistentArea:t.includes("persistent"),hasIntermittentArea:t.includes("intermittent"),hasBatteryArea:t.includes("battery"),hasUpdateArea:t.includes("update")}}_renderEntitySections(t){const{hasPersistentArea:e,hasIntermittentArea:i,hasBatteryArea:a,hasUpdateArea:n}=t;if(!(e||i||a||n))return this._renderStatusSection();const s=!a,o=!n;return W`
-      ${e?fi(this.hass,this._config?.persistent_entities,this._handlePersistentAction.bind(this),t=>qe(this,t),!0):F}
-      ${i?vi(this.hass,this._config?.intermittent_entities,this._handleIntermittentAction.bind(this),!0,s?this._config?.battery_entities:void 0,o?this._config?.update_entities:void 0,this._updateAnimationState):F}
+      ${e?gi(this.hass,this._config?.persistent_entities,this._handlePersistentAction.bind(this),t=>Fe(this,t),!0):F}
+      ${i?_i(this.hass,this._config?.intermittent_entities,this._handleIntermittentAction.bind(this),!0,s?this._config?.battery_entities:void 0,o?this._config?.update_entities:void 0,this._updateAnimationState):F}
       ${a?this._renderBatterySection():F}
       ${n?this._renderUpdateSection():F}
-    `}_renderBatterySection(){return this.hass&&this._config?.battery_entities?0===li(this.hass,this._config.battery_entities)?F:W`
+    `}_renderBatterySection(){return this.hass&&this._config?.battery_entities?0===di(this.hass,this._config.battery_entities)?F:W`
       <div class="battery-section legacy-grid">
-        ${ci(this.hass,this._config.battery_entities,this._handleEntityAction.bind(this))}
+        ${li(this.hass,this._config.battery_entities,this._handleEntityAction.bind(this))}
       </div>
-    `:F}_renderUpdateSection(){return this.hass&&this._config?.update_entities?0===mi(this.hass,this._config.update_entities)?F:W`
+    `:F}_renderUpdateSection(){return this.hass&&this._config?.update_entities?0===fi(this.hass,this._config.update_entities)?F:W`
       <div class="update-section legacy-grid">
-        ${ui(this.hass,this._config.update_entities,this._handleEntityAction.bind(this),this._updateAnimationState)}
+        ${mi(this.hass,this._config.update_entities,this._handleEntityAction.bind(this),this._updateAnimationState)}
       </div>
-    `:F}_renderBatteryBadge(){return this.hass&&this._config?.battery_entities?(t=this._config.battery_entities,!0!==t?.show_as_badge?F:function(t,e,i){if(!e||!e.show_as_badge)return F;const a=ri(t,e);if(0===a.length)return F;let n=null;for(const e of a){const i=t.states[e];if(i){const t=si(i);null!==t&&(null===n||t<n)&&(n=t)}}const s=oi(n),o=e.badge_size||ce,r=e.badge_icon_size||le,c=e.badge_position||me,l=e.badge_color||"var(--state-sensor-battery-low-color, var(--error-color, #db4437))",d={...Xe(c),width:o,height:o,"background-color":l},h={"--mdc-icon-size":r,color:"white"},p=e.tap_action||{action:"more-info"},u=e.hold_action||{action:"more-info"},m=a[0],f=function(t,e){if(0===e.length)return"";if(1===e.length){const i=t.states[e[0]];return i?`${i.attributes.friendly_name||e[0]}: ${si(i)}%`:"1 low battery"}const i=e.map(e=>{const i=t.states[e];return`${i?.attributes.friendly_name||e}: ${si(i)}%`});return`${e.length} low batteries:\n${i.join("\n")}`}(t,a);return W`
+    `:F}_renderBatteryBadge(){return this.hass&&this._config?.battery_entities?(t=this._config.battery_entities,!0!==t?.show_as_badge?F:function(t,e,i){if(!e||!e.show_as_badge)return F;const a=ci(t,e);if(0===a.length)return F;let n=null;for(const e of a){const i=t.states[e];if(i){const t=oi(i);null!==t&&(null===n||t<n)&&(n=t)}}const s=ri(n),o=e.badge_size||ce,r=e.badge_icon_size||le,c=e.badge_position||me,l=e.badge_color||"var(--state-sensor-battery-low-color, var(--error-color, #db4437))",d={...ti(c),width:o,height:o,"background-color":l},h={"--mdc-icon-size":r,color:"white"},p=e.tap_action||{action:"more-info"},u=e.hold_action||{action:"more-info"},m=a[0],f=function(t,e){if(0===e.length)return"";if(1===e.length){const i=t.states[e[0]];return i?`${i.attributes.friendly_name||e[0]}: ${oi(i)}%`:"1 low battery"}const i=e.map(e=>{const i=t.states[e];return`${i?.attributes.friendly_name||e}: ${oi(i)}%`});return`${e.length} low batteries:\n${i.join("\n")}`}(t,a);return W`
     <div
       class="alert-badge alert-badge-battery"
-      style=${ni(d)}
+      style=${si(d)}
       @click=${t=>{t.stopPropagation(),i(p,m)}}
       @contextmenu=${t=>{t.preventDefault(),t.stopPropagation(),i(u,m)}}
       title="${f}"
     >
       <ha-icon
         .icon=${s}
-        style=${ni(h)}
+        style=${si(h)}
       ></ha-icon>
     </div>
-  `}(this.hass,this._config.battery_entities,this._handleEntityAction.bind(this))):F;var t}_renderUpdateBadge(){return this.hass&&this._config?.update_entities?(t=this._config.update_entities,!0!==t?.show_as_badge?F:function(t,e,i,a){if(!e||!e.show_as_badge)return F;const n=hi(t,e);if(0===n.length)return F;const s=e.icon||di,o=e.badge_size||ce,r=e.badge_icon_size||le,c=e.badge_position||me,l=e.badge_color||"var(--state-update-active-color, var(--info-color, #039be5))",d=!0===e.spin_animation,h={...Xe(c),width:o,height:o,"background-color":l},p={"--mdc-icon-size":r,color:"white"},u={"update-icon":!0,"spin-animation":d&&a.isSpinning},m=e.tap_action||{action:"more-info"},f=e.hold_action||{action:"more-info"},g=n[0],v=pi(t,n);return W`
+  `}(this.hass,this._config.battery_entities,this._handleEntityAction.bind(this))):F;var t}_renderUpdateBadge(){return this.hass&&this._config?.update_entities?(t=this._config.update_entities,!0!==t?.show_as_badge?F:function(t,e,i,a){if(!e||!e.show_as_badge)return F;const n=pi(t,e);if(0===n.length)return F;const s=e.icon||hi,o=e.badge_size||ce,r=e.badge_icon_size||le,c=e.badge_position||me,l=e.badge_color||"var(--state-update-active-color, var(--info-color, #039be5))",d=!0===e.spin_animation,h={...ti(c),width:o,height:o,"background-color":l},p={"--mdc-icon-size":r,color:"white"},u={"update-icon":!0,"spin-animation":d&&a.isSpinning},m=e.tap_action||{action:"more-info"},f=e.hold_action||{action:"more-info"},g=n[0],v=ui(t,n);return W`
     <div
       class="alert-badge alert-badge-update"
-      style=${ni(h)}
+      style=${si(h)}
       @click=${t=>{t.stopPropagation(),i(m,g)}}
       @contextmenu=${t=>{t.preventDefault(),t.stopPropagation(),i(f,g)}}
       title="${v}"
@@ -2978,26 +3036,26 @@ function t(t,e,i,a){var n,s=arguments.length,o=s<3?e:null===a?a=Object.getOwnPro
       <ha-icon
         class=${_t(u)}
         .icon=${s}
-        style=${ni(p)}
+        style=${si(p)}
       ></ha-icon>
     </div>
-  `}(this.hass,this._config.update_entities,this._handleEntityAction.bind(this),this._updateAnimationState)):F;var t}_renderStatusSection(){const t=this._config?.persistent_entities?.entities?.length,e=this._config?.intermittent_entities?.entities?.length,i=this._config?.battery_entities,a=this._config?.update_entities,n=this.hass?li(this.hass,this._config?.battery_entities):0,s=this.hass?mi(this.hass,this._config?.update_entities):0;return t||e||0!==n||0!==s?W`
+  `}(this.hass,this._config.update_entities,this._handleEntityAction.bind(this),this._updateAnimationState)):F;var t}_renderStatusSection(){const t=this._config?.persistent_entities?.entities?.length,e=this._config?.intermittent_entities?.entities?.length,i=this._config?.battery_entities,a=this._config?.update_entities,n=this.hass?di(this.hass,this._config?.battery_entities):0,s=this.hass?fi(this.hass,this._config?.update_entities):0;return t||e||0!==n||0!==s?W`
       <div class="status-section">
-        ${fi(this.hass,this._config?.persistent_entities,this._handlePersistentAction.bind(this),t=>qe(this,t),!1)}
-        ${vi(this.hass,this._config?.intermittent_entities,this._handleIntermittentAction.bind(this),!1)}
-        ${i&&this.hass?ci(this.hass,this._config?.battery_entities,this._handleEntityAction.bind(this)):F}
-        ${a&&this.hass?ui(this.hass,this._config?.update_entities,this._handleEntityAction.bind(this),this._updateAnimationState):F}
+        ${gi(this.hass,this._config?.persistent_entities,this._handlePersistentAction.bind(this),t=>Fe(this,t),!1)}
+        ${_i(this.hass,this._config?.intermittent_entities,this._handleIntermittentAction.bind(this),!1)}
+        ${i&&this.hass?li(this.hass,this._config?.battery_entities,this._handleEntityAction.bind(this)):F}
+        ${a&&this.hass?mi(this.hass,this._config?.update_entities,this._handleEntityAction.bind(this),this._updateAnimationState):F}
       </div>
-    `:F}_getBorderStyle(){if(!this._config?.border_entity||!this.hass)return;const t=this.hass.states[this._config.border_entity];if(!t)return;const e=this._config.border_width||"2px",i=this._config.border_style||"solid",a=function(t){const e=Te(t.entity_id);if("climate"===e){const e=t.attributes.hvac_action;if(e)switch(e){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return}}const i=se[e];if(i&&i[t.state]){const e=i[t.state];if("var(--primary-text-color)"===e)return;return e}if("on"===t.state)return"var(--state-active-color, var(--amber-color, #ffc107))"}(t);return a?`${e} ${i} ${a}`:void 0}_renderName(){return this._config?.show_name&&this._config.name?W`
-      <div class="name-section">
+    `:F}_getBorderStyle(){if(!this._config?.border_entity||!this.hass)return;const t=this.hass.states[this._config.border_entity];if(!t)return;const e=this._config.border_width||"2px",i=this._config.border_style||"solid",a=function(t){const e=Ue(t.entity_id);if("climate"===e){const e=t.attributes.hvac_action;if(e)switch(e){case"heating":case"preheating":return"var(--state-climate-heat-color, #ff8c00)";case"cooling":return"var(--state-climate-cool-color, #2196f3)";case"drying":return"var(--state-climate-dry-color, #8bc34a)";case"fan":return"var(--state-climate-fan_only-color, #00bcd4)";default:return}}const i=se[e];if(i&&i[t.state]){const e=i[t.state];if("var(--primary-text-color)"===e)return;return e}if("on"===t.state)return"var(--state-active-color, var(--amber-color, #ffc107))"}(t);return a?`${e} ${i} ${a}`:void 0}_renderName(){if(!this._config?.show_name||!this._config.name)return F;const t=Te(this._config.name_style);return W`
+      <div class="name-section" style=${t}>
         ${this._config.name}
       </div>
-    `:F}_renderLabel(){return this._config?.show_label&&this._config.label?W`
-      <div class="label-section">
+    `}_renderLabel(){if(!this._config?.show_label||!this._config.label)return F;const t=Te(this._config.label_style);return W`
+      <div class="label-section" style=${t}>
         ${this._config.label}
       </div>
-    `:F}_renderStateArea(){if(!this._config?.show_state)return F;const t=Ne(this.hass,this._config);if(!t)return F;const e=this._config?.grid?.template_areas||"";return/\bstate\b/.test(e)?W`
-      <div class="state-section">
+    `}_renderStateArea(){if(!this._config?.show_state)return F;const t=Oe(this.hass,this._config);if(!t)return F;const e=this._config?.grid?.template_areas||"";if(!/\bstate\b/.test(e))return F;const i=Te(this._config.state_style);return W`
+      <div class="state-section" style=${i}>
         ${t.state}
       </div>
-    `:F}_handlePersistentAction(t,e){this.hass&&Ye(this.hass,t,e,this)}_handleIntermittentAction(t,e){this.hass&&Ye(this.hass,t,e,this)}_handleEntityAction(t,e){this.hass&&Ye(this.hass,t,e,this)}_handleTap(t){t.stopPropagation(),this._tapCount++,1===this._tapCount?this._tapTimeout=setTimeout(()=>{1===this._tapCount&&this._config?.tap_action&&this._handleAction(this._config.tap_action),this._tapCount=0},bi.TAP_DEBOUNCE_MS):2===this._tapCount&&(this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._tapCount=0,this._config?.double_tap_action&&this._handleAction(this._config.double_tap_action))}_handleHold(t){t.preventDefault(),t.stopPropagation(),this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._tapCount=0,this._config?.hold_action&&this._handleAction(this._config.hold_action)}_handleAction(t){this.hass&&this._config&&function(t,e,i,a){const n=i.entity,s=Be(i);switch(e.action){case"toggle":s.length>0&&Qe(t,s);break;case"more-info":n&&qe(a,n);break;case"navigate":e.navigation_path&&Ze(e.navigation_path);break;case"url":e.url_path&&Je(e.url_path);break;case"perform-action":e.service&&Ke(t,e.service,e.service_data);break;case"assist":Fe(a)}}(this.hass,t,this._config,this)}};yi.TAP_DEBOUNCE_MS=250,yi.styles=Ie,t([mt({attribute:!1}),e("design:type",Object)],yi.prototype,"hass",void 0),t([ft(),e("design:type",Object)],yi.prototype,"_config",void 0),t([ft(),e("design:type",Object)],yi.prototype,"_updateAnimationState",void 0),yi=bi=t([ht(yt)],yi),window.customCards=window.customCards||[],window.customCards.push({type:yt,name:bt.split("-").map(t=>t.charAt(0).toUpperCase()+t.slice(1)).join(" "),description:"A comprehensive room status card for Home Assistant"});export{yi as UnifiedRoomCard};
+    `}_handlePersistentAction(t,e){this.hass&&Xe(this.hass,t,e,this)}_handleIntermittentAction(t,e){this.hass&&Xe(this.hass,t,e,this)}_handleEntityAction(t,e){this.hass&&Xe(this.hass,t,e,this)}_handleTap(t){t.stopPropagation(),this._tapCount++,1===this._tapCount?this._tapTimeout=setTimeout(()=>{1===this._tapCount&&this._config?.tap_action&&this._handleAction(this._config.tap_action),this._tapCount=0},yi.TAP_DEBOUNCE_MS):2===this._tapCount&&(this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._tapCount=0,this._config?.double_tap_action&&this._handleAction(this._config.double_tap_action))}_handleHold(t){t.preventDefault(),t.stopPropagation(),this._tapTimeout&&(clearTimeout(this._tapTimeout),this._tapTimeout=void 0),this._tapCount=0,this._config?.hold_action&&this._handleAction(this._config.hold_action)}_handleAction(t){this.hass&&this._config&&function(t,e,i,a){const n=i.entity,s=Ne(i);switch(e.action){case"toggle":s.length>0&&Ke(t,s);break;case"more-info":n&&Fe(a,n);break;case"navigate":e.navigation_path&&Je(e.navigation_path);break;case"url":e.url_path&&Qe(e.url_path);break;case"perform-action":e.service&&Ye(t,e.service,e.service_data);break;case"assist":Ze(a)}}(this.hass,t,this._config,this)}};wi.TAP_DEBOUNCE_MS=250,wi.styles=Ie,t([mt({attribute:!1}),e("design:type",Object)],wi.prototype,"hass",void 0),t([ft(),e("design:type",Object)],wi.prototype,"_config",void 0),t([ft(),e("design:type",Object)],wi.prototype,"_updateAnimationState",void 0),wi=yi=t([ht(yt)],wi),window.customCards=window.customCards||[],window.customCards.push({type:yt,name:bt.split("-").map(t=>t.charAt(0).toUpperCase()+t.slice(1)).join(" "),description:"A comprehensive room status card for Home Assistant"});export{wi as UnifiedRoomCard};
