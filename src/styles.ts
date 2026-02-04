@@ -850,197 +850,139 @@ export const editorStyles = css`
     min-width: 0;
   }
 
-  .form-row-triple {
+  .form-label {
+    flex: 0 0 140px;
+    font-size: 14px;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
+  }
+
+  .form-input {
+    flex: 1;
+  }
+
+  /* Inline form row - text field with toggle on same row */
+  .form-row-inline {
     display: flex;
     align-items: center;
     margin-bottom: 16px;
-    gap: 16px;
+    gap: 12px;
   }
 
-  .form-row-triple:last-child {
+  .form-row-inline:last-child {
     margin-bottom: 0;
   }
 
-  .form-row-triple .form-item {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .form-row-triple .form-label {
-    flex: 1;
-    font-size: 14px;
-    white-space: nowrap;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
-  }
-
-  .form-row-triple .form-input {
+  .form-row-inline .form-label {
     flex: 0 0 auto;
   }
 
-  .switch-row {
+  .form-row-inline .form-input {
+    flex: 1;
+  }
+
+  .form-row-inline .form-toggle {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
+    gap: 6px;
+    font-size: 12px;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
   }
 
-  .switch-row:last-child {
-    margin-bottom: 0;
-    border-bottom: none;
-  }
-
-  .switch-label {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .switch-label-text {
-    font-size: 14px;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
-  }
-
-  .switch-label-hint {
+  /* Helper text style */
+  .helper-text {
     font-size: 11px;
     color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    margin: -8px 0 12px 0;
+    padding-left: 140px;
     font-style: italic;
   }
 
-  /* Entity cards within sections */
-  .entity-card {
+  .entity-list {
     border: 1px solid ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
     border-radius: 8px;
-    margin-bottom: 12px;
-    overflow: visible;
+    overflow: hidden;
   }
 
-  .entity-card:last-child {
-    margin-bottom: 0;
+  .entity-item {
+    border-bottom: 1px solid ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
+  }
+
+  .entity-item:last-child {
+    border-bottom: none;
   }
 
   .entity-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 12px;
+    padding: 8px 12px;
     background: rgba(0, 0, 0, 0.02);
     cursor: pointer;
-    border-radius: 8px 8px 0 0;
-    transition: background 0.2s ease;
   }
 
   .entity-header:hover {
     background: rgba(0, 0, 0, 0.04);
   }
 
-  .entity-header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .entity-header-right {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .entity-drag-handle {
-    cursor: grab;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
-    padding: 4px;
-    --mdc-icon-size: 18px;
-  }
-
-  .entity-icon {
-    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
-    --mdc-icon-size: 20px;
-  }
-
-  .entity-name {
-    font-size: 14px;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-  }
-
-  .entity-id {
-    font-size: 11px;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .entity-expand {
-    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
-    transition: transform 0.2s ease;
-    --mdc-icon-size: 18px;
-  }
-
-  .entity-expand.expanded {
-    transform: rotate(180deg);
-  }
-
-  .entity-delete {
-    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
-    cursor: pointer;
-    padding: 4px;
-    --mdc-icon-size: 18px;
-    transition: color 0.2s ease;
-  }
-
-  .entity-delete:hover {
-    color: var(--error-color, #db4437);
-  }
-
-  .entity-content {
+  .entity-config {
     padding: 12px;
     display: none;
     border-top: 1px solid ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
   }
 
-  .entity-content.expanded {
+  .entity-config.expanded {
     display: block;
-    overflow: visible;
   }
 
-  /* State config list */
-  .states-list {
-    margin-top: 12px;
-  }
-
-  .states-header {
+  .add-entity-btn {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    padding: 8px;
+    margin-top: 8px;
+    border: 1px dashed ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
+    border-radius: 8px;
+    cursor: pointer;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    transition: all 0.2s ease;
+    gap: 4px;
+  }
+
+  .add-entity-btn:hover {
+    border-color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+  }
+
+  .entity-list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 8px;
   }
 
-  .states-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: ${unsafeCSS(HA_CSS_VARIABLES.primaryTextColor)};
+  .entity-list-item ha-selector {
+    flex: 1;
+  }
+
+  .entity-list-item ha-icon {
+    cursor: pointer;
+    color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
+    transition: color 0.2s ease;
+  }
+
+  .entity-list-item ha-icon:hover {
+    color: var(--error-color, #db4437);
   }
 
   .add-state-btn {
     display: flex;
     align-items: center;
-    padding: 4px 8px;
+    justify-content: center;
+    padding: 6px;
+    margin-top: 8px;
     border: 1px dashed ${unsafeCSS(HA_CSS_VARIABLES.dividerColor)};
     border-radius: 4px;
-    background: transparent;
     cursor: pointer;
     color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
     transition: all 0.2s ease;
@@ -1329,6 +1271,22 @@ export function getCardDynamicStyles(config: {
 }
 
 /**
+ * Get animation class based on animation type
+ */
+export function getAnimationClass(animation: string | undefined): string {
+  if (!animation || animation === 'none') return '';
+  return `animation-${animation}`;
+}
+
+/**
+ * Get position class for entity sections
+ */
+export function getPositionClass(position: string | undefined): string {
+  if (!position) return '';
+  return `position-${position}`;
+}
+
+/**
  * Generate dynamic inline styles for text sections (name, label, state)
  * Only generates styles for properties that are explicitly set in config.
  * Returns an empty string if no custom styles are configured.
@@ -1380,20 +1338,4 @@ export function getTextSectionStyles(styleConfig: TextStyleConfig | undefined): 
   }
 
   return styles.join(' ');
-}
-
-/**
- * Get animation class based on animation type
- */
-export function getAnimationClass(animation: string | undefined): string {
-  if (!animation || animation === 'none') return '';
-  return `animation-${animation}`;
-}
-
-/**
- * Get position class for entity sections
- */
-export function getPositionClass(position: string | undefined): string {
-  if (!position) return '';
-  return `position-${position}`;
 }
