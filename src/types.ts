@@ -313,6 +313,9 @@ export interface UnifiedRoomCardConfig {
   hold_action?: TapActionConfig;
   double_tap_action?: TapActionConfig;
 
+  // Haptic Feedback
+  haptic?: boolean;
+
   // Card Dimensions
   card_height?: string;
   card_width?: string;

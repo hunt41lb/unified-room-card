@@ -691,6 +691,16 @@ export class UnifiedRoomCardEditor extends LitElement {
           <ha-icon .icon=${expanded ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
         <div class="sub-accordion-content ${expanded ? 'expanded' : ''}">
+          <!-- Haptic Feedback -->
+          <div class="form-row">
+            <span class="form-label">Haptic Feedback</span>
+            <div class="form-input">
+              <ha-switch
+                .checked=${this._config?.haptic !== false}
+                @change=${(e: Event) => this._valueChanged('haptic', (e.target as HTMLInputElement).checked)}
+              ></ha-switch>
+            </div>
+          </div>
           <!-- Tap Action -->
           <div class="form-row">
             <span class="form-label">Tap Action</span>

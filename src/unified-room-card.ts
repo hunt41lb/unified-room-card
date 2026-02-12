@@ -127,6 +127,7 @@ export class UnifiedRoomCard extends LitElement {
       show_state: false,
       show_img_cell: true, // Default to enabled
       icon_animation: 'none',
+      haptic: true,
       tap_action: { action: DEFAULT_TAP_ACTION },
       hold_action: { action: DEFAULT_HOLD_ACTION },
       double_tap_action: { action: DEFAULT_DOUBLE_TAP_ACTION },
@@ -618,7 +619,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handlePersistentAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
-    executeEntityAction(this.hass, action, entityId, this);
+    executeEntityAction(this.hass, action, entityId, this, this._config?.haptic !== false);
   }
 
   /**
@@ -626,7 +627,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handleIntermittentAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
-    executeEntityAction(this.hass, action, entityId, this);
+    executeEntityAction(this.hass, action, entityId, this, this._config?.haptic !== false);
   }
 
 
@@ -639,7 +640,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handleEntityAction(action: TapActionConfig, entityId: string): void {
     if (!this.hass) return;
-    executeEntityAction(this.hass, action, entityId, this);
+    executeEntityAction(this.hass, action, entityId, this, this._config?.haptic !== false);
   }
 
   // ===========================================================================
@@ -704,7 +705,7 @@ export class UnifiedRoomCard extends LitElement {
    */
   private _handleAction(actionConfig: TapActionConfig): void {
     if (!this.hass || !this._config) return;
-    executeCardAction(this.hass, actionConfig, this._config, this);
+    executeCardAction(this.hass, actionConfig, this._config, this, this._config.haptic !== false);
   }
 }
 

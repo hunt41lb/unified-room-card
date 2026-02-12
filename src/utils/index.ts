@@ -43,6 +43,7 @@ export {
 export {
   fireMoreInfo,
   fireAssist,
+  forwardHaptic,
   navigate,
   openUrl,
   toggleEntity,

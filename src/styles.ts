@@ -207,9 +207,14 @@ export const cardBaseStyles = css`
     transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.15s ease;
   }
 
-  /* Hover effect */
+  /* Hover effect - theme-aware background tint + scale */
   ha-card:hover {
     transform: scale(1.02);
+    background: color-mix(
+      in srgb,
+      var(--ha-card-background, var(--card-background-color, white)) 92%,
+      var(--primary-text-color, black)
+    );
   }
 
   /* Active/pressed effect */

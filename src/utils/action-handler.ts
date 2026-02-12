@@ -40,6 +40,25 @@ export function fireAssist(element: HTMLElement): void {
 }
 
 // =============================================================================
+// HAPTIC FEEDBACK
+// =============================================================================
+
+/**
+ * Forward haptic feedback to the Home Assistant Companion app.
+ * The Companion apps (iOS/Android) listen for the 'haptic' event on window
+ * and translate it to native device haptic feedback.
+ *
+ * @param hapticType - The haptic feedback intensity/type (default: 'light')
+ */
+export function forwardHaptic(
+  hapticType: string = 'light',
+): void {
+  const event = new Event('haptic');
+  (event as unknown as { detail: string }).detail = hapticType;
+  window.dispatchEvent(event);
+}
+
+// =============================================================================
 // NAVIGATION ACTIONS
 // =============================================================================
 
@@ -109,13 +128,20 @@ export function callService(
  * @param action - Action configuration
  * @param entityId - Entity ID to act on
  * @param element - Element to dispatch events from
+ * @param haptic - Whether to fire haptic feedback (default: true)
  */
 export function executeEntityAction(
   hass: HomeAssistant,
   action: TapActionConfig,
   entityId: string,
   element: HTMLElement,
+  haptic: boolean = true,
 ): void {
+  // Fire haptic feedback if enabled and action is not 'none'
+  if (haptic && action.action !== 'none') {
+    forwardHaptic('light');
+  }
+
   switch (action.action) {
     case 'more-info':
       fireMoreInfo(element, entityId);
@@ -161,13 +187,20 @@ export function executeEntityAction(
  * @param action - Action configuration
  * @param config - Card configuration (needed for entity groups)
  * @param element - Element to dispatch events from
+ * @param haptic - Whether to fire haptic feedback (default: true)
  */
 export function executeCardAction(
   hass: HomeAssistant,
   action: TapActionConfig,
   config: UnifiedRoomCardConfig,
   element: HTMLElement,
+  haptic: boolean = true,
 ): void {
+  // Fire haptic feedback if enabled and action is not 'none'
+  if (haptic && action.action !== 'none') {
+    forwardHaptic('light');
+  }
+
   const primaryEntityId = config.entity;
   const allEntities = getAllPrimaryEntities(config);
 
