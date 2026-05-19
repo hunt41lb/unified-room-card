@@ -267,17 +267,12 @@ export class UnifiedRoomCardEditor extends LitElement {
       <div class="form-row">
         <span class="form-label">When Unavailable</span>
         <div class="form-input">
-          <ha-select
+          <ha-selector
+            .hass=${this.hass}
+            .selector=${{ select: { options: UNAVAILABLE_BEHAVIOR_OPTIONS, mode: 'dropdown' } }}
             .value=${behavior}
-            @selected=${(e: Event) => this._updateUnavailableHandling('behavior', (e.target as HTMLSelectElement).value)}
-            @closed=${(e: Event) => e.stopPropagation()}
-          >
-            ${UNAVAILABLE_BEHAVIOR_OPTIONS.map(
-              (option) => html`
-                <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
-              `
-            )}
-          </ha-select>
+            @value-changed=${(e: CustomEvent) => this._updateUnavailableHandling('behavior', e.detail.value)}
+            ></ha-selector>
         </div>
       </div>
 
@@ -300,10 +295,12 @@ export class UnifiedRoomCardEditor extends LitElement {
         <div class="form-row">
           <span class="form-label">Icon Color</span>
           <div class="form-input">
-            <ha-select
+            <ha-selector
+              .hass=${this.hass}
+              .selector=${{ select: { options: HA_COLOR_OPTIONS, mode: 'dropdown' } }}
               .value=${dropdownValue}
-              @selected=${(e: Event) => {
-                const value = (e.target as HTMLSelectElement).value;
+              @value-changed=${(e: CustomEvent) => {
+                const value = e.detail.value;
                 if (value === 'custom') {
                   this._showUnavailableCustomColorInput = true;
                 } else {
@@ -311,10 +308,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                   this._updateUnavailableHandling('icon_color', value);
                 }
               }}
-              @closed=${(e: Event) => e.stopPropagation()}
-            >
-              ${this._renderColorOptions()}
-            </ha-select>
+            ></ha-selector>
           </div>
         </div>
         ${isCustomColor ? html`
@@ -451,33 +445,23 @@ export class UnifiedRoomCardEditor extends LitElement {
               <div class="form-item">
                 <span class="form-label">Horizontal</span>
                 <div class="form-input">
-                  <ha-select
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ select: { options: ICON_HORIZONTAL_DROPDOWN_OPTIONS, mode: 'dropdown' } }}
                     .value=${this._config?.icon_horizontal_position || 'right'}
-                    @selected=${(e: Event) => this._valueChanged('icon_horizontal_position', (e.target as HTMLSelectElement).value)}
-                    @closed=${(e: Event) => e.stopPropagation()}
-                  >
-                    ${ICON_HORIZONTAL_DROPDOWN_OPTIONS.map(
-                      (option) => html`
-                        <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
-                      `
-                    )}
-                  </ha-select>
+                    @value-changed=${(e: CustomEvent) => this._valueChanged('icon_horizontal_position', e.detail.value)}
+                    ></ha-selector>
                 </div>
               </div>
               <div class="form-item">
                 <span class="form-label">Vertical</span>
                 <div class="form-input">
-                  <ha-select
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ select: { options: ICON_VERTICAL_DROPDOWN_OPTIONS, mode: 'dropdown' } }}
                     .value=${this._config?.icon_vertical_position || 'top'}
-                    @selected=${(e: Event) => this._valueChanged('icon_vertical_position', (e.target as HTMLSelectElement).value)}
-                    @closed=${(e: Event) => e.stopPropagation()}
-                  >
-                    ${ICON_VERTICAL_DROPDOWN_OPTIONS.map(
-                      (option) => html`
-                        <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
-                      `
-                    )}
-                  </ha-select>
+                    @value-changed=${(e: CustomEvent) => this._valueChanged('icon_vertical_position', e.detail.value)}
+                    ></ha-selector>
                 </div>
               </div>
             </div>
@@ -532,17 +516,12 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Animation</span>
               <div class="form-input">
-                <ha-select
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ select: { options: ANIMATION_OPTIONS, mode: 'dropdown' } }}
                   .value=${this._config?.icon_animation || 'none'}
-                  @selected=${(e: Event) => this._valueChanged('icon_animation', (e.target as HTMLSelectElement).value)}
-                  @closed=${(e: Event) => e.stopPropagation()}
-                >
-                  ${ANIMATION_OPTIONS.map(
-                    (option) => html`
-                      <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
-                    `
-                  )}
-                </ha-select>
+                  @value-changed=${(e: CustomEvent) => this._valueChanged('icon_animation', e.detail.value)}
+                  ></ha-selector>
               </div>
             </div>
             <!-- Spin Duration (only show when spin is selected) -->
@@ -628,29 +607,23 @@ export class UnifiedRoomCardEditor extends LitElement {
               <div class="form-item">
                 <span class="form-label">Border Width</span>
                 <div class="form-input">
-                  <ha-select
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ select: { options: BORDER_WIDTH_OPTIONS, mode: 'dropdown' } }}
                     .value=${this._config?.border_width || '2px'}
-                    @selected=${(e: CustomEvent) => this._valueChanged('border_width', (e.target as HTMLSelectElement).value)}
-                    @closed=${(e: Event) => e.stopPropagation()}
-                  >
-                    ${BORDER_WIDTH_OPTIONS.map(opt => html`
-                      <ha-list-item value=${opt.value}>${opt.label}</ha-list-item>
-                    `)}
-                  </ha-select>
+                    @value-changed=${(e: CustomEvent) => this._valueChanged('border_width', e.detail.value)}
+                    ></ha-selector>
                 </div>
               </div>
               <div class="form-item">
                 <span class="form-label">Border Style</span>
                 <div class="form-input">
-                  <ha-select
+                  <ha-selector
+                    .hass=${this.hass}
+                    .selector=${{ select: { options: BORDER_STYLE_OPTIONS, mode: 'dropdown' } }}
                     .value=${this._config?.border_style || 'solid'}
-                    @selected=${(e: CustomEvent) => this._valueChanged('border_style', (e.target as HTMLSelectElement).value)}
-                    @closed=${(e: Event) => e.stopPropagation()}
-                  >
-                    ${BORDER_STYLE_OPTIONS.map(opt => html`
-                      <ha-list-item value=${opt.value}>${opt.label}</ha-list-item>
-                    `)}
-                  </ha-select>
+                    @value-changed=${(e: CustomEvent) => this._valueChanged('border_style', e.detail.value)}
+                    ></ha-selector>
                 </div>
               </div>
             </div>
@@ -705,19 +678,12 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Tap Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'toggle', label: 'Toggle' }, { value: 'more-info', label: 'More Info' }, { value: 'navigate', label: 'Navigate' }, { value: 'url', label: 'URL' }, { value: 'perform-action', label: 'Perform Action' }, { value: 'assist', label: 'Assist' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${this._config?.tap_action?.action || 'toggle'}
-                @selected=${(e: CustomEvent) => this._tapActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="toggle">Toggle</ha-list-item>
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="navigate">Navigate</ha-list-item>
-                <ha-list-item value="url">URL</ha-list-item>
-                <ha-list-item value="perform-action">Perform Action</ha-list-item>
-                <ha-list-item value="assist">Assist</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._tapActionChanged('tap_action', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           ${this._config?.tap_action?.action === 'navigate' ? html`
@@ -749,19 +715,12 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Hold Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'none', label: 'None' }, { value: 'toggle', label: 'Toggle' }, { value: 'more-info', label: 'More Info' }, { value: 'navigate', label: 'Navigate' }, { value: 'url', label: 'URL' }, { value: 'perform-action', label: 'Perform Action' }, { value: 'assist', label: 'Assist' }], mode: 'dropdown' } }}
                 .value=${this._config?.hold_action?.action || 'none'}
-                @selected=${(e: CustomEvent) => this._tapActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="none">None</ha-list-item>
-                <ha-list-item value="toggle">Toggle</ha-list-item>
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="navigate">Navigate</ha-list-item>
-                <ha-list-item value="url">URL</ha-list-item>
-                <ha-list-item value="perform-action">Perform Action</ha-list-item>
-                <ha-list-item value="assist">Assist</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._tapActionChanged('hold_action', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           ${this._config?.hold_action?.action === 'navigate' ? html`
@@ -793,19 +752,12 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Double Tap Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'toggle', label: 'Toggle' }, { value: 'navigate', label: 'Navigate' }, { value: 'url', label: 'URL' }, { value: 'perform-action', label: 'Perform Action' }, { value: 'assist', label: 'Assist' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${this._config?.double_tap_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._tapActionChanged('double_tap_action', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="toggle">Toggle</ha-list-item>
-                <ha-list-item value="navigate">Navigate</ha-list-item>
-                <ha-list-item value="url">URL</ha-list-item>
-                <ha-list-item value="perform-action">Perform Action</ha-list-item>
-                <ha-list-item value="assist">Assist</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._tapActionChanged('double_tap_action', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           ${this._config?.double_tap_action?.action === 'navigate' ? html`
@@ -859,15 +811,12 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Position</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }], mode: 'dropdown' } }}
                 .value=${persistentConfig.position || 'right'}
-                @selected=${(e: CustomEvent) => this._persistentValueChanged('position', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="left">Left</ha-list-item>
-                <ha-list-item value="center">Center</ha-list-item>
-                <ha-list-item value="right">Right</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._persistentValueChanged('position', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Default Icon Size -->
@@ -998,30 +947,24 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Tap Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'toggle', label: 'Toggle' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${entityConfig.tap_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value as TapActionType)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="toggle">Toggle</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'tap_action', e.detail.value as TapActionType)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Hold Action -->
           <div class="form-row">
             <span class="form-label">Hold Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'toggle', label: 'Toggle' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${entityConfig.hold_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value as TapActionType)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="toggle">Toggle</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'hold_action', e.detail.value as TapActionType)}
+              ></ha-selector>
             </div>
           </div>
           <!-- State Configuration Header with Apply Defaults -->
@@ -1058,14 +1001,12 @@ export class UnifiedRoomCardEditor extends LitElement {
                 ></ha-selector>
                 <div class="color-select-wrapper" style="flex: 1.5; display: flex; flex-direction: column; gap: 4px;">
                   <div class="color-select-with-preview">
-                    <ha-select
+                    <ha-selector
+                      .hass=${this.hass}
+                      .selector=${{ select: { options: HA_COLOR_OPTIONS, mode: 'dropdown' } }}
                       .value=${dropdownValue}
-                      @selected=${(e: CustomEvent) => this._handleColorSelect(index, stateIndex, (e.target as HTMLSelectElement).value)}
-                      @closed=${(e: Event) => e.stopPropagation()}
-                      style="flex: 1;"
-                    >
-                      ${this._renderColorOptions()}
-                    </ha-select>
+                      @value-changed=${(e: CustomEvent) => this._handleColorSelect(index, stateIndex, e.detail.value)}
+                    ></ha-selector>
                     <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
                   </div>
                   ${isCustomColor ? html`
@@ -1135,16 +1076,12 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Animation (when active)</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'pulse', label: 'Pulse' }, { value: 'glow', label: 'Glow' }, { value: 'flash', label: 'Flash' }], mode: 'dropdown' } }}
                 .value=${intermittentConfig.animation || ''}
-                @selected=${(e: CustomEvent) => this._intermittentValueChanged('animation', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="">None</ha-list-item>
-                <ha-list-item value="pulse">Pulse</ha-list-item>
-                <ha-list-item value="glow">Glow</ha-list-item>
-                <ha-list-item value="flash">Flash</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._intermittentValueChanged('animation', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Entities List -->
@@ -1241,47 +1178,36 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Animation</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'pulse', label: 'Pulse' }, { value: 'glow', label: 'Glow' }, { value: 'flash', label: 'Flash' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${entityConfig.animation || ''}
-                @selected=${(e: CustomEvent) => this._updateIntermittentEntity(index, 'animation', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="">Inherit from section</ha-list-item>
-                <ha-list-item value="pulse">Pulse</ha-list-item>
-                <ha-list-item value="glow">Glow</ha-list-item>
-                <ha-list-item value="flash">Flash</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updateIntermittentEntity(index, 'animation', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Tap Action -->
           <div class="form-row">
             <span class="form-label">Tap Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'toggle', label: 'Toggle' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${entityConfig.tap_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value as TapActionType)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="toggle">Toggle</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'tap_action', e.detail.value as TapActionType)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Hold Action -->
           <div class="form-row">
             <span class="form-label">Hold Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'toggle', label: 'Toggle' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${entityConfig.hold_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value as TapActionType)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="toggle">Toggle</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'hold_action', e.detail.value as TapActionType)}
+              ></ha-selector>
             </div>
           </div>
           <!-- State Configuration Header with Apply Defaults -->
@@ -1318,14 +1244,12 @@ export class UnifiedRoomCardEditor extends LitElement {
                 ></ha-selector>
                 <div class="color-select-wrapper" style="flex: 1.5; display: flex; flex-direction: column; gap: 4px;">
                   <div class="color-select-with-preview">
-                    <ha-select
+                    <ha-selector
+                      .hass=${this.hass}
+                      .selector=${{ select: { options: HA_COLOR_OPTIONS, mode: 'dropdown' } }}
                       .value=${dropdownValue}
-                      @selected=${(e: CustomEvent) => this._handleIntermittentColorSelect(index, stateIndex, (e.target as HTMLSelectElement).value)}
-                      @closed=${(e: Event) => e.stopPropagation()}
-                      style="flex: 1;"
-                    >
-                      ${this._renderColorOptions()}
-                    </ha-select>
+                      @value-changed=${(e: CustomEvent) => this._handleIntermittentColorSelect(index, stateIndex, e.detail.value)}
+                    ></ha-selector>
                     <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
                   </div>
                   ${isCustomColor ? html`
@@ -1605,15 +1529,12 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Badge Position</span>
               <div class="form-input">
-                <ha-select
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ select: { options: BADGE_POSITION_DROPDOWN_OPTIONS, mode: 'dropdown' } }}
                   .value=${batteryConfig.badge_position || 'top-right'}
-                  @selected=${(e: CustomEvent) => this._batteryValueChanged('badge_position', (e.target as HTMLSelectElement).value)}
-                  @closed=${(e: Event) => e.stopPropagation()}
-                >
-                  ${BADGE_POSITION_DROPDOWN_OPTIONS.map(option => html`
-                    <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
-                  `)}
-                </ha-select>
+                  @value-changed=${(e: CustomEvent) => this._batteryValueChanged('badge_position', e.detail.value)}
+                  ></ha-selector>
               </div>
             </div>
             <div class="form-row">
@@ -1651,30 +1572,24 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Tap Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'navigate', label: 'Navigate' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${batteryConfig.tap_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._batteryActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="navigate">Navigate</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._batteryActionChanged('tap_action', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Hold Action -->
           <div class="form-row">
             <span class="form-label">Hold Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'navigate', label: 'Navigate' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${batteryConfig.hold_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._batteryActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="navigate">Navigate</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._batteryActionChanged('hold_action', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Entities -->
@@ -1755,13 +1670,12 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Color</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: HA_COLOR_OPTIONS, mode: 'dropdown' } }}
                 .value=${updateConfig.color || ''}
-                @selected=${(e: CustomEvent) => this._updateValueChanged('color', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                ${this._renderColorOptions()}
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updateValueChanged('color', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Spin Animation -->
@@ -1804,15 +1718,12 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Badge Position</span>
               <div class="form-input">
-                <ha-select
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ select: { options: BADGE_POSITION_DROPDOWN_OPTIONS, mode: 'dropdown' } }}
                   .value=${updateConfig.badge_position || 'top-right'}
-                  @selected=${(e: CustomEvent) => this._updateValueChanged('badge_position', (e.target as HTMLSelectElement).value)}
-                  @closed=${(e: Event) => e.stopPropagation()}
-                >
-                  ${BADGE_POSITION_DROPDOWN_OPTIONS.map(option => html`
-                    <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
-                  `)}
-                </ha-select>
+                  @value-changed=${(e: CustomEvent) => this._updateValueChanged('badge_position', e.detail.value)}
+                  ></ha-selector>
               </div>
             </div>
             <div class="form-row">
@@ -1850,30 +1761,24 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Tap Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'navigate', label: 'Navigate' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${updateConfig.tap_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updateActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="navigate">Navigate</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updateActionChanged('tap_action', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Hold Action -->
           <div class="form-row">
             <span class="form-label">Hold Action</span>
             <div class="form-input">
-              <ha-select
+              <ha-selector
+                .hass=${this.hass}
+                .selector=${{ select: { options: [{ value: 'more-info', label: 'More Info' }, { value: 'navigate', label: 'Navigate' }, { value: 'none', label: 'None' }], mode: 'dropdown' } }}
                 .value=${updateConfig.hold_action?.action || 'more-info'}
-                @selected=${(e: CustomEvent) => this._updateActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
-                @closed=${(e: Event) => e.stopPropagation()}
-              >
-                <ha-list-item value="more-info">More Info</ha-list-item>
-                <ha-list-item value="navigate">Navigate</ha-list-item>
-                <ha-list-item value="none">None</ha-list-item>
-              </ha-select>
+                @value-changed=${(e: CustomEvent) => this._updateActionChanged('hold_action', e.detail.value)}
+              ></ha-selector>
             </div>
           </div>
           <!-- Entities -->
@@ -2436,34 +2341,7 @@ export class UnifiedRoomCardEditor extends LitElement {
     this._dispatchConfigChanged();
   }
 
-  /**
-   * Render color dropdown options grouped by category
-   */
-  private _renderColorOptions(): TemplateResult[] {
-    const options: TemplateResult[] = [];
-    let currentCategory = '';
 
-    for (const opt of HA_COLOR_OPTIONS) {
-      // Add category header (optgroup-like behavior)
-      if (opt.category !== currentCategory) {
-        currentCategory = opt.category;
-        // Use a disabled item as a category header
-        if (currentCategory !== 'Default') {
-          options.push(html`
-            <ha-list-item disabled noninteractive style="font-weight: 500; opacity: 0.7; font-size: 12px; text-transform: uppercase;">
-              ${currentCategory}
-            </ha-list-item>
-          `);
-        }
-      }
-
-      options.push(html`
-        <ha-list-item value=${opt.value}>${opt.label}</ha-list-item>
-      `);
-    }
-
-    return options;
-  }
 
   /**
    * Handle color dropdown selection
@@ -2613,14 +2491,12 @@ export class UnifiedRoomCardEditor extends LitElement {
             ></ha-selector>
             <div class="color-select-wrapper" style="flex: 1.5; display: flex; flex-direction: column; gap: 4px;">
               <div class="color-select-with-preview">
-                <ha-select
+                <ha-selector
+                  .hass=${this.hass}
+                  .selector=${{ select: { options: HA_COLOR_OPTIONS, mode: 'dropdown' } }}
                   .value=${dropdownValue}
-                  @selected=${(e: CustomEvent) => this._handleIconStateMapColorSelect(stateValue, idx, (e.target as HTMLSelectElement).value)}
-                  @closed=${(e: Event) => e.stopPropagation()}
-                  style="flex: 1;"
-                >
-                  ${this._renderColorOptions()}
-                </ha-select>
+                  @value-changed=${(e: CustomEvent) => this._handleIconStateMapColorSelect(stateValue, idx, e.detail.value)}
+                ></ha-selector>
                 <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
               </div>
               ${isCustomColor ? html`
@@ -3435,15 +3311,12 @@ export class UnifiedRoomCardEditor extends LitElement {
         <div class="form-row">
           <span class="form-label">Animation</span>
           <div class="form-input">
-            <ha-select
+            <ha-selector
+              .hass=${this.hass}
+              .selector=${{ select: { options: [{ value: 'none', label: 'None (Static)' }, { value: 'pulse', label: 'Pulse' }, { value: 'breathe', label: 'Breathe' }], mode: 'dropdown' } }}
               .value=${effect.animation || 'none'}
-              @selected=${(e: Event) => this._updateGlowEffect(index, 'animation', (e.target as HTMLSelectElement).value)}
-              @closed=${(e: Event) => e.stopPropagation()}
-            >
-              <ha-list-item value="none">None (Static)</ha-list-item>
-              <ha-list-item value="pulse">Pulse</ha-list-item>
-              <ha-list-item value="breathe">Breathe</ha-list-item>
-            </ha-select>
+              @value-changed=${(e: CustomEvent) => this._updateGlowEffect(index, 'animation', e.detail.value)}
+            ></ha-selector>
           </div>
         </div>
       </div>
