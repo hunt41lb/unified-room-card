@@ -790,13 +790,7 @@ export const editorStyles = css`
 
   /* Ensure ha-select dropdowns can extend beyond containers */
   ha-select {
-    --mdc-menu-max-height: 300px;
-    --mdc-menu-min-width: 200px;
-  }
-
-  /* Fix mwc-menu positioning to use fixed positioning */
-  mwc-menu {
-    --mdc-menu-z-index: 100;
+    min-width: 200px;
   }
 
   .section-description {
@@ -845,7 +839,7 @@ export const editorStyles = css`
     flex: 0 0 auto;
   }
 
-  .form-row-dual .form-input ha-textfield {
+  .form-row-dual .form-input ha-input {
     width: 100%;
   }
 
@@ -1008,7 +1002,7 @@ export const editorStyles = css`
     flex-wrap: wrap;
   }
 
-  .state-config-row > ha-textfield,
+  .state-config-row > ha-input,
   .state-config-row > ha-selector {
     flex: 1;
     min-width: 100px;
@@ -1040,7 +1034,7 @@ export const editorStyles = css`
     width: 100%;
   }
 
-  .color-select-wrapper ha-textfield {
+  .color-select-wrapper ha-input {
     width: 100%;
   }
 
@@ -1124,14 +1118,14 @@ export const editorStyles = css`
     --mdc-icon-size: 14px;
   }
 
-  ha-textfield,
+  ha-input,
   ha-select,
   ha-selector {
     width: 100%;
   }
 
   ha-switch {
-    --mdc-theme-secondary: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
+    --ha-switch-checked-background-color: ${unsafeCSS(HA_CSS_VARIABLES.primaryColor)};
   }
 
   /* Section divider and header */
