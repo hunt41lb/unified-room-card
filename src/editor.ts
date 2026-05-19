@@ -159,11 +159,11 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row-inline">
             <span class="form-label">Name</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${this._config?.name || ''}
                 placeholder="Room Name"
                 @input=${(e: Event) => this._valueChanged('name', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
             <div class="form-toggle">
               <span>Show</span>
@@ -177,11 +177,11 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row-inline">
             <span class="form-label">Label</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${this._config?.label || ''}
                 placeholder="e.g., Ground Floor"
                 @input=${(e: Event) => this._valueChanged('label', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
             <div class="form-toggle">
               <span>Show</span>
@@ -274,7 +274,7 @@ export class UnifiedRoomCardEditor extends LitElement {
           >
             ${UNAVAILABLE_BEHAVIOR_OPTIONS.map(
               (option) => html`
-                <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
               `
             )}
           </ha-select>
@@ -321,11 +321,11 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Custom Color</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${unavailableConfig.icon_color || ''}
                 placeholder="var(--disabled-text-color)"
                 @input=${(e: Event) => this._updateUnavailableHandling('icon_color', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
         ` : ''}
@@ -334,11 +334,11 @@ export class UnifiedRoomCardEditor extends LitElement {
         <div class="form-row">
           <span class="form-label">Background Color</span>
           <div class="form-input">
-            <ha-textfield
+            <ha-input
               .value=${unavailableConfig.background_color || ''}
               placeholder="var(--secondary-background-color)"
               @input=${(e: Event) => this._updateUnavailableHandling('background_color', (e.target as HTMLInputElement).value)}
-            ></ha-textfield>
+            ></ha-input>
           </div>
         </div>
         <p class="helper-text">CSS color or variable for icon background when unavailable</p>
@@ -458,7 +458,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                   >
                     ${ICON_HORIZONTAL_DROPDOWN_OPTIONS.map(
                       (option) => html`
-                        <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                        <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
                       `
                     )}
                   </ha-select>
@@ -474,7 +474,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                   >
                     ${ICON_VERTICAL_DROPDOWN_OPTIONS.map(
                       (option) => html`
-                        <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                        <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
                       `
                     )}
                   </ha-select>
@@ -485,11 +485,11 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Icon Size</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.icon_size || ''}
                   placeholder="35px"
                   @input=${(e: Event) => this._valueChanged('icon_size', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
             <!-- Show Background toggle -->
@@ -507,11 +507,11 @@ export class UnifiedRoomCardEditor extends LitElement {
               <div class="form-row">
                 <span class="form-label">Background Size</span>
                 <div class="form-input">
-                  <ha-textfield
+                  <ha-input
                     .value=${this._config?.img_cell_size || ''}
                     placeholder="50px"
                     @input=${(e: Event) => this._valueChanged('img_cell_size', (e.target as HTMLInputElement).value)}
-                  ></ha-textfield>
+                  ></ha-input>
                 </div>
               </div>
               <!-- Background Opacity -->
@@ -539,7 +539,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                 >
                   ${ANIMATION_OPTIONS.map(
                     (option) => html`
-                      <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                      <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
                     `
                   )}
                 </ha-select>
@@ -590,21 +590,21 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-item">
               <span class="form-label">Height</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.card_height || ''}
                   placeholder="97px"
                   @input=${(e: Event) => this._valueChanged('card_height', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
             <div class="form-item">
               <span class="form-label">Width</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.card_width || ''}
                   placeholder="auto"
                   @input=${(e: Event) => this._valueChanged('card_width', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           </div>
@@ -634,7 +634,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                     @closed=${(e: Event) => e.stopPropagation()}
                   >
                     ${BORDER_WIDTH_OPTIONS.map(opt => html`
-                      <mwc-list-item value=${opt.value}>${opt.label}</mwc-list-item>
+                      <ha-list-item value=${opt.value}>${opt.label}</ha-list-item>
                     `)}
                   </ha-select>
                 </div>
@@ -648,7 +648,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                     @closed=${(e: Event) => e.stopPropagation()}
                   >
                     ${BORDER_STYLE_OPTIONS.map(opt => html`
-                      <mwc-list-item value=${opt.value}>${opt.label}</mwc-list-item>
+                      <ha-list-item value=${opt.value}>${opt.label}</ha-list-item>
                     `)}
                   </ha-select>
                 </div>
@@ -710,13 +710,13 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._tapActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="toggle">Toggle</mwc-list-item>
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="navigate">Navigate</mwc-list-item>
-                <mwc-list-item value="url">URL</mwc-list-item>
-                <mwc-list-item value="perform-action">Perform Action</mwc-list-item>
-                <mwc-list-item value="assist">Assist</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="toggle">Toggle</ha-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="navigate">Navigate</ha-list-item>
+                <ha-list-item value="url">URL</ha-list-item>
+                <ha-list-item value="perform-action">Perform Action</ha-list-item>
+                <ha-list-item value="assist">Assist</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -724,11 +724,11 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Navigation Path</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.tap_action?.navigation_path || ''}
                   placeholder="/lovelace/0"
                   @input=${(e: Event) => this._tapActionDataChanged('tap_action', 'navigation_path', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : ''}
@@ -736,11 +736,11 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">URL Path</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.tap_action?.url_path || ''}
                   placeholder="https://example.com"
                   @input=${(e: Event) => this._tapActionDataChanged('tap_action', 'url_path', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : ''}
@@ -754,13 +754,13 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._tapActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="none">None</mwc-list-item>
-                <mwc-list-item value="toggle">Toggle</mwc-list-item>
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="navigate">Navigate</mwc-list-item>
-                <mwc-list-item value="url">URL</mwc-list-item>
-                <mwc-list-item value="perform-action">Perform Action</mwc-list-item>
-                <mwc-list-item value="assist">Assist</mwc-list-item>
+                <ha-list-item value="none">None</ha-list-item>
+                <ha-list-item value="toggle">Toggle</ha-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="navigate">Navigate</ha-list-item>
+                <ha-list-item value="url">URL</ha-list-item>
+                <ha-list-item value="perform-action">Perform Action</ha-list-item>
+                <ha-list-item value="assist">Assist</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -768,11 +768,11 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Navigation Path</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.hold_action?.navigation_path || ''}
                   placeholder="/lovelace/0"
                   @input=${(e: Event) => this._tapActionDataChanged('hold_action', 'navigation_path', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : ''}
@@ -780,11 +780,11 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">URL Path</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.hold_action?.url_path || ''}
                   placeholder="https://example.com"
                   @input=${(e: Event) => this._tapActionDataChanged('hold_action', 'url_path', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : ''}
@@ -798,13 +798,13 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._tapActionChanged('double_tap_action', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="toggle">Toggle</mwc-list-item>
-                <mwc-list-item value="navigate">Navigate</mwc-list-item>
-                <mwc-list-item value="url">URL</mwc-list-item>
-                <mwc-list-item value="perform-action">Perform Action</mwc-list-item>
-                <mwc-list-item value="assist">Assist</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="toggle">Toggle</ha-list-item>
+                <ha-list-item value="navigate">Navigate</ha-list-item>
+                <ha-list-item value="url">URL</ha-list-item>
+                <ha-list-item value="perform-action">Perform Action</ha-list-item>
+                <ha-list-item value="assist">Assist</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -812,11 +812,11 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Navigation Path</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.double_tap_action?.navigation_path || ''}
                   placeholder="/lovelace/0"
                   @input=${(e: Event) => this._tapActionDataChanged('double_tap_action', 'navigation_path', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : ''}
@@ -824,11 +824,11 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">URL Path</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${this._config?.double_tap_action?.url_path || ''}
                   placeholder="https://example.com"
                   @input=${(e: Event) => this._tapActionDataChanged('double_tap_action', 'url_path', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : ''}
@@ -864,9 +864,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._persistentValueChanged('position', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="left">Left</mwc-list-item>
-                <mwc-list-item value="center">Center</mwc-list-item>
-                <mwc-list-item value="right">Right</mwc-list-item>
+                <ha-list-item value="left">Left</ha-list-item>
+                <ha-list-item value="center">Center</ha-list-item>
+                <ha-list-item value="right">Right</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -874,11 +874,11 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Default Icon Size</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${persistentConfig.icon_size || ''}
                 placeholder="21px"
                 @input=${(e: Event) => this._persistentValueChanged('icon_size', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Padding & Gap -->
@@ -886,21 +886,21 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-item">
               <span class="form-label">Padding</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${persistentConfig.padding || ''}
                   placeholder="Auto (based on position)"
                   @input=${(e: Event) => this._persistentValueChanged('padding', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
             <div class="form-item">
               <span class="form-label">Margin</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${persistentConfig.margin || ''}
                   placeholder="Auto"
                   @input=${(e: Event) => this._persistentValueChanged('margin', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           </div>
@@ -908,11 +908,11 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Gap (between icons)</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${persistentConfig.gap || ''}
                 placeholder="4px"
                 @input=${(e: Event) => this._persistentValueChanged('gap', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Entities List -->
@@ -987,11 +987,11 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Icon Size</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${entityConfig.icon_size || ''}
                 placeholder="Inherit from section"
                 @input=${(e: Event) => this._updatePersistentEntity(index, 'icon_size', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Tap Action -->
@@ -1003,9 +1003,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="toggle">Toggle</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="toggle">Toggle</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1018,9 +1018,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._updatePersistentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="toggle">Toggle</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="toggle">Toggle</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1043,12 +1043,12 @@ export class UnifiedRoomCardEditor extends LitElement {
 
             return html`
               <div class="state-config-row">
-                <ha-textfield
+                <ha-input
                   .value=${stateConfig.state || ''}
                   placeholder="State (e.g., locked)"
                   @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'state', (e.target as HTMLInputElement).value)}
                   style="flex: 1;"
-                ></ha-textfield>
+                ></ha-input>
                 <ha-selector
                   .hass=${this.hass}
                   .selector=${{ icon: {} }}
@@ -1069,12 +1069,12 @@ export class UnifiedRoomCardEditor extends LitElement {
                     <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
                   </div>
                   ${isCustomColor ? html`
-                    <ha-textfield
+                    <ha-input
                       .value=${currentColor}
                       placeholder="CSS color value"
                       @input=${(e: Event) => this._updatePersistentEntityState(index, stateIndex, 'color', (e.target as HTMLInputElement).value)}
                       style="width: 100%;"
-                    ></ha-textfield>
+                    ></ha-input>
                   ` : nothing}
                 </div>
                 <ha-icon icon="mdi:delete" @click=${() => this._removePersistentEntityState(index, stateIndex)}></ha-icon>
@@ -1113,22 +1113,22 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Default Icon Size</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${intermittentConfig.icon_size || ''}
                 placeholder="21px"
                 @input=${(e: Event) => this._intermittentValueChanged('icon_size', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Gap -->
           <div class="form-row">
             <span class="form-label">Gap (between icons)</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${intermittentConfig.gap || ''}
                 placeholder="4px"
                 @input=${(e: Event) => this._intermittentValueChanged('gap', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Section Animation -->
@@ -1140,10 +1140,10 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._intermittentValueChanged('animation', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="">None</mwc-list-item>
-                <mwc-list-item value="pulse">Pulse</mwc-list-item>
-                <mwc-list-item value="glow">Glow</mwc-list-item>
-                <mwc-list-item value="flash">Flash</mwc-list-item>
+                <ha-list-item value="">None</ha-list-item>
+                <ha-list-item value="pulse">Pulse</ha-list-item>
+                <ha-list-item value="glow">Glow</ha-list-item>
+                <ha-list-item value="flash">Flash</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1219,22 +1219,22 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Icon Size</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${entityConfig.icon_size || ''}
                 placeholder="Inherit from section"
                 @input=${(e: Event) => this._updateIntermittentEntity(index, 'icon_size', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Active States (entity-specific override) -->
           <div class="form-row">
             <span class="form-label">Active States</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${(entityConfig.active_states || []).join(', ')}
                 placeholder="Default: domain-based (e.g., on)"
                 @input=${(e: Event) => this._updateIntermittentEntityActiveStates(index, (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Entity Animation -->
@@ -1246,11 +1246,11 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._updateIntermittentEntity(index, 'animation', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="">Inherit from section</mwc-list-item>
-                <mwc-list-item value="pulse">Pulse</mwc-list-item>
-                <mwc-list-item value="glow">Glow</mwc-list-item>
-                <mwc-list-item value="flash">Flash</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="">Inherit from section</ha-list-item>
+                <ha-list-item value="pulse">Pulse</ha-list-item>
+                <ha-list-item value="glow">Glow</ha-list-item>
+                <ha-list-item value="flash">Flash</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1263,9 +1263,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'tap_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="toggle">Toggle</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="toggle">Toggle</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1278,9 +1278,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._updateIntermittentEntityAction(index, 'hold_action', (e.target as HTMLSelectElement).value as TapActionType)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="toggle">Toggle</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="toggle">Toggle</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1303,12 +1303,12 @@ export class UnifiedRoomCardEditor extends LitElement {
 
             return html`
               <div class="state-config-row">
-                <ha-textfield
+                <ha-input
                   .value=${stateConfig.state || ''}
                   placeholder="State (e.g., on)"
                   @input=${(e: Event) => this._updateIntermittentEntityState(index, stateIndex, 'state', (e.target as HTMLInputElement).value)}
                   style="flex: 1;"
-                ></ha-textfield>
+                ></ha-input>
                 <ha-selector
                   .hass=${this.hass}
                   .selector=${{ icon: {} }}
@@ -1329,12 +1329,12 @@ export class UnifiedRoomCardEditor extends LitElement {
                     <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
                   </div>
                   ${isCustomColor ? html`
-                    <ha-textfield
+                    <ha-input
                       .value=${currentColor}
                       placeholder="CSS color value"
                       @input=${(e: Event) => this._updateIntermittentEntityState(index, stateIndex, 'color', (e.target as HTMLInputElement).value)}
                       style="width: 100%;"
-                    ></ha-textfield>
+                    ></ha-input>
                   ` : nothing}
                 </div>
                 <ha-icon icon="mdi:delete" @click=${() => this._removeIntermittentEntityState(index, stateIndex)}></ha-icon>
@@ -1569,24 +1569,24 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Low Battery Threshold (%)</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 type="number"
                 min="0"
                 max="100"
                 .value=${String(batteryConfig.low_threshold ?? 20)}
                 @input=${(e: Event) => this._batteryValueChanged('low_threshold', parseInt((e.target as HTMLInputElement).value) || 20)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Icon Size -->
           <div class="form-row">
             <span class="form-label">Icon Size</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${batteryConfig.icon_size || ''}
                 placeholder="21px"
                 @input=${(e: Event) => this._batteryValueChanged('icon_size', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Show as Badge Toggle (NEW) -->
@@ -1611,7 +1611,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                   @closed=${(e: Event) => e.stopPropagation()}
                 >
                   ${BADGE_POSITION_DROPDOWN_OPTIONS.map(option => html`
-                    <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                    <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
                   `)}
                 </ha-select>
               </div>
@@ -1619,31 +1619,31 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Badge Size</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${batteryConfig.badge_size || ''}
                   placeholder="20px"
                   @input=${(e: Event) => this._batteryValueChanged('badge_size', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
             <div class="form-row">
               <span class="form-label">Badge Icon Size</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${batteryConfig.badge_icon_size || ''}
                   placeholder="12px"
                   @input=${(e: Event) => this._batteryValueChanged('badge_icon_size', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
             <div class="form-row">
               <span class="form-label">Badge Color</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${batteryConfig.badge_color || ''}
                   placeholder="var(--error-color)"
                   @input=${(e: Event) => this._batteryValueChanged('badge_color', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : nothing}
@@ -1656,9 +1656,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._batteryActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="navigate">Navigate</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="navigate">Navigate</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1671,9 +1671,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._batteryActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="navigate">Navigate</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="navigate">Navigate</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1744,11 +1744,11 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Icon Size</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${updateConfig.icon_size || ''}
                 placeholder="21px"
                 @input=${(e: Event) => this._updateValueChanged('icon_size', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <!-- Color -->
@@ -1810,7 +1810,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                   @closed=${(e: Event) => e.stopPropagation()}
                 >
                   ${BADGE_POSITION_DROPDOWN_OPTIONS.map(option => html`
-                    <mwc-list-item .value=${option.value}>${option.label}</mwc-list-item>
+                    <ha-list-item .value=${option.value}>${option.label}</ha-list-item>
                   `)}
                 </ha-select>
               </div>
@@ -1818,31 +1818,31 @@ export class UnifiedRoomCardEditor extends LitElement {
             <div class="form-row">
               <span class="form-label">Badge Size</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${updateConfig.badge_size || ''}
                   placeholder="20px"
                   @input=${(e: Event) => this._updateValueChanged('badge_size', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
             <div class="form-row">
               <span class="form-label">Badge Icon Size</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${updateConfig.badge_icon_size || ''}
                   placeholder="12px"
                   @input=${(e: Event) => this._updateValueChanged('badge_icon_size', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
             <div class="form-row">
               <span class="form-label">Badge Color</span>
               <div class="form-input">
-                <ha-textfield
+                <ha-input
                   .value=${updateConfig.badge_color || ''}
                   placeholder="var(--info-color)"
                   @input=${(e: Event) => this._updateValueChanged('badge_color', (e.target as HTMLInputElement).value)}
-                ></ha-textfield>
+                ></ha-input>
               </div>
             </div>
           ` : nothing}
@@ -1855,9 +1855,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._updateActionChanged('tap_action', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="navigate">Navigate</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="navigate">Navigate</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1870,9 +1870,9 @@ export class UnifiedRoomCardEditor extends LitElement {
                 @selected=${(e: CustomEvent) => this._updateActionChanged('hold_action', (e.target as HTMLSelectElement).value)}
                 @closed=${(e: Event) => e.stopPropagation()}
               >
-                <mwc-list-item value="more-info">More Info</mwc-list-item>
-                <mwc-list-item value="navigate">Navigate</mwc-list-item>
-                <mwc-list-item value="none">None</mwc-list-item>
+                <ha-list-item value="more-info">More Info</ha-list-item>
+                <ha-list-item value="navigate">Navigate</ha-list-item>
+                <ha-list-item value="none">None</ha-list-item>
               </ha-select>
             </div>
           </div>
@@ -1925,41 +1925,41 @@ export class UnifiedRoomCardEditor extends LitElement {
           <div class="form-row">
             <span class="form-label">Grid Template Areas</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${this._config?.grid?.template_areas || ''}
                 placeholder='"name name icon icon" "climate climate persistent intermittent"'
                 @input=${(e: Event) => this._gridValueChanged('template_areas', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <div class="form-row">
             <span class="form-label">Grid Template Columns</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${this._config?.grid?.template_columns || ''}
                 placeholder="1fr 1fr 1fr 1fr"
                 @input=${(e: Event) => this._gridValueChanged('template_columns', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <div class="form-row">
             <span class="form-label">Grid Template Rows</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${this._config?.grid?.template_rows || ''}
                 placeholder="auto auto"
                 @input=${(e: Event) => this._gridValueChanged('template_rows', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
           <div class="form-row">
             <span class="form-label">Grid Area</span>
             <div class="form-input">
-              <ha-textfield
+              <ha-input
                 .value=${this._config?.grid_area || ''}
                 placeholder="Optional grid area name"
                 @input=${(e: Event) => this._valueChanged('grid_area', (e.target as HTMLInputElement).value)}
-              ></ha-textfield>
+              ></ha-input>
             </div>
           </div>
         </div>
@@ -2450,15 +2450,15 @@ export class UnifiedRoomCardEditor extends LitElement {
         // Use a disabled item as a category header
         if (currentCategory !== 'Default') {
           options.push(html`
-            <mwc-list-item disabled noninteractive style="font-weight: 500; opacity: 0.7; font-size: 12px; text-transform: uppercase;">
+            <ha-list-item disabled noninteractive style="font-weight: 500; opacity: 0.7; font-size: 12px; text-transform: uppercase;">
               ${currentCategory}
-            </mwc-list-item>
+            </ha-list-item>
           `);
         }
       }
 
       options.push(html`
-        <mwc-list-item value=${opt.value}>${opt.label}</mwc-list-item>
+        <ha-list-item value=${opt.value}>${opt.label}</ha-list-item>
       `);
     }
 
@@ -2598,12 +2598,12 @@ export class UnifiedRoomCardEditor extends LitElement {
 
         return html`
           <div class="state-config-row">
-            <ha-textfield
+            <ha-input
               .value=${stateValue}
               placeholder="State (e.g., on)"
               @input=${(e: Event) => this._updateIconStateMapState(stateValue, 'state', (e.target as HTMLInputElement).value)}
               style="flex: 1;"
-            ></ha-textfield>
+            ></ha-input>
             <ha-selector
               .hass=${this.hass}
               .selector=${{ icon: {} }}
@@ -2624,12 +2624,12 @@ export class UnifiedRoomCardEditor extends LitElement {
                 <div class="color-preview" style=${this._getColorPreviewStyle(currentColor)}></div>
               </div>
               ${isCustomColor ? html`
-                <ha-textfield
+                <ha-input
                   .value=${currentColor}
                   placeholder="CSS color value"
                   @input=${(e: Event) => this._updateIconStateMapState(stateValue, 'color', (e.target as HTMLInputElement).value)}
                   style="width: 100%;"
-                ></ha-textfield>
+                ></ha-input>
               ` : nothing}
             </div>
             <ha-icon icon="mdi:delete" @click=${() => this._removeIconStateMapState(stateValue)}></ha-icon>
@@ -3388,7 +3388,7 @@ export class UnifiedRoomCardEditor extends LitElement {
         <div class="form-row">
           <span class="form-label">Trigger States</span>
           <div class="form-input">
-            <ha-textfield
+            <ha-input
               .value=${displayStates}
               placeholder="error, jammed, unlocked"
               @input=${(e: Event) => {
@@ -3400,7 +3400,7 @@ export class UnifiedRoomCardEditor extends LitElement {
                   this._updateGlowEffect(index, 'state', undefined);
                 }
               }}
-            ></ha-textfield>
+            ></ha-input>
           </div>
         </div>
         <p class="helper-text">Comma-separated list of states that trigger this glow</p>
@@ -3409,11 +3409,11 @@ export class UnifiedRoomCardEditor extends LitElement {
         <div class="form-row">
           <span class="form-label">Glow Color</span>
           <div class="form-input">
-            <ha-textfield
+            <ha-input
               .value=${effect.color || ''}
               placeholder="auto"
               @input=${(e: Event) => this._updateGlowEffect(index, 'color', (e.target as HTMLInputElement).value)}
-            ></ha-textfield>
+            ></ha-input>
           </div>
         </div>
         <p class="helper-text">Use "auto" for entity color, or CSS color/variable (e.g., #ff0000, var(--error-color))</p>
@@ -3440,9 +3440,9 @@ export class UnifiedRoomCardEditor extends LitElement {
               @selected=${(e: Event) => this._updateGlowEffect(index, 'animation', (e.target as HTMLSelectElement).value)}
               @closed=${(e: Event) => e.stopPropagation()}
             >
-              <mwc-list-item value="none">None (Static)</mwc-list-item>
-              <mwc-list-item value="pulse">Pulse</mwc-list-item>
-              <mwc-list-item value="breathe">Breathe</mwc-list-item>
+              <ha-list-item value="none">None (Static)</ha-list-item>
+              <ha-list-item value="pulse">Pulse</ha-list-item>
+              <ha-list-item value="breathe">Breathe</ha-list-item>
             </ha-select>
           </div>
         </div>
