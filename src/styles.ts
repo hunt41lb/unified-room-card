@@ -788,11 +788,6 @@ export const editorStyles = css`
     overflow: visible;
   }
 
-  /* Ensure ha-select dropdowns can extend beyond containers */
-  ha-select {
-    min-width: 200px;
-  }
-
   .section-description {
     font-size: 12px;
     color: ${unsafeCSS(HA_CSS_VARIABLES.secondaryTextColor)};
@@ -1030,7 +1025,7 @@ export const editorStyles = css`
     gap: 4px;
   }
 
-  .color-select-wrapper ha-select {
+  .color-select-wrapper ha-selector {
     width: 100%;
   }
 
@@ -1046,7 +1041,7 @@ export const editorStyles = css`
     width: 100%;
   }
 
-  .color-select-with-preview ha-select {
+  .color-select-with-preview ha-selector {
     flex: 1;
   }
 
@@ -1119,7 +1114,6 @@ export const editorStyles = css`
   }
 
   ha-input,
-  ha-select,
   ha-selector {
     width: 100%;
   }
